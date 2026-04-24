@@ -1,0 +1,33 @@
+/* Eywa Design Tokens */
+:root {
+  --color-bg:             #0d1117;
+  --color-surface:        #161c27;
+  --color-surface-raised: #1d2535;
+  --color-surface-hover:  #222c3d;
+  --color-border:         #2a3347;
+  --color-border-active:  #3d4f6e;
+  --color-blue-deep:      #1a3a6e;
+  --color-blue-mid:       #3b6fd4;
+  --color-blue-light:     #7aaef8;
+  --color-amber:          #d97706;
+  --color-amber-bright:   #f59e0b;
+  --color-text-primary:   #e8eaf0;
+  --color-text-secondary: #8892a4;
+  --color-text-muted:     #4f5b72;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: var(--color-bg); color: var(--color-text-primary); }
+#root { min-height: 100vh; }
+.loading-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg); }
+.loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-blue-mid); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }

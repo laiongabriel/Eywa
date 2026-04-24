@@ -1,0 +1,203 @@
+.focus-root {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: focusEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes focusEnter {
+  from {
+    opacity: 0;
+    background: #000;
+  }
+  to {
+    opacity: 1;
+    background: var(--color-bg);
+  }
+}
+
+@keyframes focusExit {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.03); }
+}
+
+.focus-root.exiting {
+  animation: focusExit 0.4s ease forwards;
+}
+
+.focus-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+  max-width: 520px;
+  width: 100%;
+  animation: focusContentIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+@keyframes focusContentIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.focus-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.focus-task-title {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin: 0;
+  max-width: 480px;
+}
+
+/* Ring */
+.focus-ring-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.focus-ring-svg {
+  display: block;
+}
+
+.focus-ring-progress {
+  transition: stroke-dashoffset 0.9s linear, stroke 0.5s ease;
+}
+
+.focus-timer-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+
+.focus-timer {
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.3s ease;
+  font-family: 'Inter', system-ui, monospace;
+}
+
+.focus-timer.paused {
+  opacity: 0.4;
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.2; }
+}
+
+.focus-target {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cycle hint */
+.focus-cycle-hint {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+  margin: -0.5rem 0 0;
+}
+
+/* Break banner */
+.focus-break-banner {
+  font-size: 0.825rem;
+  color: var(--color-amber-bright);
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  border-radius: 10px;
+  padding: 0.625rem 1rem;
+  max-width: 380px;
+  text-align: center;
+  line-height: 1.4;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Controls */
+.focus-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.focus-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  padding: 0.75rem 1.5rem;
+}
+
+.focus-btn:active { transform: scale(0.97); }
+
+.focus-btn-pause {
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-active);
+}
+
+.focus-btn-pause:hover {
+  background: var(--color-surface-hover);
+}
+
+.focus-btn-resume {
+  background: var(--color-blue-mid);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(59, 111, 212, 0.3);
+}
+
+.focus-btn-resume:hover {
+  background: #4a7fe0;
+  box-shadow: 0 6px 20px rgba(59, 111, 212, 0.4);
+}
+
+.focus-btn-end {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.825rem;
+}
+
+.focus-btn-end:hover {
+  border-color: var(--color-border-active);
+  color: var(--color-text-secondary);
+}

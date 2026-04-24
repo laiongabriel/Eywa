@@ -1,0 +1,78 @@
+/* Reuses .modal-backdrop, .modal-card, .modal-header, .modal-title,
+   .modal-close, .modal-form, .modal-input, .modal-title-input,
+   .modal-row, .modal-field, .modal-label, .modal-select,
+   .modal-actions, .btn-cancel, .btn-save from AddTaskModal.css */
+@import './AddTaskModal.css';
+
+/* All-day toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.toggle-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-amber);
+  cursor: pointer;
+}
+
+.toggle-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+/* Color picker */
+.color-picker {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.color-swatch:hover  { transform: scale(1.15); }
+.color-swatch.selected { border-color: var(--color-text-primary); }
+
+.color-blue   { background: #3b6fd4; }
+.color-amber  { background: #d97706; }
+.color-green  { background: #22c55e; }
+.color-purple { background: #a855f7; }
+.color-red    { background: #ef4444; }
+
+/* Delete button in edit mode */
+.modal-actions {
+  justify-content: space-between !important;
+}
+
+.modal-actions-right {
+  display: flex;
+  gap: 0.625rem;
+}
+
+.btn-delete {
+  background: none;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 9px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  font-family: inherit;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: #ef4444;
+}
