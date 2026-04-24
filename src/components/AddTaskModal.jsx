@@ -1,33 +1,55 @@
 import { useState, useEffect, useRef } from 'react'
+import { playModalClose } from '../lib/sounds'
 import './AddTaskModal.css'
 
 const DEFAULT_FORM = {
   title: '',
-  scheduled_at: '',
+  date: '',       // YYYY-MM-DD
+  time: '',       // HH:MM
   estimated_minutes: '',
 }
 
-export default function AddTaskModal({ onClose, onSave, initialData }) {
-  const [form, setForm] = useState(initialData ? {
-    title: initialData.title,
-    scheduled_at: initialData.scheduled_at
-      ? new Date(initialData.scheduled_at).toISOString().slice(0, 16)
-      : '',
-    estimated_minutes: initialData.estimated_minutes ?? '',
-  } : DEFAULT_FORM)
+/** Format a date string (YYYY-MM-DD) in Brazilian long format */
+function formatDateBR(dateStr) {
+  if (!dateStr) return null
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  })
+}
 
-  const [showIntention, setShowIntention] = useState(
+export default function AddTaskModal({ onClose, onSave, initialData }) {
+  const isEdit = !!initialData
+
+  function parseInitial() {
+    if (!initialData) return DEFAULT_FORM
+    if (!initialData.scheduled_at) return { ...DEFAULT_FORM, title: initialData.title }
+    const d = new Date(initialData.scheduled_at)
+    const pad = n => String(n).padStart(2, '0')
+    return {
+      title: initialData.title,
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      estimated_minutes: initialData.estimated_minutes ?? '',
+    }
+  }
+
+  const [form, setForm] = useState(parseInitial)
+  const [showWhen, setShowWhen] = useState(
     !!(initialData?.scheduled_at || initialData?.estimated_minutes)
   )
   const [saving, setSaving] = useState(false)
   const titleRef = useRef(null)
 
-  useEffect(() => {
-    titleRef.current?.focus()
-  }, [])
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   function set(field, value) {
     setForm(f => ({ ...f, [field]: value }))
+  }
+
+  function handleCancel() {
+    playModalClose()
+    onClose()
   }
 
   async function handleSubmit(e) {
@@ -35,9 +57,15 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     if (!form.title.trim()) return
     setSaving(true)
 
+    let scheduled_at = null
+    if (form.date) {
+      const combined = form.time ? `${form.date}T${form.time}` : `${form.date}T00:00`
+      scheduled_at = new Date(combined).toISOString()
+    }
+
     const payload = {
       title: form.title.trim(),
-      scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
+      scheduled_at,
       estimated_minutes: form.estimated_minutes ? Number(form.estimated_minutes) : null,
     }
 
@@ -50,19 +78,21 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
   }
 
   function handleBackdrop(e) {
-    if (e.target === e.currentTarget) onClose()
+    if (e.target === e.currentTarget) { playModalClose(); onClose() }
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Escape') onClose()
+    if (e.key === 'Escape') { playModalClose(); onClose() }
   }
+
+  const dateLabelBR = formatDateBR(form.date)
 
   return (
     <div className="modal-backdrop" onClick={handleBackdrop} onKeyDown={handleKeyDown}>
-      <div className="modal-card" role="dialog" aria-modal="true" aria-label="Nova tarefa">
+      <div className="modal-card" role="dialog" aria-modal="true" aria-label={isEdit ? 'Editar tarefa' : 'Nova tarefa'}>
         <div className="modal-header">
-          <h2 className="modal-title">{initialData ? 'Editar tarefa' : 'Nova tarefa'}</h2>
-          <button className="modal-close" onClick={onClose} aria-label="Fechar">✕</button>
+          <h2 className="modal-title">{isEdit ? 'Editar tarefa' : 'Nova tarefa'}</h2>
+          <button className="modal-close" onClick={handleCancel} aria-label="Fechar">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
@@ -77,54 +107,67 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
             required
           />
 
-          {/* Implementation intention toggle */}
+          {/* When + duration toggle */}
           <button
             type="button"
-            className="intention-toggle"
-            onClick={() => setShowIntention(v => !v)}
+            className={`intention-toggle ${showWhen ? 'open' : ''}`}
+            onClick={() => setShowWhen(v => !v)}
           >
-            <span className={`intention-arrow ${showIntention ? 'open' : ''}`}>›</span>
+            <span className={`intention-arrow ${showWhen ? 'open' : ''}`}>›</span>
             Quando e por quanto tempo?
-            <span className="intention-badge">+3× de execução</span>
           </button>
 
-          {showIntention && (
+          {showWhen && (
             <div className="intention-fields">
-              <p className="intention-hint">
-                Declarar quando e por quanto tempo você vai fazer uma tarefa aumenta a
-                probabilidade de execução em até 3× — <em>implementation intention</em> (Gollwitzer).
-              </p>
+              {/* Date + time side by side */}
               <div className="modal-row">
                 <div className="modal-field">
-                  <label className="modal-label">Quando</label>
-                  <input
-                    className="modal-input"
-                    type="datetime-local"
-                    value={form.scheduled_at}
-                    onChange={(e) => set('scheduled_at', e.target.value)}
-                  />
+                  <label className="modal-label">Data</label>
+                  <div className="date-input-wrap">
+                    {dateLabelBR && (
+                      <span className="date-display">{dateLabelBR}</span>
+                    )}
+                    <input
+                      className={`modal-input date-native ${dateLabelBR ? 'has-value' : ''}`}
+                      type="date"
+                      value={form.date}
+                      onChange={(e) => set('date', e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div className="modal-field">
-                  <label className="modal-label">Duração (min)</label>
+                  <label className="modal-label">Horário</label>
                   <input
                     className="modal-input"
-                    type="number"
-                    min="5"
-                    max="540"
-                    step="5"
-                    placeholder="90"
-                    value={form.estimated_minutes}
-                    onChange={(e) => set('estimated_minutes', e.target.value)}
+                    type="time"
+                    value={form.time}
+                    onChange={(e) => set('time', e.target.value)}
+                    disabled={!form.date}
                   />
                 </div>
+              </div>
+
+              {/* Duration */}
+              <div className="modal-field">
+                <label className="modal-label">Duração (minutos)</label>
+                <input
+                  className="modal-input"
+                  type="number"
+                  min="1"
+                  max="720"
+                  step="5"
+                  placeholder="Ex: 30"
+                  value={form.estimated_minutes}
+                  onChange={(e) => set('estimated_minutes', e.target.value)}
+                />
               </div>
             </div>
           )}
 
           <div className="modal-actions">
-            <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
+            <button type="button" className="btn-cancel" onClick={handleCancel}>Cancelar</button>
             <button type="submit" className="btn-save" disabled={saving || !form.title.trim()}>
-              {saving ? '...' : initialData ? 'Salvar' : 'Criar tarefa'}
+              {saving ? '...' : isEdit ? 'Salvar' : 'Criar tarefa'}
             </button>
           </div>
         </form>

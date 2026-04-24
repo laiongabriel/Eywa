@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { updateTask, deleteTask, setMIT } from '../lib/tasks'
+import { updateTask, deleteTask } from '../lib/tasks'
 import { playTaskComplete, playTaskDelete } from '../lib/sounds'
 import './TaskItem.css'
 
-export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus }) {
+export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus, dragHandle }) {
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
@@ -32,8 +32,8 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
   }
 
   async function handleSetMIT() {
-    const updated = await setMIT(userId, task.id)
-    onUpdate(updated, true)
+    const updated = await updateTask(task.id, { is_mit: !task.is_mit })
+    onUpdate(updated)
   }
 
   async function handleEditSubmit(e) {
@@ -53,6 +53,9 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
 
   return (
     <div className={`task-item ${task.completed ? 'completed' : ''} ${task.is_mit ? 'is-mit' : ''} ${deleting ? 'deleting' : ''}`}>
+      {dragHandle && (
+        <span className="task-drag-handle" {...dragHandle}>⠿</span>
+      )}
       <button
         className={`task-checkbox ${task.completed ? 'checked' : ''} ${pop ? 'pop' : ''}`}
         onClick={handleToggle}
@@ -96,14 +99,15 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
             onClick={() => onStartFocus(task)}
             data-tooltip="Entrar em modo foco"
           >
-            Começar
+            <PlayIcon />
+            Focar
           </button>
         )}
-        {!task.is_mit && !task.completed && (
+        {!task.completed && (
           <button
-            className="task-action-btn mit-btn"
+            className={`task-action-btn mit-btn ${task.is_mit ? 'active' : ''}`}
             onClick={handleSetMIT}
-            data-tooltip="Definir como mais importante"
+            data-tooltip={task.is_mit ? 'Remover prioridade' : 'Marcar como prioritária'}
           >
             ★
           </button>
@@ -137,6 +141,14 @@ function CheckIcon() {
   return (
     <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
       <path d="M1 4l2.5 2.5L9 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+function PlayIcon() {
+  return (
+    <svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" aria-hidden="true">
+      <path d="M1 1.5v7l7-3.5L1 1.5z"/>
     </svg>
   )
 }

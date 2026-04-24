@@ -1,14 +1,35 @@
 .task-item {
   display: flex;
-  align-items: flex-start;
-  gap: 0.875rem;
-  padding: 0.75rem 0.875rem;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.7rem 0.875rem;
   border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   transition: border-color 0.15s ease, opacity 0.2s ease, transform 0.2s ease;
   animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--task-idx, 0) * 45ms);
+}
+
+/* Drag handle */
+.task-drag-handle {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  cursor: grab;
+  padding: 0 0.125rem;
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  user-select: none;
+  line-height: 1;
+}
+
+.task-item:hover .task-drag-handle {
+  opacity: 0.8;
+}
+
+.task-drag-handle:active {
+  cursor: grabbing;
 }
 
 @keyframes slideIn {
@@ -151,31 +172,25 @@
 /* Actions */
 .task-actions {
   display: flex;
-  gap: 0.125rem;
-  align-items: flex-start;
-}
-
-.task-action-btn:not(.start-btn) {
-  opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
-}
-
-.task-item:hover .task-action-btn:not(.start-btn) {
-  opacity: 1;
+  gap: 0.25rem;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .task-action-btn {
   background: none;
   border: none;
-  padding: 0.25rem;
-  border-radius: 5px;
+  padding: 0.3rem 0.4rem;
+  border-radius: 6px;
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
   transition: color 0.15s ease, background 0.15s ease;
   line-height: 1;
+  font-size: 0.875rem;
 }
 
 .task-action-btn:hover {
@@ -184,36 +199,48 @@
 }
 
 .mit-btn {
-  font-size: 0.875rem;
+  font-size: 1rem;
+  color: var(--color-text-muted);
 }
 
 .mit-btn:hover {
   color: var(--color-amber);
+  background: rgba(217, 119, 6, 0.1);
+}
+
+.mit-btn.active {
+  color: var(--color-amber);
+}
+
+.mit-btn.active:hover {
+  color: var(--color-amber-bright);
+  background: rgba(217, 119, 6, 0.1);
 }
 
 .start-btn {
-  font-size: 0.75rem;
+  font-size: 0.775rem;
   font-weight: 600;
-  color: var(--color-amber);
-  background: rgba(217, 119, 6, 0.1);
-  border: 1px solid rgba(217, 119, 6, 0.25) !important;
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border) !important;
   border-radius: 6px;
-  padding: 0.2rem 0.6rem !important;
-  opacity: 1 !important;
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+  padding: 0.28rem 0.6rem 0.28rem 0.5rem !important;
+  gap: 0.3rem;
+  transition: border-color 0.15s, color 0.15s, background 0.15s !important;
 }
 
 .start-btn:hover {
-  background: rgba(217, 119, 6, 0.2) !important;
-  color: var(--color-amber-bright) !important;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
-}
-
-.start-btn:active {
-  transform: scale(0.95) !important;
+  border-color: var(--color-amber) !important;
+  color: var(--color-amber) !important;
+  background: rgba(217, 119, 6, 0.08) !important;
 }
 
 .delete-btn:hover {
-  color: #fca5a5;
-  background: rgba(252, 165, 165, 0.08);
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.edit-btn:hover {
+  color: var(--color-blue-light);
+  background: rgba(133, 180, 252, 0.08);
 }
