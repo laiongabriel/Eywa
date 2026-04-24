@@ -1,13 +1,11 @@
-import { useNavigate, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import './AppShell.css'
 
 export default function AppShell({ children }) {
-  const navigate = useNavigate()
-
   async function handleSignOut() {
     await supabase.auth.signOut()
-    navigate('/auth')
+    window.location.replace('/auth')
   }
 
   return (
