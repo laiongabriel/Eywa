@@ -21,9 +21,9 @@
   max-width: 480px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-active);
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 1.75rem;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -77,7 +77,7 @@
   padding: 0.625rem 0.875rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-radius: 9px;
+  border-radius: 4px;
   color: var(--color-text-primary);
   font-size: 0.875rem;
   font-family: inherit;
@@ -96,7 +96,7 @@
 /* date/datetime inputs */
 .modal-input[type="date"],
 .modal-input[type="datetime-local"] {
-  color-scheme: dark;
+  color-scheme: inherit;
 }
 
 .modal-select {
@@ -104,7 +104,7 @@
   padding: 0.625rem 0.875rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-radius: 9px;
+  border-radius: 4px;
   color: var(--color-text-primary);
   font-size: 0.875rem;
   font-family: inherit;
@@ -144,7 +144,7 @@
   gap: 0.5rem;
   background: none;
   border: 1px dashed var(--color-border);
-  border-radius: 9px;
+  border-radius: 4px;
   padding: 0.625rem 0.875rem;
   color: var(--color-text-secondary);
   font-size: 0.85rem;
@@ -199,7 +199,7 @@
   line-height: 1.5;
   padding: 0.625rem 0.875rem;
   background: rgba(59, 111, 212, 0.06);
-  border-radius: 8px;
+  border-radius: 4px;
   border-left: 2px solid var(--color-blue-mid);
 }
 
@@ -219,7 +219,7 @@
 .btn-cancel {
   background: none;
   border: 1px solid var(--color-border);
-  border-radius: 9px;
+  border-radius: 4px;
   color: var(--color-text-secondary);
   font-size: 0.875rem;
   font-family: inherit;
@@ -236,8 +236,8 @@
 .btn-save {
   background: var(--color-amber);
   border: none;
-  border-radius: 9px;
-  color: #0d1117;
+  border-radius: 4px;
+  color: #fff;
   font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;

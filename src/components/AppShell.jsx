@@ -1,11 +1,21 @@
 import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useTheme } from '../contexts/ThemeContext'
 import './AppShell.css'
 
+const THEME_OPTIONS = [
+  { value: 'dark',   icon: '🌙', label: 'Escuro'  },
+  { value: 'light',  icon: '☀️', label: 'Claro'   },
+  { value: 'system', icon: '⊙',  label: 'Sistema' },
+]
+
 export default function AppShell({ children }) {
-  async function handleSignOut() {
+  const { theme, setTheme } = useTheme()
+
+  async function handleSignOut(e) {
+    e.preventDefault()
     await supabase.auth.signOut()
-    window.location.replace('/auth')
+    window.location.href = '/auth'
   }
 
   return (
@@ -20,7 +30,21 @@ export default function AppShell({ children }) {
             Agenda
           </NavLink>
         </div>
-        <button className="btn-signout" onClick={handleSignOut}>Sair</button>
+        <div className="shell-nav-right">
+          <div className="theme-switcher">
+            {THEME_OPTIONS.map(({ value, icon, label }) => (
+              <button
+                key={value}
+                className={`theme-btn ${theme === value ? 'active' : ''}`}
+                onClick={() => setTheme(value)}
+                data-tooltip={label}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+          <a className="link-signout" href="/auth" onClick={handleSignOut}>Sair</a>
+        </div>
       </nav>
       <main className="shell-main">
         {children}

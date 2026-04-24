@@ -3,8 +3,6 @@ import './AddTaskModal.css'
 
 const DEFAULT_FORM = {
   title: '',
-  priority: 'medium',
-  due_date: '',
   scheduled_at: '',
   estimated_minutes: '',
 }
@@ -12,8 +10,6 @@ const DEFAULT_FORM = {
 export default function AddTaskModal({ onClose, onSave, initialData }) {
   const [form, setForm] = useState(initialData ? {
     title: initialData.title,
-    priority: initialData.priority,
-    due_date: initialData.due_date ?? '',
     scheduled_at: initialData.scheduled_at
       ? new Date(initialData.scheduled_at).toISOString().slice(0, 16)
       : '',
@@ -41,8 +37,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
 
     const payload = {
       title: form.title.trim(),
-      priority: form.priority,
-      due_date: form.due_date || null,
       scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
       estimated_minutes: form.estimated_minutes ? Number(form.estimated_minutes) : null,
     }
@@ -82,32 +76,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
             onChange={(e) => set('title', e.target.value)}
             required
           />
-
-          {/* Priority + Due date row */}
-          <div className="modal-row">
-            <div className="modal-field">
-              <label className="modal-label">Prioridade</label>
-              <select
-                className="modal-select"
-                value={form.priority}
-                onChange={(e) => set('priority', e.target.value)}
-              >
-                <option value="low">Baixa</option>
-                <option value="medium">Média</option>
-                <option value="high">Alta</option>
-              </select>
-            </div>
-
-            <div className="modal-field">
-              <label className="modal-label">Data limite</label>
-              <input
-                className="modal-input"
-                type="date"
-                value={form.due_date}
-                onChange={(e) => set('due_date', e.target.value)}
-              />
-            </div>
-          </div>
 
           {/* Implementation intention toggle */}
           <button

@@ -15,7 +15,6 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
-  const [filter, setFilter] = useState('active') // 'active' | 'completed' | 'all'
   const [focusTask, setFocusTask] = useState(null)
   const [showReview, setShowReview] = useState(false)
 
@@ -45,7 +44,6 @@ export default function TasksPage() {
 
   function handleUpdate(updated, reloadAll) {
     if (reloadAll) {
-      // MIT change: reload to get correct ordering
       loadTasks()
     } else {
       setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
@@ -63,18 +61,15 @@ export default function TasksPage() {
 
   const mit = tasks.find(t => t.is_mit && !t.completed)
 
-  const filteredTasks = tasks.filter(t => {
-    if (t.is_mit && !t.completed) return false // shown separately
-    if (filter === 'active') return !t.completed
-    if (filter === 'completed') return t.completed
-    return true
-  })
+  // Active tasks (excluding MIT), then completed at bottom
+  const activeTasks = tasks.filter(t => !(t.is_mit && !t.completed) && !t.completed)
+  const completedTasks = tasks.filter(t => t.completed)
+  const displayTasks = [...activeTasks, ...completedTasks]
 
   const activeCount = tasks.filter(t => !t.completed).length
 
   return (
     <div className="tasks-root">
-      {/* MIT section */}
       {mit && (
         <section className="mit-section">
           <div className="mit-label">Tarefa mais importante hoje</div>
@@ -88,7 +83,6 @@ export default function TasksPage() {
         </section>
       )}
 
-      {/* Header row */}
       <div className="tasks-header">
         <div className="tasks-header-left">
           <h1 className="tasks-heading">Tarefas</h1>
@@ -97,7 +91,7 @@ export default function TasksPage() {
           )}
         </div>
         <div className="tasks-header-actions">
-          <button className="btn-review" onClick={() => setShowReview(true)} title="Revisão diária">
+          <button className="btn-review" onClick={() => setShowReview(true)} data-tooltip="Revisão diária">
             ◑
           </button>
           <button className="btn-add-task" onClick={openAddModal}>
@@ -106,36 +100,19 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div className="filter-tabs">
-        {(['active', 'completed', 'all']).map(f => (
-          <button
-            key={f}
-            className={`filter-tab ${filter === f ? 'active' : ''}`}
-            onClick={() => setFilter(f)}
-          >
-            {f === 'active' ? 'Pendentes' : f === 'completed' ? 'Concluídas' : 'Todas'}
-          </button>
-        ))}
-      </div>
-
-      {/* Task list */}
       {loading ? (
         <div className="tasks-loading">
           <div className="loading-dot" />
         </div>
-      ) : filteredTasks.length === 0 ? (
-        <div className="tasks-empty">
-          {filter === 'active'
-            ? 'Nenhuma tarefa pendente. Aproveite!'
-            : filter === 'completed'
-            ? 'Nenhuma tarefa concluída ainda.'
-            : 'Nenhuma tarefa criada ainda.'}
-        </div>
+      ) : displayTasks.length === 0 ? (
+        <div className="tasks-empty">Nenhuma tarefa criada ainda.</div>
       ) : (
         <ul className="tasks-list">
-          {filteredTasks.map((task, index) => (
+          {displayTasks.map((task, index) => (
             <li key={task.id} style={{ '--task-idx': index }}>
+              {index === activeTasks.length && completedTasks.length > 0 && activeTasks.length > 0 && (
+                <div className="tasks-divider">Concluídas</div>
+              )}
               <TaskItem
                 task={task}
                 userId={userId}
@@ -149,7 +126,6 @@ export default function TasksPage() {
         </ul>
       )}
 
-      {/* Add/Edit modal */}
       {showModal && (
         <AddTaskModal
           onClose={() => { setShowModal(false); setEditingTask(null) }}
@@ -158,7 +134,6 @@ export default function TasksPage() {
         />
       )}
 
-      {/* Focus Mode — full screen overlay */}
       {focusTask && (
         <FocusMode
           task={focusTask}
@@ -166,7 +141,6 @@ export default function TasksPage() {
         />
       )}
 
-      {/* Daily Review — ritual overlay */}
       {showReview && (
         <DailyReview
           tasks={tasks}

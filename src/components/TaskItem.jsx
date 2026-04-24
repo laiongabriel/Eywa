@@ -3,8 +3,6 @@ import { updateTask, deleteTask, setMIT } from '../lib/tasks'
 import { playTaskComplete } from '../lib/sounds'
 import './TaskItem.css'
 
-const PRIORITY_LABEL = { low: 'baixa', medium: 'média', high: 'alta' }
-
 export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus }) {
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -34,7 +32,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
 
   async function handleSetMIT() {
     const updated = await setMIT(userId, task.id)
-    onUpdate(updated, true) // true = MIT changed, reload list
+    onUpdate(updated, true)
   }
 
   async function handleEditSubmit(e) {
@@ -51,8 +49,6 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
       setEditTitle(task.title)
     }
   }
-
-  const overdue = task.due_date && !task.completed && new Date(task.due_date) < new Date()
 
   return (
     <div className={`task-item ${task.completed ? 'completed' : ''} ${task.is_mit ? 'is-mit' : ''} ${deleting ? 'deleting' : ''}`}>
@@ -82,24 +78,14 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
           </span>
         )}
 
-        <div className="task-meta">
-          <span className={`task-priority priority-${task.priority}`}>
-            {PRIORITY_LABEL[task.priority]}
-          </span>
-
-          {task.due_date && (
-            <span className={`task-due ${overdue ? 'overdue' : ''}`}>
-              {formatDate(task.due_date)}
-            </span>
-          )}
-
-          {task.scheduled_at && (
+        {task.scheduled_at && (
+          <div className="task-meta">
             <span className="task-scheduled">
               {formatScheduled(task.scheduled_at)}
               {task.estimated_minutes ? ` · ${task.estimated_minutes}min` : ''}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="task-actions">
@@ -107,7 +93,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
           <button
             className="task-action-btn start-btn"
             onClick={() => onStartFocus(task)}
-            title="Entrar em modo foco"
+            data-tooltip="Entrar em modo foco"
           >
             Começar
           </button>
@@ -116,7 +102,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
           <button
             className="task-action-btn mit-btn"
             onClick={handleSetMIT}
-            title="Definir como tarefa mais importante do dia"
+            data-tooltip="Definir como mais importante"
           >
             ★
           </button>
@@ -124,14 +110,14 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
         <button
           className="task-action-btn edit-btn"
           onClick={() => onEdit ? onEdit(task) : setEditing(true)}
-          title="Editar"
+          data-tooltip="Editar"
         >
           <EditIcon />
         </button>
         <button
           className="task-action-btn delete-btn"
           onClick={handleDelete}
-          title="Deletar"
+          data-tooltip="Deletar"
           disabled={deleting}
         >
           <TrashIcon />
@@ -139,11 +125,6 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
       </div>
     </div>
   )
-}
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00') // prevent timezone offset shifting day
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
 function formatScheduled(ts) {

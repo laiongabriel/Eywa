@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppShell from './components/AppShell'
 import AuthPage from './pages/AuthPage'
@@ -18,16 +19,18 @@ function ProtectedShell({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/auth/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<ProtectedShell><TasksPage /></ProtectedShell>} />
-          <Route path="/agenda" element={<ProtectedShell><CalendarPage /></ProtectedShell>} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/" element={<ProtectedShell><TasksPage /></ProtectedShell>} />
+            <Route path="/agenda" element={<ProtectedShell><CalendarPage /></ProtectedShell>} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
