@@ -25,6 +25,120 @@
   padding: 1.75rem;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
   animation: mcSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  /* ensure datepicker popper is not clipped */
+  overflow: visible;
+}
+
+/* ── react-datepicker Eywa theme overrides ───────────────────────── */
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  width: 100%;
+}
+
+.react-datepicker__input-container .datepicker-input {
+  width: 100%;
+  cursor: pointer;
+}
+
+.eywa-datepicker {
+  font-family: var(--font-body) !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border-active) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
+  color: var(--color-text-primary) !important;
+  font-size: 0.875rem !important;
+}
+
+.eywa-datepicker .react-datepicker__header {
+  background: var(--color-surface-raised) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 0.75rem 0 0.5rem !important;
+}
+
+.eywa-datepicker .react-datepicker__current-month,
+.eywa-datepicker .react-datepicker-time__header,
+.eywa-datepicker .react-datepicker__day-name {
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-body) !important;
+}
+
+.eywa-datepicker .react-datepicker__day-name {
+  color: var(--color-text-muted) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.eywa-datepicker .react-datepicker__day {
+  color: var(--color-text-primary) !important;
+  border-radius: 6px !important;
+  font-family: var(--font-body) !important;
+  transition: background 0.12s !important;
+}
+
+.eywa-datepicker .react-datepicker__day:hover {
+  background: var(--color-surface-hover) !important;
+}
+
+.eywa-datepicker .react-datepicker__day--selected,
+.eywa-datepicker .react-datepicker__day--keyboard-selected {
+  background: var(--color-amber) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.eywa-datepicker .react-datepicker__day--today {
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.eywa-datepicker .react-datepicker__day--outside-month {
+  color: var(--color-text-muted) !important;
+}
+
+.eywa-datepicker .react-datepicker__navigation-icon::before {
+  border-color: var(--color-text-secondary) !important;
+}
+
+.eywa-datepicker .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: var(--color-text-primary) !important;
+}
+
+/* Time list */
+.eywa-datepicker .react-datepicker__time-container {
+  border-left: 1px solid var(--color-border) !important;
+}
+
+.eywa-datepicker .react-datepicker__time-container .react-datepicker__time {
+  background: var(--color-surface) !important;
+}
+
+.eywa-datepicker .react-datepicker__time-list-item {
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-body) !important;
+  transition: background 0.12s !important;
+}
+
+.eywa-datepicker .react-datepicker__time-list-item:hover {
+  background: var(--color-surface-hover) !important;
+}
+
+.eywa-datepicker .react-datepicker__time-list-item--selected {
+  background: var(--color-amber) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.eywa-datepicker .react-datepicker__close-icon::after {
+  background-color: var(--color-text-muted) !important;
+  font-size: 14px !important;
+}
+
+/* Light theme adjustments */
+[data-theme="light"] .eywa-datepicker {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
 @keyframes mcSlideUp {
@@ -185,34 +299,6 @@
 @keyframes ifExpand {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-/* date input overlay */
-.date-input-wrap {
-  position: relative;
-}
-
-.date-display {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 0.875rem;
-  font-size: 0.875rem;
-  color: var(--color-text-primary);
-  pointer-events: none;
-  z-index: 1;
-  background: var(--color-surface-raised);
-  border-radius: 8px;
-}
-
-.date-native.has-value {
-  color: transparent;
-}
-
-.date-native:focus ~ .date-display,
-.date-input-wrap:focus-within .date-display {
-  display: none;
 }
 
 .modal-actions {

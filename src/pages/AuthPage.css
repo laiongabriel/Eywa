@@ -412,6 +412,22 @@
   padding-right: 2.75rem;
 }
 
+/* Caps Lock warning */
+.caps-lock-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  animation: errorIn 0.2s ease;
+}
+
 /* --------------------------------------------------------------------------
    Forgot password
    -------------------------------------------------------------------------- */

@@ -1,45 +1,27 @@
 import { useState, useEffect, useRef } from 'react'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import { ptBR } from 'date-fns/locale'
+import 'react-datepicker/dist/react-datepicker.css'
 import { playModalClose } from '../lib/sounds'
 import './AddTaskModal.css'
 
-const DEFAULT_FORM = {
-  title: '',
-  date: '',       // YYYY-MM-DD
-  time: '',       // HH:MM
-  estimated_minutes: '',
-}
-
-/** Format a date string (YYYY-MM-DD) in Brazilian long format */
-function formatDateBR(dateStr) {
-  if (!dateStr) return null
-  const [y, m, d] = dateStr.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', {
-    weekday: 'short', day: 'numeric', month: 'short',
-  })
-}
+registerLocale('pt-BR', ptBR)
 
 export default function AddTaskModal({ onClose, onSave, initialData }) {
   const isEdit = !!initialData
 
   function parseInitial() {
-    if (!initialData) return DEFAULT_FORM
-    if (!initialData.scheduled_at) return { ...DEFAULT_FORM, title: initialData.title }
-    const d = new Date(initialData.scheduled_at)
-    const pad = n => String(n).padStart(2, '0')
     return {
-      title: initialData.title,
-      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
-      estimated_minutes: initialData.estimated_minutes ?? '',
+      title: initialData?.title ?? '',
+      scheduledDate: initialData?.scheduled_at ? new Date(initialData.scheduled_at) : null,
+      estimatedMinutes: initialData?.estimated_minutes ?? '',
     }
   }
 
-  const [form, setForm] = useState(parseInitial)
-  const [showWhen, setShowWhen] = useState(
-    !!(initialData?.scheduled_at || initialData?.estimated_minutes)
-  )
-  const [saving, setSaving] = useState(false)
-  const titleRef = useRef(null)
+  const [form, setForm]           = useState(parseInitial)
+  const [showWhen, setShowWhen]   = useState(!!(initialData?.scheduled_at || initialData?.estimated_minutes))
+  const [saving, setSaving]       = useState(false)
+  const titleRef                  = useRef(null)
 
   useEffect(() => { titleRef.current?.focus() }, [])
 
@@ -57,16 +39,10 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     if (!form.title.trim()) return
     setSaving(true)
 
-    let scheduled_at = null
-    if (form.date) {
-      const combined = form.time ? `${form.date}T${form.time}` : `${form.date}T00:00`
-      scheduled_at = new Date(combined).toISOString()
-    }
-
     const payload = {
       title: form.title.trim(),
-      scheduled_at,
-      estimated_minutes: form.estimated_minutes ? Number(form.estimated_minutes) : null,
+      scheduled_at: form.scheduledDate ? form.scheduledDate.toISOString() : null,
+      estimated_minutes: form.estimatedMinutes !== '' ? Number(form.estimatedMinutes) : null,
     }
 
     try {
@@ -85,8 +61,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     if (e.key === 'Escape') { playModalClose(); onClose() }
   }
 
-  const dateLabelBR = formatDateBR(form.date)
-
   return (
     <div className="modal-backdrop" onClick={handleBackdrop} onKeyDown={handleKeyDown}>
       <div className="modal-card" role="dialog" aria-modal="true" aria-label={isEdit ? 'Editar tarefa' : 'Nova tarefa'}>
@@ -96,7 +70,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          {/* Title */}
           <input
             ref={titleRef}
             className="modal-input modal-title-input"
@@ -107,7 +80,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
             required
           />
 
-          {/* When + duration toggle */}
           <button
             type="button"
             className={`intention-toggle ${showWhen ? 'open' : ''}`}
@@ -119,47 +91,38 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
 
           {showWhen && (
             <div className="intention-fields">
-              {/* Date + time side by side */}
               <div className="modal-row">
                 <div className="modal-field">
-                  <label className="modal-label">Data</label>
-                  <div className="date-input-wrap">
-                    {dateLabelBR && (
-                      <span className="date-display">{dateLabelBR}</span>
-                    )}
-                    <input
-                      className={`modal-input date-native ${dateLabelBR ? 'has-value' : ''}`}
-                      type="date"
-                      value={form.date}
-                      onChange={(e) => set('date', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="modal-field">
-                  <label className="modal-label">Horário</label>
-                  <input
-                    className="modal-input"
-                    type="time"
-                    value={form.time}
-                    onChange={(e) => set('time', e.target.value)}
-                    disabled={!form.date}
+                  <label className="modal-label">Data e horário</label>
+                  <DatePicker
+                    selected={form.scheduledDate}
+                    onChange={(date) => set('scheduledDate', date)}
+                    showTimeSelect
+                    dateFormat="dd/MM/yyyy HH:mm"
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    locale="pt-BR"
+                    placeholderText="Selecionar..."
+                    className="modal-input datepicker-input"
+                    calendarClassName="eywa-datepicker"
+                    isClearable
+                    autoComplete="off"
+                    popperPlacement="bottom-start"
                   />
                 </div>
-              </div>
-
-              {/* Duration */}
-              <div className="modal-field">
-                <label className="modal-label">Duração (minutos)</label>
-                <input
-                  className="modal-input"
-                  type="number"
-                  min="1"
-                  max="720"
-                  step="5"
-                  placeholder="Ex: 30"
-                  value={form.estimated_minutes}
-                  onChange={(e) => set('estimated_minutes', e.target.value)}
-                />
+                <div className="modal-field">
+                  <label className="modal-label">Duração (min)</label>
+                  <input
+                    className="modal-input"
+                    type="number"
+                    min="1"
+                    step="1"
+                    max="1440"
+                    placeholder="Ex: 45"
+                    value={form.estimatedMinutes}
+                    onChange={(e) => set('estimatedMinutes', e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -175,3 +138,4 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     </div>
   )
 }
+

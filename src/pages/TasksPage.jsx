@@ -209,7 +209,7 @@ export default function TasksPage() {
 
           {completedTasks.length > 0 && (
             <>
-              {sortableTasks.length > 0 && <div className="tasks-divider">Concluídas</div>}
+              <div className="tasks-divider">Concluídas</div>
               <ul className="tasks-list">
                 {completedTasks.map((task, index) => (
                   <li key={task.id} style={{ '--task-idx': index }}>
