@@ -3,7 +3,7 @@
   align-items: flex-start;
   gap: 0.875rem;
   padding: 0.75rem 0.875rem;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   transition: border-color 0.15s ease, opacity 0.2s ease, transform 0.2s ease;
@@ -40,7 +40,7 @@
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1.5px solid var(--color-border-active);
   background: transparent;
   cursor: pointer;
@@ -110,7 +110,7 @@
   flex: 1;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-blue-mid);
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--color-text-primary);
   font-size: 0.9375rem;
   font-family: inherit;
@@ -122,7 +122,7 @@
 .task-edit-save {
   background: var(--color-amber);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   color: #fff;
   font-size: 0.8rem;
   font-weight: 600;
@@ -164,7 +164,7 @@
   background: none;
   border: none;
   padding: 0.25rem;
-  border-radius: 3px;
+  border-radius: 5px;
   cursor: pointer;
   color: var(--color-text-muted);
   display: flex;
@@ -193,7 +193,7 @@
   color: var(--color-amber);
   background: rgba(217, 119, 6, 0.1);
   border: 1px solid rgba(217, 119, 6, 0.25) !important;
-  border-radius: 3px;
+  border-radius: 6px;
   padding: 0.2rem 0.6rem !important;
   opacity: 1 !important;
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
