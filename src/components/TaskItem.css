@@ -88,10 +88,12 @@
 
 .task-title {
   font-size: 0.9375rem;
+  font-weight: 450;
   color: var(--color-text-primary);
-  line-height: 1.4;
+  line-height: 1.45;
   cursor: text;
   word-break: break-word;
+  letter-spacing: -0.005em;
 }
 
 .completed .task-title {
@@ -141,7 +143,9 @@
 
 .task-scheduled {
   font-size: 0.75rem;
+  font-weight: 500;
   color: var(--color-text-muted);
+  letter-spacing: 0;
 }
 
 /* Actions */

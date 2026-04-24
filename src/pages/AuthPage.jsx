@@ -235,6 +235,15 @@ export default function AuthPage() {
       const loginVal = fields.email.trim()
       let emailToUse = loginVal
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginVal)) {
+        // Exact case-sensitive match: if the user types "gabriel" but registered
+        // as "Gabriel", this query returns no row and we reject the login.
+        const { data: exactUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', loginVal)
+          .maybeSingle()
+        if (!exactUser) { setServerError('Usuário não encontrado.'); return }
+
         const { data: resolved, error: rpcErr } = await supabase
           .rpc('get_email_by_username', { p_username: loginVal })
         if (rpcErr || !resolved) { setServerError('Usuário não encontrado.'); return }

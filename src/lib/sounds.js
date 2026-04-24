@@ -60,26 +60,56 @@ export function playResume() {
   } catch { /* silent fail */ }
 }
 
-/** Played when ending a focus session — satisfying descending chime */
+/** Played when ending a focus session — warm major chord resolution */
 export function playSessionEnd() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    // G5 E5 C5 — resolve down
-    const freqs = [783.99, 659.25, 523.25]
-    freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.18, 1.0, 0.18))
+    const now = c.currentTime
+    const tone = (freq, delay, dur, vol) => {
+      const osc = c.createOscillator()
+      const gain = c.createGain()
+      osc.connect(gain)
+      gain.connect(c.destination)
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0, now + delay)
+      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur)
+      osc.start(now + delay)
+      osc.stop(now + delay + dur + 0.05)
+    }
+    // C major chord gently voiced: C3 bass + G3 + C4 + E4 resolve
+    tone(130.81, 0,    1.8, 0.075) // C3 — bass
+    tone(196.00, 0.05, 1.6, 0.065) // G3 — fifth
+    tone(261.63, 0.1,  1.5, 0.060) // C4 — octave
+    tone(329.63, 0.2,  1.3, 0.045) // E4 — major third, final resolve
   } catch { /* silent fail */ }
 }
 
-/** Played when a task is marked complete — quick reward sound */
+/** Played when a task is marked complete — soft two-note bell chime */
 export function playTaskComplete() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    note(c, 523.25, c.currentTime, 0.15, 0.15)
-    note(c, 783.99, c.currentTime + 0.08, 0.35, 0.18)
+    const now = c.currentTime
+    const bell = (freq, delay, vol) => {
+      const osc = c.createOscillator()
+      const gain = c.createGain()
+      osc.connect(gain)
+      gain.connect(c.destination)
+      osc.type = 'triangle'
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0, now + delay)
+      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.018)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.65)
+      osc.start(now + delay)
+      osc.stop(now + delay + 0.7)
+    }
+    bell(880.00,  0,    0.062) // A5 — clear bell tone
+    bell(1108.73, 0.09, 0.048) // C#6 — major third above, warm chord
   } catch { /* silent fail */ }
 }
 

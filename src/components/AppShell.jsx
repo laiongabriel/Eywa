@@ -50,7 +50,6 @@ export default function AppShell({ children }) {
               className={`theme-toggle ${themeOpen ? 'open' : ''}`}
               onClick={() => setThemeOpen(v => !v)}
               aria-label="Tema"
-              data-tooltip={themeOpen ? undefined : 'Tema'}
             >
               {theme === 'dark'   && <MoonIcon />}
               {theme === 'light'  && <SunIcon />}

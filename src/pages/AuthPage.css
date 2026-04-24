@@ -68,10 +68,17 @@
 }
 
 .auth-logo-text {
-  font-size: 2rem;
+  font-size: 1.875rem;
   font-weight: 700;
-  letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #e8eaf0 0%, #7a9fd4 55%, #a0bfe0 100%);
+  letter-spacing: -0.045em;
+  background: linear-gradient(135deg, #eceef4 0%, #85b4fc 55%, #b0cfff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .auth-logo-text {
+  background: linear-gradient(135deg, #111110 0%, #3a6fd0 55%, #1e4fa8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -79,10 +86,10 @@
 
 .auth-tagline {
   color: var(--color-text-secondary);
-  font-size: 0.825rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   margin: 0.3rem 0 0;
-  letter-spacing: 0.015em;
-  opacity: 0.85;
+  letter-spacing: 0.01em;
 }
 
 /* --------------------------------------------------------------------------
