@@ -87,7 +87,7 @@
 }
 
 .task-title {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 450;
   color: var(--color-text-primary);
   line-height: 1.45;
@@ -142,7 +142,7 @@
 }
 
 .task-scheduled {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--color-text-muted);
   letter-spacing: 0;

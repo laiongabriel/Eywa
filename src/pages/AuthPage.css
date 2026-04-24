@@ -68,8 +68,9 @@
 }
 
 .auth-logo-text {
-  font-size: 1.875rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
   letter-spacing: -0.045em;
   background: linear-gradient(135deg, #eceef4 0%, #85b4fc 55%, #b0cfff 100%);
   -webkit-background-clip: text;
@@ -86,7 +87,7 @@
 
 .auth-tagline {
   color: var(--color-text-secondary);
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   font-weight: 500;
   margin: 0.3rem 0 0;
   letter-spacing: 0.01em;
@@ -106,7 +107,7 @@
   border: 1px solid var(--color-border);
   border-radius: 10px;
   color: var(--color-text-primary);
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
@@ -178,12 +179,12 @@
 
 .auth-input {
   width: 100%;
-  padding: 0.75rem 2.75rem 0.75rem 1rem; /* right room for icon */
+  padding: 0.75rem 2.75rem 0.75rem 1rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   color: var(--color-text-primary);
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   font-family: inherit;
   outline: none;
   box-sizing: border-box;
@@ -294,12 +295,12 @@
 /* Submit button */
 .btn-primary {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   background: var(--color-amber);
   border: none;
   border-radius: 10px;
-  color: #0d1117;
-  font-size: 0.9rem;
+  color: #fff;
+  font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
@@ -308,8 +309,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.625rem;
+  min-height: 2.75rem;
 }
+
+[data-theme="dark"] .btn-primary { color: #fff; }
+[data-theme="light"] .btn-primary { color: #fff; }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--color-amber-bright);

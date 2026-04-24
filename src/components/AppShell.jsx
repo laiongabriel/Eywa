@@ -5,9 +5,8 @@ import { useTheme } from '../contexts/ThemeContext'
 import './AppShell.css'
 
 const THEMES = [
-  { value: 'system', label: 'Sistema' },
-  { value: 'light',  label: 'Claro'   },
-  { value: 'dark',   label: 'Escuro'  },
+  { value: 'light', label: 'Claro'  },
+  { value: 'dark',  label: 'Escuro' },
 ]
 
 export default function AppShell({ children }) {
@@ -51,9 +50,8 @@ export default function AppShell({ children }) {
               onClick={() => setThemeOpen(v => !v)}
               aria-label="Tema"
             >
-              {theme === 'dark'   && <MoonIcon />}
-              {theme === 'light'  && <SunIcon />}
-              {theme === 'system' && <SystemIcon />}
+              {theme === 'dark'  && <MoonIcon />}
+              {theme === 'light' && <SunIcon />}
             </button>
             {themeOpen && (
               <div className="theme-menu" role="menu">
@@ -65,9 +63,8 @@ export default function AppShell({ children }) {
                     role="menuitem"
                   >
                     <span className="theme-option-icon">
-                      {value === 'dark'   && <MoonIcon />}
-                      {value === 'light'  && <SunIcon />}
-                      {value === 'system' && <SystemIcon />}
+                      {value === 'dark'  && <MoonIcon />}
+                      {value === 'light' && <SunIcon />}
                     </span>
                     {label}
                     {theme === value && <span className="theme-check">✓</span>}
@@ -125,15 +122,6 @@ function SunIcon() {
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
       <circle cx="7.5" cy="7.5" r="2.25" stroke="currentColor" strokeWidth="1.3"/>
       <path d="M7.5 1.5v1.25M7.5 12.25V13.5M1.5 7.5h1.25M12.25 7.5H13.5M3.14 3.14l.88.88M11.1 11.1l.88.88M11.1 3.9l-.88.88M4.02 11.1l-.88.88" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-function SystemIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-      <rect x="1.5" y="2" width="12" height="8.5" rx="1.25" stroke="currentColor" strokeWidth="1.3"/>
-      <path d="M5.5 13h4M7.5 10.5V13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
     </svg>
   )
 }
