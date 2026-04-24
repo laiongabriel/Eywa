@@ -2,7 +2,6 @@
 
 function ctx() {
   if (typeof window === 'undefined') return null
-  // reuse a single AudioContext to avoid browser limits
   if (!window.__eywaAudioCtx) {
     try {
       window.__eywaAudioCtx = new (window.AudioContext || window.webkitAudioContext)()
@@ -13,7 +12,8 @@ function ctx() {
   return window.__eywaAudioCtx
 }
 
-function note(audioCtx, freq, startTime, duration, volume = 0.18, type = 'sine') {
+/** Low-level: play one sine/triangle note */
+function note(audioCtx, freq, startTime, duration, volume = 0.14, type = 'sine') {
   const osc = audioCtx.createOscillator()
   const gain = audioCtx.createGain()
   osc.connect(gain)
@@ -21,46 +21,46 @@ function note(audioCtx, freq, startTime, duration, volume = 0.18, type = 'sine')
   osc.type = type
   osc.frequency.value = freq
   gain.gain.setValueAtTime(0, startTime)
-  gain.gain.linearRampToValueAtTime(volume, startTime + 0.03)
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.04)
   gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration)
   osc.start(startTime)
-  osc.stop(startTime + duration + 0.05)
+  osc.stop(startTime + duration + 0.06)
 }
 
-/** Played when entering Focus Mode — soft ascending arpeggio */
+/** Played when entering Focus Mode — gentle ascending C major arpeggio */
 export function playFocusEnter() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    // C4 E4 G4 C5 — major chord arpeggio
-    const freqs = [261.63, 329.63, 392.00, 523.25]
-    freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.11, 0.7, 0.14))
+    // C3 → E3 → G3 → C4
+    const freqs = [130.81, 164.81, 196.00, 261.63]
+    freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.12, 0.9, 0.10))
   } catch { /* silent fail */ }
 }
 
-/** Played when pausing — single soft click */
+/** Played when pausing — single low soft thud */
 export function playPause() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    note(c, 392.00, c.currentTime, 0.25, 0.1)
+    note(c, 220.00, c.currentTime, 0.22, 0.09)
   } catch { /* silent fail */ }
 }
 
-/** Played when resuming — two quick notes */
+/** Played when resuming — two low rising notes */
 export function playResume() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    note(c, 392.00, c.currentTime, 0.2, 0.1)
-    note(c, 523.25, c.currentTime + 0.1, 0.3, 0.12)
+    note(c, 196.00, c.currentTime, 0.2, 0.09)
+    note(c, 261.63, c.currentTime + 0.1, 0.35, 0.10)
   } catch { /* silent fail */ }
 }
 
-/** Played when ending a focus session — warm major chord resolution */
+/** Played when ending a focus session — warm C major chord resolution */
 export function playSessionEnd() {
   try {
     const c = ctx()
@@ -75,41 +75,42 @@ export function playSessionEnd() {
       osc.type = 'sine'
       osc.frequency.value = freq
       gain.gain.setValueAtTime(0, now + delay)
-      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.05)
+      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.055)
       gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur)
       osc.start(now + delay)
       osc.stop(now + delay + dur + 0.05)
     }
-    // C major chord gently voiced: C3 bass + G3 + C4 + E4 resolve
-    tone(130.81, 0,    1.8, 0.075) // C3 — bass
-    tone(196.00, 0.05, 1.6, 0.065) // G3 — fifth
-    tone(261.63, 0.1,  1.5, 0.060) // C4 — octave
-    tone(329.63, 0.2,  1.3, 0.045) // E4 — major third, final resolve
+    // C2 bass → G2 → C3 → E3 resolve — same low warmth as FocusEnter
+    tone(65.41,  0,    2.2, 0.065) // C2 — deep bass
+    tone(98.00,  0.06, 2.0, 0.058) // G2 — fifth
+    tone(130.81, 0.12, 1.8, 0.052) // C3
+    tone(164.81, 0.22, 1.5, 0.040) // E3 — major third resolve
   } catch { /* silent fail */ }
 }
 
-/** Played when a task is marked complete — soft two-note bell chime */
+/** Played when a task is marked complete — two warm mid-range notes */
 export function playTaskComplete() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
     const now = c.currentTime
-    const bell = (freq, delay, vol) => {
+    const tone = (freq, delay, dur, vol) => {
       const osc = c.createOscillator()
       const gain = c.createGain()
       osc.connect(gain)
       gain.connect(c.destination)
-      osc.type = 'triangle'
+      osc.type = 'sine'
       osc.frequency.value = freq
       gain.gain.setValueAtTime(0, now + delay)
-      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.018)
-      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.65)
+      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.04)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur)
       osc.start(now + delay)
-      osc.stop(now + delay + 0.7)
+      osc.stop(now + delay + dur + 0.05)
     }
-    bell(880.00,  0,    0.062) // A5 — clear bell tone
-    bell(1108.73, 0.09, 0.048) // C#6 — major third above, warm chord
+    // G3 → C4 — low satisfying step up, similar palette to session sounds
+    tone(196.00, 0,    0.75, 0.085)
+    tone(261.63, 0.12, 0.90, 0.068)
   } catch { /* silent fail */ }
 }
 
@@ -119,7 +120,52 @@ export function playBreakSuggestion() {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    const freqs = [523.25, 659.25, 523.25]
-    freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.22, 0.9, 0.12))
+    // E3 → G3 → E3 — gentle notice
+    const freqs = [164.81, 196.00, 164.81]
+    freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.25, 1.1, 0.09))
+  } catch { /* silent fail */ }
+}
+
+/** Played when opening a modal — quick soft whoosh (low freq sweep) */
+export function playModalOpen() {
+  try {
+    const c = ctx()
+    if (!c) return
+    if (c.state === 'suspended') c.resume()
+    const now = c.currentTime
+    const osc = c.createOscillator()
+    const gain = c.createGain()
+    osc.connect(gain)
+    gain.connect(c.destination)
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(180, now)
+    osc.frequency.exponentialRampToValueAtTime(260, now + 0.12)
+    gain.gain.setValueAtTime(0, now)
+    gain.gain.linearRampToValueAtTime(0.065, now + 0.03)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22)
+    osc.start(now)
+    osc.stop(now + 0.24)
+  } catch { /* silent fail */ }
+}
+
+/** Played when deleting a task — single short low descending note */
+export function playTaskDelete() {
+  try {
+    const c = ctx()
+    if (!c) return
+    if (c.state === 'suspended') c.resume()
+    const now = c.currentTime
+    const osc = c.createOscillator()
+    const gain = c.createGain()
+    osc.connect(gain)
+    gain.connect(c.destination)
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(220, now)
+    osc.frequency.exponentialRampToValueAtTime(140, now + 0.18)
+    gain.gain.setValueAtTime(0, now)
+    gain.gain.linearRampToValueAtTime(0.07, now + 0.025)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28)
+    osc.start(now)
+    osc.stop(now + 0.3)
   } catch { /* silent fail */ }
 }

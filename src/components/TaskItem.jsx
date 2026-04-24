@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { updateTask, deleteTask, setMIT } from '../lib/tasks'
-import { playTaskComplete } from '../lib/sounds'
+import { playTaskComplete, playTaskDelete } from '../lib/sounds'
 import './TaskItem.css'
 
 export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus }) {
@@ -22,6 +22,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
 
   async function handleDelete() {
     setDeleting(true)
+    playTaskDelete()
     try {
       await deleteTask(task.id)
       onDelete(task.id)

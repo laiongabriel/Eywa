@@ -9,8 +9,8 @@
   display: flex;
   align-items: center;
   gap: 1.75rem;
-  padding: 0 2rem;
-  height: 52px;
+  padding: 0 max(2.5rem, calc((100vw - 880px) / 2 + 2rem));
+  height: 54px;
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
@@ -265,8 +265,8 @@
 /* ── Main shell layout ───────────────────────────────────── */
 .shell-main {
   flex: 1;
-  max-width: 720px;
+  max-width: 880px;
   width: 100%;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  padding: 2.75rem 2rem;
 }

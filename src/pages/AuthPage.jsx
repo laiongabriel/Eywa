@@ -219,7 +219,7 @@ export default function AuthPage() {
       }
 
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: fields.email.trim(),
           password: fields.password,
           options: {
@@ -227,6 +227,12 @@ export default function AuthPage() {
           },
         })
         if (error) throw error
+        // Supabase returns a user with empty `identities` when the email is
+        // already registered (email enumeration protection mode). Detect it.
+        if (signUpData?.user && signUpData.user.identities?.length === 0) {
+          setServerError('Este email já está cadastrado. Tente entrar ou recuperar a senha.')
+          return
+        }
         switchMode('signup-sent')
         return
       }

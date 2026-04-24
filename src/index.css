@@ -15,8 +15,8 @@
   --color-text-secondary: #9da6ba;
   --color-text-muted:     #5c6880;
 
-  --font-body:    'Figtree', system-ui, -apple-system, sans-serif;
-  --font-display: 'Cabinet Grotesk', 'Figtree', system-ui, sans-serif;
+  --font-body:    'Lexend', system-ui, -apple-system, sans-serif;
+  --font-display: 'Cabinet Grotesk', 'Lexend', system-ui, sans-serif;
 
   color-scheme: dark;
   font-family: var(--font-body);

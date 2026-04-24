@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchTasks, createTask, updateTask } from '../lib/tasks'
+import { playModalOpen } from '../lib/sounds'
 import TaskItem from '../components/TaskItem'
 import AddTaskModal from '../components/AddTaskModal'
 import FocusMode from '../components/FocusMode'
@@ -57,6 +58,7 @@ export default function TasksPage() {
   function openAddModal() {
     setEditingTask(null)
     setShowModal(true)
+    playModalOpen()
   }
 
   const mit = tasks.find(t => t.is_mit && !t.completed)
