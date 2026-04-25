@@ -11,10 +11,12 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
   const isEdit = !!initialData
 
   function parseInitial() {
+    const mins = initialData?.estimated_minutes
     return {
       title: initialData?.title ?? '',
       scheduledDate: initialData?.scheduled_at ? new Date(initialData.scheduled_at) : null,
-      estimatedMinutes: initialData?.estimated_minutes ?? '',
+      durationH: mins ? String(Math.floor(mins / 60) || '') : '',
+      durationM: mins ? String(mins % 60 || '')           : '',
     }
   }
 
@@ -39,10 +41,11 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     if (!form.title.trim()) return
     setSaving(true)
 
+    const totalMins = Number(form.durationH || 0) * 60 + Number(form.durationM || 0)
     const payload = {
       title: form.title.trim(),
       scheduled_at: form.scheduledDate ? form.scheduledDate.toISOString() : null,
-      estimated_minutes: form.estimatedMinutes !== '' ? Number(form.estimatedMinutes) : null,
+      estimated_minutes: totalMins > 0 ? totalMins : null,
     }
 
     try {
@@ -111,17 +114,31 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                   />
                 </div>
                 <div className="modal-field">
-                  <label className="modal-label">Duração (min)</label>
-                  <input
-                    className="modal-input"
-                    type="number"
-                    min="1"
-                    step="1"
-                    max="1440"
-                    placeholder="Ex: 45"
-                    value={form.estimatedMinutes}
-                    onChange={(e) => set('estimatedMinutes', e.target.value)}
-                  />
+                  <label className="modal-label">Duração</label>
+                  <div className="duration-row">
+                    <input
+                      className="modal-input duration-input"
+                      type="number"
+                      min="0"
+                      max="23"
+                      step="1"
+                      placeholder="0"
+                      value={form.durationH}
+                      onChange={(e) => set('durationH', e.target.value)}
+                    />
+                    <span className="duration-sep">h</span>
+                    <input
+                      className="modal-input duration-input"
+                      type="number"
+                      min="0"
+                      max="59"
+                      step="1"
+                      placeholder="0"
+                      value={form.durationM}
+                      onChange={(e) => set('durationM', e.target.value)}
+                    />
+                    <span className="duration-sep">min</span>
+                  </div>
                 </div>
               </div>
             </div>

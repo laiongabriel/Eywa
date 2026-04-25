@@ -67,7 +67,7 @@ export default function AppShell({ children }) {
                       {value === 'light' && <SunIcon />}
                     </span>
                     {label}
-                    {theme === value && <span className="theme-check">✓</span>}
+                    {theme === value && <span className="theme-check"><ThemeCheckIcon /></span>}
                   </button>
                 ))}
               </div>
@@ -106,6 +106,14 @@ export default function AppShell({ children }) {
         </div>
       )}
     </div>
+  )
+}
+
+function ThemeCheckIcon() {
+  return (
+    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
+      <path d="M1 4L4 7L9 1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
   )
 }
 

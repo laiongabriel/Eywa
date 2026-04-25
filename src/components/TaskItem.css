@@ -6,7 +6,7 @@
   border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  transition: border-color 0.15s ease, opacity 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.15s ease;
   animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--task-idx, 0) * 45ms);
 }
@@ -50,9 +50,15 @@
   background: rgba(217, 119, 6, 0.04);
 }
 
+@keyframes taskDelete {
+  0%   { opacity: 1; transform: translateX(0) scale(1); max-height: 80px; padding-top: 0.7rem; padding-bottom: 0.7rem; }
+  35%  { opacity: 0.1; transform: translateX(20px) scale(0.97); max-height: 80px; }
+  100% { opacity: 0; transform: translateX(20px) scale(0.96); max-height: 0; padding-top: 0; padding-bottom: 0; }
+}
+
 .task-item.deleting {
-  opacity: 0;
-  transform: translateX(-12px);
+  animation: taskDelete 0.36s cubic-bezier(0.4, 0, 1, 1) forwards;
+  overflow: hidden;
   pointer-events: none;
 }
 

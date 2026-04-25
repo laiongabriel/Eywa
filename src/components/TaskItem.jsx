@@ -25,7 +25,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
     playTaskDelete()
     try {
       await deleteTask(task.id)
-      onDelete(task.id)
+      setTimeout(() => onDelete(task.id), 380)
     } catch {
       setDeleting(false)
     }
@@ -82,11 +82,12 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
           </span>
         )}
 
-        {task.scheduled_at && (
+        {(task.scheduled_at || task.estimated_minutes) && (
           <div className="task-meta">
             <span className="task-scheduled">
-              {formatScheduled(task.scheduled_at)}
-              {task.estimated_minutes ? ` · ${task.estimated_minutes}min` : ''}
+              {task.scheduled_at && formatScheduled(task.scheduled_at)}
+              {task.scheduled_at && task.estimated_minutes ? ' · ' : ''}
+              {task.estimated_minutes ? formatDuration(task.estimated_minutes) : ''}
             </span>
           </div>
         )}
@@ -137,10 +138,19 @@ function formatScheduled(ts) {
   return d.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
+function formatDuration(mins) {
+  if (!mins) return ''
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  if (h && m) return `${h}h ${m}min`
+  if (h) return `${h}h`
+  return `${m}min`
+}
+
 function CheckIcon() {
   return (
-    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
-      <path d="M1 4l2.5 2.5L9 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+      <path d="M1 4.5L4.5 8L10 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }

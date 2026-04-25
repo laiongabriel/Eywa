@@ -422,7 +422,7 @@ export default function AuthPage() {
             </FieldWrap>
 
             {mode !== 'forgot' && (
-              <>
+              <div className="pw-field-group">
               <FieldWrap
                 label="Senha"
                 error={errors.password} touched={touched.password} value={fields.password}
@@ -460,7 +460,7 @@ export default function AuthPage() {
                   <CapsLockIcon /> Caps Lock está ativado
                 </p>
               )}
-              </>
+              </div>
             )}
 
             {mode === 'signup' && (
@@ -538,12 +538,20 @@ function FieldWrap({ error, touched, value, children, label, hideIcon, hint }) {
       {label && <label className="field-label">{label}</label>}
       <div className="input-wrap">
         {children}
-        {showValid && <span className="field-icon valid"   aria-hidden="true">✓</span>}
+        {showValid && <span className="field-icon valid"   aria-hidden="true"><FieldCheckIcon /></span>}
         {showError && <span className="field-icon invalid" aria-hidden="true">!</span>}
       </div>
       {hint}
       {hasError && <p className="field-error" role="alert">{error}</p>}
     </div>
+  )
+}
+
+function FieldCheckIcon() {
+  return (
+    <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+      <path d="M1 4.5L4.5 8L10 1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
   )
 }
 

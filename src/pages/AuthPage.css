@@ -150,14 +150,15 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 1.5rem;
 }
 
-/* field-wrap = label + input row + error */
+/* field-wrap = label + input row + error (error is absolute, no layout shift) */
 .field-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.325rem;
+  position: relative;
   animation: fieldIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -231,12 +232,18 @@
 .field-icon.valid   { color: #6ee7b7; }
 .field-icon.invalid { color: #f87171; }
 
-/* Error message */
+/* Error message — positioned absolute so it doesn't shift layout */
 .field-error {
-  font-size: 0.85rem;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  font-size: 0.8rem;
   color: #f87171;
   margin: 0;
-  padding-left: 0.25rem;
+  padding: 0 0.25rem;
+  z-index: 6;
+  white-space: nowrap;
   animation: errorIn 0.2s ease;
 }
 
@@ -412,19 +419,29 @@
   padding-right: 2.75rem;
 }
 
-/* Caps Lock warning */
+/* Password field group: wraps the password FieldWrap + caps lock warning */
+.pw-field-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Caps Lock warning — positioned absolute below the field group */
 .caps-lock-warning {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   gap: 0.375rem;
   margin: 0;
-  padding: 0.375rem 0.625rem;
+  padding: 0 0.25rem;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--color-text-secondary);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
+  z-index: 6;
+  white-space: nowrap;
   animation: errorIn 0.2s ease;
 }
 

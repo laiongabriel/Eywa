@@ -61,28 +61,24 @@
 }
 
 .btn-add-task {
-  padding: 0.45rem 1rem;
+  padding: 0.4rem 0.875rem;
   background: var(--color-amber);
   border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 0.9rem;
+  border-radius: 9px;
+  color: #0d1117;
+  font-size: 0.825rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
 }
-
-[data-theme="light"] .btn-add-task { color: #fff; }
 
 .btn-add-task:hover {
   background: var(--color-amber-bright);
-  box-shadow: 0 4px 16px rgba(201, 107, 0, 0.3);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
 }
 
-.btn-add-task:active {
-  transform: scale(0.97);
-}
+.btn-add-task:active { transform: scale(0.97); }
 
 /* Completed section divider */
 .tasks-divider {
