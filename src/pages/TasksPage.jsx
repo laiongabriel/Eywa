@@ -31,7 +31,7 @@ function SortableTaskItem({ task, isFadingOut, index, ...props }) {
       style={{
         display: 'grid',
         gridTemplateRows: isFadingOut ? '0fr' : '1fr',
-        overflow: 'hidden',
+        overflow: isFadingOut ? 'hidden' : 'visible',
         marginBottom: isFadingOut ? '0' : '0.375rem',
         transition: 'grid-template-rows 0.38s ease, margin-bottom 0.38s ease',
         '--task-idx': index,
@@ -249,7 +249,7 @@ export default function TasksPage() {
                       '--task-idx': index,
                       display: 'grid',
                       gridTemplateRows: deletingIds.has(task.id) ? '0fr' : '1fr',
-                      overflow: 'hidden',
+                      overflow: deletingIds.has(task.id) ? 'hidden' : 'visible',
                       marginBottom: deletingIds.has(task.id) ? '0' : '0.375rem',
                       transition: 'grid-template-rows 0.38s ease, margin-bottom 0.38s ease',
                     }}

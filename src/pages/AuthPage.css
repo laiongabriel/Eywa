@@ -150,14 +150,15 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
 
-/* field-wrap = label + input row + error-slot */
+/* field-wrap = label + input row + error (error is absolute, no layout shift) */
 .field-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.325rem;
+  position: relative;
   animation: fieldIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -231,18 +232,18 @@
 .field-icon.valid   { color: #6ee7b7; }
 .field-icon.invalid { color: #f87171; }
 
-/* Reserved space for error — always present, grows when error appears */
-.field-error-slot {
-  min-height: 1.15rem;
-  display: flex;
-  align-items: flex-start;
-}
-
-/* Error message */
+/* Error message — positioned absolute so it doesn't shift layout */
 .field-error {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
   font-size: 0.8rem;
   color: #f87171;
   margin: 0;
+  padding: 0 0.25rem;
+  z-index: 6;
+  white-space: nowrap;
   animation: errorIn 0.2s ease;
 }
 
