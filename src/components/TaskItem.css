@@ -63,9 +63,9 @@
 /* Checkbox */
 .task-checkbox {
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
   border: 1.5px solid var(--color-border-active);
   background: transparent;
   cursor: pointer;
@@ -204,7 +204,7 @@
 }
 
 .mit-btn {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: var(--color-text-muted);
 }
 

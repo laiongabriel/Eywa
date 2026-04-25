@@ -208,7 +208,11 @@ export default function AuthPage() {
       if (err) newErrors[f] = err
     }
     setTouched(newTouched); setErrors(newErrors)
-    if (Object.keys(newErrors).length > 0) { setShake(true); return }
+    if (Object.keys(newErrors).length > 0) {
+      setShake(true)
+      setTimeout(() => { document.querySelector('.auth-input.invalid')?.focus() }, 0)
+      return
+    }
 
     setLoading(true)
     try {
@@ -279,7 +283,12 @@ export default function AuthPage() {
     const usernameVal = fields.username.trim()
     setTouched(prev => ({ ...prev, username: true }))
     const err = validateField('username', usernameVal, fields, 'signup')
-    if (err) { setErrors(prev => ({ ...prev, username: err })); setShake(true); return }
+    if (err) {
+      setErrors(prev => ({ ...prev, username: err }))
+      setShake(true)
+      setTimeout(() => { document.querySelector('.auth-input.invalid')?.focus() }, 0)
+      return
+    }
 
     setLoading(true)
     try {
@@ -426,6 +435,11 @@ export default function AuthPage() {
             {mode !== 'forgot' && (
               <FieldWrap
                 label="Senha"
+                labelRight={mode === 'signin' ? (
+                  <button type="button" className="auth-forgot-link" onClick={() => switchMode('forgot')}>
+                    Esqueceu a senha?
+                  </button>
+                ) : null}
                 error={errors.password} touched={touched.password} value={fields.password}
                 hideIcon
                 hint={mode === 'signup' && fields.password ? (
@@ -479,14 +493,6 @@ export default function AuthPage() {
               </FieldWrap>
             )}
 
-            {mode === 'signin' && (
-              <div className="auth-forgot-link-row">
-                <button type="button" className="auth-forgot-link" onClick={() => switchMode('forgot')}>
-                  Esqueceu a senha?
-                </button>
-              </div>
-            )}
-
             {serverError && <p className="auth-server-error" role="alert">{serverError}</p>}
             {info        && <p className="auth-info" role="status">{info}</p>}
 
@@ -523,22 +529,25 @@ export default function AuthPage() {
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
-function FieldWrap({ error, touched, value, children, label, hideIcon, hint }) {
-  const showValid = !hideIcon && touched && !error && value
+function FieldWrap({ error, touched, value, children, label, labelRight, hideIcon, hint }) {
+  const showValid = !hideIcon && !error && !!value
   const showError = !hideIcon && touched && !!error
   const hasError  = touched && !!error
   return (
     <div className="field-wrap">
-      {label && <label className="field-label">{label}</label>}
+      {(label || labelRight) && (
+        <div className="field-label-row">
+          {label && <label className="field-label">{label}</label>}
+          {labelRight}
+        </div>
+      )}
       <div className="input-wrap">
         {children}
         {showValid && <span className="field-icon valid"   aria-hidden="true"><FieldCheckIcon /></span>}
         {showError && <span className="field-icon invalid" aria-hidden="true">!</span>}
       </div>
       {hint}
-      <div className="field-error-slot" aria-live="polite">
-        {hasError && <p className="field-error" role="alert">{error}</p>}
-      </div>
+      {hasError && <p className="field-error" role="alert">{error}</p>}
     </div>
   )
 }
