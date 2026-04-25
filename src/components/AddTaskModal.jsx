@@ -12,9 +12,17 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
 
   function parseInitial() {
     const mins = initialData?.estimated_minutes
+    let scheduledDate = null
+    let scheduledTime = ''
+    if (initialData?.scheduled_at) {
+      const d = new Date(initialData.scheduled_at)
+      scheduledDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+      scheduledTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+    }
     return {
       title: initialData?.title ?? '',
-      scheduledDate: initialData?.scheduled_at ? new Date(initialData.scheduled_at) : null,
+      scheduledDate,
+      scheduledTime,
       durationH: mins ? String(Math.floor(mins / 60) || '') : '',
       durationM: mins ? String(mins % 60 || '')           : '',
     }
@@ -42,9 +50,27 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     setSaving(true)
 
     const totalMins = Number(form.durationH || 0) * 60 + Number(form.durationM || 0)
+
+    let scheduled_at = null
+    if (form.scheduledTime && !form.scheduledDate) {
+      // Only time → assume today
+      const [h, m] = form.scheduledTime.split(':').map(Number)
+      const d = new Date(); d.setHours(h, m, 0, 0)
+      scheduled_at = d.toISOString()
+    } else if (form.scheduledDate) {
+      const d = new Date(form.scheduledDate)
+      if (form.scheduledTime) {
+        const [h, m] = form.scheduledTime.split(':').map(Number)
+        d.setHours(h, m, 0, 0)
+      } else {
+        d.setHours(0, 0, 0, 0)
+      }
+      scheduled_at = d.toISOString()
+    }
+
     const payload = {
       title: form.title.trim(),
-      scheduled_at: form.scheduledDate ? form.scheduledDate.toISOString() : null,
+      scheduled_at,
       estimated_minutes: totalMins > 0 ? totalMins : null,
     }
 
@@ -96,16 +122,13 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
             <div className="intention-fields">
               <div className="modal-row">
                 <div className="modal-field">
-                  <label className="modal-label">Data e horário</label>
+                  <label className="modal-label">Data</label>
                   <DatePicker
                     selected={form.scheduledDate}
-                    onChange={(date) => set('scheduledDate', date)}
-                    showTimeSelect
-                    dateFormat="dd/MM/yyyy HH:mm"
-                    timeFormat="HH:mm"
-                    timeIntervals={15}
+                    onChange={(date) => set('scheduledDate', date ? new Date(date.getFullYear(), date.getMonth(), date.getDate()) : null)}
+                    dateFormat="dd/MM/yyyy"
                     locale="pt-BR"
-                    placeholderText="Selecionar..."
+                    placeholderText="DD/MM/AAAA"
                     className="modal-input datepicker-input"
                     calendarClassName="eywa-datepicker"
                     isClearable
@@ -113,15 +136,24 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     popperPlacement="bottom-start"
                   />
                 </div>
+                <div className="modal-field modal-field--time">
+                  <label className="modal-label">Horário</label>
+                  <input
+                    type="time"
+                    className="modal-input"
+                    value={form.scheduledTime}
+                    onChange={(e) => set('scheduledTime', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="modal-row modal-row--duration">
                 <div className="modal-field">
                   <label className="modal-label">Duração</label>
                   <div className="duration-row">
                     <input
                       className="modal-input duration-input"
                       type="number"
-                      min="0"
-                      max="23"
-                      step="1"
+                      min="0" max="23" step="1"
                       placeholder="0"
                       value={form.durationH}
                       onChange={(e) => set('durationH', e.target.value)}
@@ -130,9 +162,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     <input
                       className="modal-input duration-input"
                       type="number"
-                      min="0"
-                      max="59"
-                      step="1"
+                      min="0" max="59" step="1"
                       placeholder="0"
                       value={form.durationM}
                       onChange={(e) => set('durationM', e.target.value)}

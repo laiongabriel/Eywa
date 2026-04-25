@@ -542,7 +542,9 @@ function FieldWrap({ error, touched, value, children, label, hideIcon, hint }) {
         {showError && <span className="field-icon invalid" aria-hidden="true">!</span>}
       </div>
       {hint}
-      {hasError && <p className="field-error" role="alert">{error}</p>}
+      <div className="field-error-slot">
+        {hasError && <p className="field-error" role="alert">{error}</p>}
+      </div>
     </div>
   )
 }

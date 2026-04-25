@@ -30,13 +30,6 @@
   background-clip: text;
 }
 
-[data-theme="light"] .shell-logo {
-  background: linear-gradient(135deg, #111110 0%, #3a6fd0 55%, #1e4fa8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 .shell-nav-links {
   display: flex;
   gap: 0.125rem;
@@ -70,89 +63,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-/* ── Theme dropdown ───────────────────────────────────────── */
-.theme-dropdown {
-  position: relative;
-}
-
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  padding: 0.3rem 0.45rem;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  line-height: 1;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-}
-
-.theme-toggle:hover,
-.theme-toggle.open {
-  border-color: var(--color-border-active);
-  color: var(--color-text-primary);
-  background: var(--color-surface-raised);
-}
-
-.theme-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 136px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 0.3rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
-  animation: menuIn 0.13s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 50;
-}
-
-@keyframes menuIn {
-  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.theme-option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  background: none;
-  border: none;
-  border-radius: 7px;
-  padding: 0.5rem 0.625rem;
-  font-size: 0.875rem;
-  font-family: inherit;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background 0.1s, color 0.1s;
-  text-align: left;
-}
-
-.theme-option:hover {
-  background: var(--color-surface-raised);
-  color: var(--color-text-primary);
-}
-
-.theme-option.active {
-  color: var(--color-text-primary);
-}
-
-.theme-option-icon {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.theme-check {
-  margin-left: auto;
-  font-size: 0.8rem;
-  color: var(--color-amber);
-  line-height: 1;
 }
 
 /* ── Sign-out button ─────────────────────────────────────── */

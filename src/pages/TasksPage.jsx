@@ -21,24 +21,37 @@ import AddTaskModal from '../components/AddTaskModal'
 import FocusMode from '../components/FocusMode'
 import './TasksPage.css'
 
-/** Wraps TaskItem with dnd-kit sortable behaviour */
-function SortableTaskItem({ task, ...props }) {
+/** Wraps TaskItem with dnd-kit sortable behaviour + smooth grid height collapse */
+function SortableTaskItem({ task, isFadingOut, index, ...props }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id })
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  }
-
   return (
-    <div ref={setNodeRef} style={style}>
-      <TaskItem
-        task={task}
-        dragHandle={{ ...attributes, ...listeners }}
-        {...props}
-      />
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateRows: isFadingOut ? '0fr' : '1fr',
+        overflow: 'hidden',
+        marginBottom: isFadingOut ? '0' : '0.375rem',
+        transition: 'grid-template-rows 0.38s ease, margin-bottom 0.38s ease',
+        '--task-idx': index,
+      }}
+    >
+      <div
+        ref={setNodeRef}
+        style={{
+          transform: CSS.Transform.toString(transform),
+          transition,
+          opacity: isDragging ? 0.5 : 1,
+          minHeight: 0,
+        }}
+      >
+        <TaskItem
+          task={task}
+          dragHandle={{ ...attributes, ...listeners }}
+          {...props}
+        />
+      </div>
     </div>
   )
 }
@@ -49,6 +62,7 @@ export default function TasksPage() {
 
   const [tasks, setTasks]         = useState([])
   const [order, setOrder]         = useState([])   // IDs of active (non-completed) tasks
+  const [deletingIds, setDeletingIds] = useState(new Set())
   const [loading, setLoading]     = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
@@ -59,12 +73,15 @@ export default function TasksPage() {
   const loadTasks = useCallback(async () => {
     const data = await fetchTasks(userId)
     setTasks(data)
-    // Restore saved order from localStorage, fall back to server order
     const saved = JSON.parse(localStorage.getItem(`eywa_task_order_${userId}`) || 'null')
     if (saved && Array.isArray(saved)) {
       setOrder(saved)
     } else {
-      setOrder(data.filter(t => !t.completed).map(t => t.id))
+      // Default order: timed tasks first sorted by scheduled_at, then untimed
+      const active = data.filter(t => !t.completed && !t.is_mit)
+      const timed   = active.filter(t => t.scheduled_at).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
+      const untimed = active.filter(t => !t.scheduled_at)
+      setOrder([...timed, ...untimed].map(t => t.id))
     }
     setLoading(false)
   }, [userId])
@@ -78,8 +95,14 @@ export default function TasksPage() {
 
   async function handleCreate(payload) {
     const task = await createTask(userId, payload)
-    setTasks(prev => [task, ...prev])
-    setOrder(prev => [task.id, ...prev])
+    setTasks(prev => [...prev, task])
+    if (task.scheduled_at) {
+      // Timed task: prepend (before untimed tasks)
+      setOrder(prev => [task.id, ...prev])
+    } else {
+      // Untimed task: append
+      setOrder(prev => [...prev, task.id])
+    }
     playTaskCreated()
   }
 
@@ -104,9 +127,14 @@ export default function TasksPage() {
     }
   }
 
+  function handleDeleteStart(id) {
+    setDeletingIds(prev => new Set([...prev, id]))
+  }
+
   function handleDelete(id) {
     setTasks(prev => prev.filter(t => t.id !== id))
     setOrder(prev => prev.filter(oid => oid !== id))
+    setDeletingIds(prev => { const s = new Set(prev); s.delete(id); return s })
   }
 
   function openAddModal() {
@@ -190,14 +218,17 @@ export default function TasksPage() {
         <>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={sortableOrder} strategy={verticalListSortingStrategy}>
-              <ul className="tasks-list">
+              <ul className="tasks-list" style={{ gap: 0 }}>
                 {sortableTasks.map((task, index) => (
-                  <li key={task.id} style={{ '--task-idx': index }}>
+                  <li key={task.id}>
                     <SortableTaskItem
                       task={task}
+                      index={index}
+                      isFadingOut={deletingIds.has(task.id)}
                       userId={userId}
                       onUpdate={handleUpdate}
                       onDelete={handleDelete}
+                      onDeleteStart={handleDeleteStart}
                       onEdit={() => handleEditOpen(task)}
                       onStartFocus={setFocusTask}
                     />
@@ -210,16 +241,29 @@ export default function TasksPage() {
           {completedTasks.length > 0 && (
             <>
               <div className="tasks-divider">Concluídas</div>
-              <ul className="tasks-list">
+              <ul className="tasks-list" style={{ gap: 0 }}>
                 {completedTasks.map((task, index) => (
-                  <li key={task.id} style={{ '--task-idx': index }}>
+                  <li
+                    key={task.id}
+                    style={{
+                      '--task-idx': index,
+                      display: 'grid',
+                      gridTemplateRows: deletingIds.has(task.id) ? '0fr' : '1fr',
+                      overflow: 'hidden',
+                      marginBottom: deletingIds.has(task.id) ? '0' : '0.375rem',
+                      transition: 'grid-template-rows 0.38s ease, margin-bottom 0.38s ease',
+                    }}
+                  >
+                    <div style={{ minHeight: 0 }}>
                     <TaskItem
                       task={task}
                       userId={userId}
                       onUpdate={handleUpdate}
                       onDelete={handleDelete}
+                      onDeleteStart={handleDeleteStart}
                       onEdit={() => handleEditOpen(task)}
                     />
+                    </div>
                   </li>
                 ))}
               </ul>

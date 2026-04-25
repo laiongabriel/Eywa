@@ -51,14 +51,12 @@
 }
 
 @keyframes taskDelete {
-  0%   { opacity: 1; transform: translateX(0) scale(1); max-height: 80px; padding-top: 0.7rem; padding-bottom: 0.7rem; }
-  35%  { opacity: 0.1; transform: translateX(20px) scale(0.97); max-height: 80px; }
-  100% { opacity: 0; transform: translateX(20px) scale(0.96); max-height: 0; padding-top: 0; padding-bottom: 0; }
+  0%   { opacity: 1; transform: translateX(0) scale(1); }
+  100% { opacity: 0; transform: translateX(20px) scale(0.97); }
 }
 
 .task-item.deleting {
-  animation: taskDelete 0.36s cubic-bezier(0.4, 0, 1, 1) forwards;
-  overflow: hidden;
+  animation: taskDelete 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
   pointer-events: none;
 }
 
@@ -85,8 +83,9 @@
 }
 
 .task-checkbox.checked {
-  background: var(--color-amber);
+  background: rgba(217, 119, 6, 0.12);
   border-color: var(--color-amber);
+  color: var(--color-amber);
 }
 
 .task-checkbox:active {

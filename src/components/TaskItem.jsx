@@ -3,7 +3,7 @@ import { updateTask, deleteTask } from '../lib/tasks'
 import { playTaskComplete, playTaskDelete } from '../lib/sounds'
 import './TaskItem.css'
 
-export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus, dragHandle }) {
+export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
@@ -21,6 +21,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
   }
 
   async function handleDelete() {
+    onDeleteStart?.(task.id)
     setDeleting(true)
     playTaskDelete()
     try {
@@ -135,7 +136,16 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
 
 function formatScheduled(ts) {
   const d = new Date(ts)
-  return d.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+  const now = new Date()
+  const isToday    = d.toDateString() === now.toDateString()
+  const tmrw = new Date(now); tmrw.setDate(now.getDate() + 1)
+  const isTomorrow = d.toDateString() === tmrw.toDateString()
+  const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0
+  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  if (isToday)    return hasTime ? time : 'Hoje'
+  if (isTomorrow) return hasTime ? `Amanhã · ${time}` : 'Amanhã'
+  const day = d.toLocaleDateString('pt-BR', { weekday: 'short' })
+  return hasTime ? `${day} · ${time}` : day
 }
 
 function formatDuration(mins) {
@@ -149,8 +159,8 @@ function formatDuration(mins) {
 
 function CheckIcon() {
   return (
-    <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
-      <path d="M1 4.5L4.5 8L10 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="13" height="11" viewBox="0 0 13 11" fill="none" aria-hidden="true">
+      <path d="M1.5 5.5L5 9L11.5 1.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }

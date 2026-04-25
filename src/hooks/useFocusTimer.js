@@ -2,11 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { playBreakSuggestion } from '../lib/sounds'
 
 /**
- * Ultradian rhythm default: ~90 min focus cycle (Kleitman / Lavie)
+ * Default: 30 min focus cycle.
  * The timer counts up. If estimatedMinutes is provided, it also shows
- * a progress ring against that target; otherwise against 90 min.
+ * a progress ring against that target; otherwise against 30 min.
  */
-const ULTRADIAN_SECONDS = 90 * 60
+const ULTRADIAN_SECONDS = 30 * 60
 
 export function useFocusTimer(estimatedMinutes) {
   const [elapsed, setElapsed] = useState(0)    // seconds
