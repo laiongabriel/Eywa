@@ -153,12 +153,11 @@
   gap: 1.5rem;
 }
 
-/* field-wrap = label + input row + error (error is absolute, no layout shift) */
+/* field-wrap = label + input row + error (inline, takes up space) */
 .field-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.325rem;
-  position: relative;
   animation: fieldIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -232,18 +231,12 @@
 .field-icon.valid   { color: #6ee7b7; }
 .field-icon.invalid { color: #f87171; }
 
-/* Error message — positioned absolute so it doesn't shift layout */
+/* Error message — inline, takes up space */
 .field-error {
-  position: absolute;
-  top: calc(100% + 5px);
-  left: 0;
-  right: 0;
   font-size: 0.8rem;
   color: #f87171;
-  margin: 0;
-  padding: 0 0.25rem;
-  z-index: 6;
-  white-space: nowrap;
+  margin: 0.1rem 0 0;
+  padding: 0 0.1rem;
   animation: errorIn 0.2s ease;
 }
 
@@ -393,18 +386,20 @@
    -------------------------------------------------------------------------- */
 .input-eye-btn {
   position: absolute;
-  right: 0.6rem;
+  right: 0.35rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: var(--color-text-muted);
-  padding: 0.25rem;
+  padding: 0.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 5px;
   transition: color 0.15s, background 0.15s;
   line-height: 0;
 }
@@ -419,23 +414,9 @@
   padding-right: 2.75rem;
 }
 
-/* Password field group: wraps the password FieldWrap + caps lock warning */
+/* Password field group: wraps the password FieldWrap */
 .pw-field-group {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Caps Lock warning — in normal flow, no layout surprise */
-.caps-lock-warning {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  margin: -0.25rem 0 0;
-  padding: 0 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  animation: errorIn 0.2s ease;
+  display: contents;
 }
 
 /* --------------------------------------------------------------------------

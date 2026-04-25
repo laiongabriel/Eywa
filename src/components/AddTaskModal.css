@@ -176,9 +176,13 @@
   color: var(--color-text-muted);
   font-size: 1rem;
   cursor: pointer;
-  padding: 0.25rem;
-  line-height: 1;
-  border-radius: 5px;
+  padding: 0.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
@@ -263,11 +267,34 @@
 }
 
 .modal-field--time {
-  width: 7.5rem;
+  width: 9rem;
 }
 
-.modal-input[type="time"] {
-  color-scheme: dark;
+/* HH : MM custom time entry */
+.time-hhmm {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.time-part-input {
+  width: 3.5rem !important;
+  text-align: center;
+  padding-left: 0.4rem !important;
+  padding-right: 0.4rem !important;
+}
+
+/* hide number spinners */
+.time-part-input::-webkit-inner-spin-button,
+.time-part-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.time-part-input { -moz-appearance: textfield; }
+
+.time-colon {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  line-height: 1;
+  padding-bottom: 0.1rem;
 }
 
 .modal-label {

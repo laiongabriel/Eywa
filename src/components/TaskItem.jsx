@@ -159,8 +159,8 @@ function formatDuration(mins) {
 
 function CheckIcon() {
   return (
-    <svg width="16" height="13" viewBox="0 0 16 13" fill="none" aria-hidden="true">
-      <path d="M1.5 6.5L6 11L14.5 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="14" height="12" viewBox="0 0 14 12" fill="none" aria-hidden="true">
+      <path d="M1.5 6L5.5 10L12.5 1.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }

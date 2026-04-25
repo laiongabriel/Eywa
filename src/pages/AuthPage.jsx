@@ -47,6 +47,9 @@ function validateField(field, value, allValues, mode) {
     case 'email':
       if (mode === 'signin') {
         if (!value) return 'Email ou nome de usuário é obrigatório.'
+        // If it looks like a username (not an email), require at least 3 chars
+        if (!value.includes('@') && value.length < 3)
+          return 'Mínimo 3 caracteres.'
         return null
       }
       if (!value) return 'Email é obrigatório.'
@@ -82,7 +85,6 @@ export default function AuthPage() {
   const [shake, setShake]             = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm,  setShowConfirm]  = useState(false)
-  const [capsLock,     setCapsLock]     = useState(false)
   const [exiting, setExiting]           = useState(false)
   const innerRef          = useRef(null)
   const profileCheckedRef = useRef(false)
@@ -422,7 +424,6 @@ export default function AuthPage() {
             </FieldWrap>
 
             {mode !== 'forgot' && (
-              <div className="pw-field-group">
               <FieldWrap
                 label="Senha"
                 error={errors.password} touched={touched.password} value={fields.password}
@@ -446,7 +447,6 @@ export default function AuthPage() {
                   value={fields.password}
                   onChange={e => handleChange('password', e.target.value)}
                   onBlur={() => handleBlur('password')}
-                  onKeyUp={e => setCapsLock(e.getModifierState('CapsLock'))}
                   autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 />
                 <button type="button" className="input-eye-btn"
@@ -455,12 +455,6 @@ export default function AuthPage() {
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </FieldWrap>
-              {capsLock && !showPassword && (
-                <p className="caps-lock-warning" role="alert">
-                  <CapsLockIcon /> Caps Lock está ativado
-                </p>
-              )}
-              </div>
             )}
 
             {mode === 'signup' && (
@@ -589,16 +583,6 @@ function EyeOffIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
       <line x1="1" y1="1" x2="23" y2="23"/>
-    </svg>
-  )
-}
-
-function CapsLockIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="8 13 12 9 16 13"/>
-      <line x1="12" y1="9" x2="12" y2="20"/>
-      <line x1="7" y1="4" x2="17" y2="4"/>
     </svg>
   )
 }

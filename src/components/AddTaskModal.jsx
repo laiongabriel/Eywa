@@ -13,16 +13,21 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
   function parseInitial() {
     const mins = initialData?.estimated_minutes
     let scheduledDate = null
-    let scheduledTime = ''
+    let scheduledH = ''
+    let scheduledM = ''
     if (initialData?.scheduled_at) {
       const d = new Date(initialData.scheduled_at)
       scheduledDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-      scheduledTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+      if (d.getHours() !== 0 || d.getMinutes() !== 0) {
+        scheduledH = String(d.getHours())
+        scheduledM = String(d.getMinutes())
+      }
     }
     return {
       title: initialData?.title ?? '',
       scheduledDate,
-      scheduledTime,
+      scheduledH,
+      scheduledM,
       durationH: mins ? String(Math.floor(mins / 60) || '') : '',
       durationM: mins ? String(mins % 60 || '')           : '',
     }
@@ -52,19 +57,16 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     const totalMins = Number(form.durationH || 0) * 60 + Number(form.durationM || 0)
 
     let scheduled_at = null
-    if (form.scheduledTime && !form.scheduledDate) {
+    const hasTime = form.scheduledH !== '' || form.scheduledM !== ''
+    const h = parseInt(form.scheduledH) || 0
+    const m = parseInt(form.scheduledM) || 0
+    if (hasTime && !form.scheduledDate) {
       // Only time → assume today
-      const [h, m] = form.scheduledTime.split(':').map(Number)
       const d = new Date(); d.setHours(h, m, 0, 0)
       scheduled_at = d.toISOString()
     } else if (form.scheduledDate) {
       const d = new Date(form.scheduledDate)
-      if (form.scheduledTime) {
-        const [h, m] = form.scheduledTime.split(':').map(Number)
-        d.setHours(h, m, 0, 0)
-      } else {
-        d.setHours(0, 0, 0, 0)
-      }
+      if (hasTime) { d.setHours(h, m, 0, 0) } else { d.setHours(0, 0, 0, 0) }
       scheduled_at = d.toISOString()
     }
 
@@ -138,12 +140,23 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
                 <div className="modal-field modal-field--time">
                   <label className="modal-label">Horário</label>
-                  <input
-                    type="time"
-                    className="modal-input"
-                    value={form.scheduledTime}
-                    onChange={(e) => set('scheduledTime', e.target.value)}
-                  />
+                  <div className="time-hhmm">
+                    <input
+                      className="modal-input time-part-input"
+                      type="number" min="0" max="23" step="1"
+                      placeholder="HH"
+                      value={form.scheduledH}
+                      onChange={(e) => set('scheduledH', e.target.value)}
+                    />
+                    <span className="time-colon">:</span>
+                    <input
+                      className="modal-input time-part-input"
+                      type="number" min="0" max="59" step="1"
+                      placeholder="MM"
+                      value={form.scheduledM}
+                      onChange={(e) => set('scheduledM', e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="modal-row modal-row--duration">
