@@ -103,41 +103,18 @@ export default function TasksPage() {
   }
 
   async function handleCreate(payload) {
-    const tempId = 'pending-' + Date.now()
-    const tempTask = {
-      id: tempId,
-      user_id: userId,
-      title: payload.title,
-      scheduled_at: payload.scheduled_at ?? null,
-      estimated_minutes: payload.estimated_minutes ?? null,
-      reminder_offset_minutes: payload.reminder_offset_minutes ?? null,
-      completed: false,
-      is_mit: false,
-      created_at: new Date().toISOString(),
-      _pending: true,
-    }
-    setTasks(prev => [...prev, tempTask])
-    if (tempTask.scheduled_at) {
-      setOrder(prev => [tempId, ...prev])
+    const realTask = await createTask(userId, payload)
+    setTasks(prev => [...prev, realTask])
+    if (realTask.scheduled_at) {
+      setOrder(prev => [realTask.id, ...prev])
     } else {
-      setOrder(prev => [...prev, tempId])
+      setOrder(prev => [...prev, realTask.id])
     }
-    // DB call in background — don't await
-    createTask(userId, payload)
-      .then(realTask => {
-        setTasks(prev => prev.map(t => t.id === tempId ? realTask : t))
-        setOrder(prev => prev.map(id => id === tempId ? realTask.id : id))
-        if (realTask.reminder_offset_minutes != null) {
-          requestNotificationPermission().then(perm => {
-            if (perm === 'granted') scheduleTaskNotification(realTask)
-          })
-        }
+    if (realTask.reminder_offset_minutes != null) {
+      requestNotificationPermission().then(perm => {
+        if (perm === 'granted') scheduleTaskNotification(realTask)
       })
-      .catch(() => {
-        setTasks(prev => prev.filter(t => t.id !== tempId))
-        setOrder(prev => prev.filter(id => id !== tempId))
-        addToast('Erro ao criar tarefa')
-      })
+    }
   }
 
   async function handleEditOpen(task) {

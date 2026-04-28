@@ -99,7 +99,3 @@ export function getNotificationPermission() {
   if (!('Notification' in window)) return 'unsupported'
   return Notification.permission
 }
-
-export function isNotificationSupported() {
-  return 'Notification' in window
-}

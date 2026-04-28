@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { playModalClose, playTaskCreated } from '../lib/sounds'
+import { ChevronDown } from 'lucide-react'
 import './AddTaskModal.css'
 
 /* ─── Constants ──────────────────────────────────────────────── */
@@ -38,14 +39,6 @@ function parseReminderMinutes(mins) {
   return                        { preset: 'custom', customValue: String(mins),         customUnit: 'minutes' }
 }
 
-/* ─── SmallChevron ───────────────────────────────────────────── */
-function SmallChevron() {
-  return (
-    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-      <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
 
 /* ─── CustomDatePicker ───────────────────────────────────────── */
 function CustomDatePicker({ value, onChange }) {
@@ -100,11 +93,16 @@ function CustomDatePicker({ value, onChange }) {
   for (let d = 1; d <= daysInMonth; d++) {
     cells.push({ day: d, month: viewMonth, year: viewYear, outside: false })
   }
+  // Only pad to complete the last row (no extra rows)
   let next = 1
-  while (cells.length < 42) {
+  const remainder = cells.length % 7
+  if (remainder !== 0) {
+    const toAdd = 7 - remainder
     const m = viewMonth === 11 ? 0  : viewMonth + 1
     const y = viewMonth === 11 ? viewYear + 1 : viewYear
-    cells.push({ day: next++, month: m, year: y, outside: true })
+    for (let i = 0; i < toAdd; i++) {
+      cells.push({ day: next++, month: m, year: y, outside: true })
+    }
   }
 
   function isSame(d1, d2) {
@@ -207,7 +205,7 @@ function UnitDropdown({ value, onChange }) {
         onClick={() => setOpen(v => !v)}
       >
         <span>{label}</span>
-        <SmallChevron />
+        <ChevronDown size={10} strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
         <div className="unit-dd-menu">
@@ -311,84 +309,51 @@ function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
 }
 
 /* ─── ReminderSelect ─────────────────────────────────────────── */
+const CHIP_PRESETS = [
+  { id: '',       short: 'Nenhum'   },
+  { id: 'now',    short: 'Na hora'  },
+  { id: '5m',     short: '5 min'    },
+  { id: '10m',    short: '10 min'   },
+  { id: '15m',    short: '15 min'   },
+  { id: '30m',    short: '30 min'   },
+  { id: '1h',     short: '1 hora'   },
+  { id: '2h',     short: '2 horas'  },
+  { id: '1d',     short: '1 dia'    },
+  { id: 'custom', short: '+ tempo'  },
+]
+
 function ReminderSelect({ disabled, preset, customValue, customUnit, onPresetChange, onCustomValueChange, onCustomUnitChange }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-    function onDown(e) {
-      if (!ref.current?.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onDown)
-    return () => document.removeEventListener('mousedown', onDown)
-  }, [open])
-
-  const triggerLabel = preset === 'custom'
-    ? (() => {
-        const v = parseInt(customValue) || 0
-        if (!v) return 'Personalizado'
-        if (customUnit === 'days')  return `${v}d antes`
-        if (customUnit === 'hours') return `${v}h antes`
-        return `${v}min antes`
-      })()
-    : (REMINDER_PRESETS.find(p => p.id === preset)?.label ?? 'Sem lembrete')
-
   return (
     <div
-      className="rsel-root"
-      ref={ref}
+      className={`rchip-root${disabled ? ' disabled' : ''}`}
       {...(disabled ? { 'data-tooltip': 'Defina um horário para ativar o lembrete' } : {})}
     >
-      <button
-        type="button"
-        className={`rsel-trigger${disabled ? ' disabled' : ''}${open ? ' open' : ''}`}
-        onClick={() => !disabled && setOpen(v => !v)}
-        tabIndex={disabled ? -1 : 0}
-      >
-        <span className="rsel-label">{triggerLabel}</span>
-        <SmallChevron />
-      </button>
-      {open && (
-        <div className="rsel-menu">
-          {REMINDER_PRESETS.map(p => (
-            <div
-              key={p.id}
-              className={`rsel-opt${preset === p.id ? ' sel' : ''}`}
-              onMouseDown={(e) => {
-                e.preventDefault()
-                onPresetChange(p.id)
-                setOpen(false)
-              }}
-            >
-              {p.label}
-            </div>
-          ))}
-          <div className="rsel-divider" />
-          <div
-            className={`rsel-opt${preset === 'custom' ? ' sel' : ''}`}
-            onMouseDown={(e) => {
-              e.preventDefault()
-              onPresetChange('custom')
-            }}
+      <div className="rchip-wrap">
+        {CHIP_PRESETS.map(p => (
+          <button
+            key={p.id || 'none'}
+            type="button"
+            className={`rchip${preset === p.id ? ' sel' : ''}`}
+            onClick={() => onPresetChange(p.id)}
+            tabIndex={disabled ? -1 : 0}
           >
-            Personalizado...
-          </div>
-          {preset === 'custom' && (
-            <div className="rsel-custom" onMouseDown={(e) => e.stopPropagation()}>
-              <input
-                type="text"
-                inputMode="numeric"
-                className="rsel-custom-input"
-                placeholder="30"
-                value={customValue}
-                onChange={(e) => onCustomValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                autoFocus
-              />
-              <UnitDropdown value={customUnit} onChange={onCustomUnitChange} />
-              <span className="rsel-custom-sep">antes</span>
-            </div>
-          )}
+            {p.short}
+          </button>
+        ))}
+      </div>
+      {preset === 'custom' && (
+        <div className="rchip-custom">
+          <input
+            type="text"
+            inputMode="numeric"
+            className="rsel-custom-input"
+            placeholder="30"
+            value={customValue}
+            onChange={(e) => onCustomValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            autoFocus
+          />
+          <UnitDropdown value={customUnit} onChange={onCustomUnitChange} />
+          <span className="rsel-custom-sep">antes</span>
         </div>
       )}
     </div>
@@ -417,7 +382,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       scheduledDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
       if (d.getHours() !== 0 || d.getMinutes() !== 0) {
         scheduledH = String(d.getHours())
-        scheduledM = String(d.getMinutes())
+        scheduledM = String(d.getMinutes()).padStart(2, '0')
       }
     }
     const r = parseReminderMinutes(initialData?.reminder_offset_minutes ?? null)
@@ -449,9 +414,17 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     setForm(f => ({ ...f, [field]: val }))
   }
 
-  const hasScheduledTime = !!(
-    form.scheduledDate && (form.scheduledH !== '' || form.scheduledM !== '')
-  )
+  const hasScheduledTime = (() => {
+    const hasTime = form.scheduledH !== '' || form.scheduledM !== ''
+    if (!hasTime) return false
+    if (form.scheduledDate) return true
+    // Time only — enable reminder if the time is still in the future today
+    const h = parseInt(form.scheduledH) || 0
+    const m = parseInt(form.scheduledM) || 0
+    const now = new Date()
+    const t = new Date(); t.setHours(h, m, 0, 0)
+    return t > now
+  })()
 
   function handleCancel() { playModalClose(); onClose() }
 
@@ -499,6 +472,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     }
 
     try {
+      await new Promise(r => setTimeout(r, 360))
       await onSave(payload)
       playTaskCreated()
       onClose()
@@ -544,7 +518,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
             Quando e por quanto tempo?
           </button>
 
-          {showWhen && (
+          <div className={`intention-fields-wrap${showWhen ? ' open' : ''}`}>
+            <div className="intention-fields-inner">
             <div className="intention-fields">
               {/* Date + Time */}
               <div className="modal-row">
@@ -603,7 +578,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
             </div>
-          )}
+            </div>
+          </div>
 
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={handleCancel}>Cancelar</button>
@@ -611,7 +587,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
               <span className={`btn-save-text${saving ? ' hidden' : ''}`}>
                 {isEdit ? 'Salvar' : 'Criar tarefa'}
               </span>
-              {saving && <ModalSpinner />}
+              {saving && <div className="btn-spinner-wrap"><ModalSpinner /></div>}
             </button>
           </div>
         </form>

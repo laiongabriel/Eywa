@@ -61,10 +61,11 @@
 }
 
 .btn-add-task {
-  padding: 0.42rem 0.875rem;
+  padding: 0.5rem 1.25rem;
+  min-height: 2.125rem;
   background: var(--color-amber);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #fff;
   font-size: 0.875rem;
   font-weight: 600;
@@ -78,10 +79,10 @@
 
 .btn-add-task:hover {
   background: var(--color-amber-bright);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
 }
 
-.btn-add-task:active { transform: scale(0.97); }
+.btn-add-task:active { transform: scale(0.98); }
 
 /* Completed section divider */
 .tasks-divider {

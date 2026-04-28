@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useFocusTimer, formatElapsed } from '../hooks/useFocusTimer'
 import { playFocusEnter, playPause, playResume, playSessionEnd } from '../lib/sounds'
+import { Pause, Play } from 'lucide-react'
 import './FocusMode.css'
 
 const RADIUS = 80
@@ -113,11 +114,11 @@ export default function FocusMode({ task, onEnd }) {
         <div className="focus-controls">
           {paused ? (
             <button className="focus-btn focus-btn-resume" onClick={handleResume}>
-              <PlayIcon /> Retomar
+              <Play size={14} fill="currentColor" stroke="none" aria-hidden="true" /> Retomar
             </button>
           ) : (
             <button className="focus-btn focus-btn-pause" onClick={handlePause}>
-              <PauseIcon /> Pausar
+              <Pause size={14} fill="currentColor" stroke="none" aria-hidden="true" /> Pausar
             </button>
           )}
           <button className="focus-btn focus-btn-end" onClick={handleEnd}>
@@ -126,22 +127,5 @@ export default function FocusMode({ task, onEnd }) {
         </div>
       </div>
     </div>
-  )
-}
-
-function PauseIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <rect x="2" y="1.5" width="3.5" height="11" rx="1" fill="currentColor"/>
-      <rect x="8.5" y="1.5" width="3.5" height="11" rx="1" fill="currentColor"/>
-    </svg>
-  )
-}
-
-function PlayIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M3 2l9 5-9 5V2z" fill="currentColor"/>
-    </svg>
   )
 }

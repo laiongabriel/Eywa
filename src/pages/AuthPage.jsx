@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { resetRouteProgress, startRouteProgress } from '../lib/routeProgress'
+import { Eye, EyeOff, Check } from 'lucide-react'
 import './AuthPage.css'
 
 // ── Error translation ────────────────────────────────────────────────────────
@@ -561,20 +562,12 @@ function FieldWrap({ error, touched, value, children, label, labelRight, hideIco
       )}
       <div className="input-wrap">
         {children}
-        {showValid && <span className="field-icon valid"   aria-hidden="true"><FieldCheckIcon /></span>}
+        {showValid && <span className="field-icon valid" aria-hidden="true"><Check size={11} strokeWidth={2.2} /></span>}
         {showError && <span className="field-icon invalid" aria-hidden="true">!</span>}
       </div>
       {hint}
       {hasError && <p className="field-error" role="alert">{error}</p>}
     </div>
-  )
-}
-
-function FieldCheckIcon() {
-  return (
-    <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
-      <path d="M1 4.5L4.5 8L10 1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
   )
 }
 
@@ -599,19 +592,9 @@ function GoogleIcon() {
 }
 
 function EyeIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </svg>
-  )
+  return <Eye size={16} aria-hidden="true" />
 }
 
 function EyeOffIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
-    </svg>
-  )
+  return <EyeOff size={16} aria-hidden="true" />
 }

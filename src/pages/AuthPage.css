@@ -300,10 +300,10 @@
 
 .btn-primary {
   width: 100%;
-  padding: 0.78rem 1rem;
+  padding: 0.6rem 1rem;
   background: var(--color-amber);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #fff;
   font-size: 0.9375rem;
   font-weight: 600;
@@ -314,7 +314,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.75rem;
+  min-height: 2.375rem;
 }
 
 [data-theme="dark"] .btn-primary { color: #fff; }

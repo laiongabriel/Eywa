@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { resetRouteProgress, startRouteProgress } from '../lib/routeProgress'
+import { Check, X } from 'lucide-react'
 import './AppShell.css'
 
 export default function AppShell({ children }) {
@@ -54,31 +55,15 @@ export default function AppShell({ children }) {
             <p className="signout-body">Tem certeza que deseja sair?</p>
             <div className="signout-actions">
               <button className="signout-cancel" onClick={() => setShowSignOut(false)}>
-                <XSmIcon /> Cancelar
+                <X size={13} strokeWidth={2} aria-hidden="true" /> Cancelar
               </button>
               <button className="signout-confirm" onClick={confirmSignOut}>
-                <CheckSmIcon /> Sair
+                <Check size={13} strokeWidth={2.5} aria-hidden="true" /> Sair
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
-  )
-}
-
-function CheckSmIcon() {
-  return (
-    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true">
-      <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-function XSmIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-    </svg>
   )
 }

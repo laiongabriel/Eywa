@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { updateTask, deleteTask } from '../lib/tasks'
 import { playPriorityMark, playTaskComplete, playTaskDelete } from '../lib/sounds'
 import { useToast } from '../contexts/ToastContext'
+import { Check, Play, Pencil, Trash2, BellRing } from 'lucide-react'
 import './TaskItem.css'
 
 export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTask, onDeleteCancel, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
@@ -107,7 +108,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTa
         onClick={handleToggle}
         aria-label={localCompleted ? 'Marcar como pendente' : 'Marcar como concluída'}
       >
-        {localCompleted && <CheckIcon />}
+        {localCompleted && <Check size={15} strokeWidth={2.8} aria-hidden="true" />}
       </button>
 
       <div className="task-body">
@@ -137,7 +138,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTa
               {task.reminder_offset_minutes != null && (
                 <>
                   {(task.scheduled_at || task.estimated_minutes) ? ' · ' : ''}
-                  <BellMiniIcon />
+                  <BellRing size={14} strokeWidth={2} aria-hidden="true" style={{ display: 'inline-block', verticalAlign: '-3px' }} />
                   {' '}{formatReminderText(task.reminder_offset_minutes)}
                 </>
               )}
@@ -153,7 +154,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTa
             onClick={() => onStartFocus(task)}
             data-tooltip="Entrar em modo foco"
           >
-            <PlayIcon />
+            <Play size={11} fill="currentColor" stroke="none" aria-hidden="true" />
             Focar
           </button>
         )}
@@ -171,7 +172,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTa
           onClick={() => onEdit ? onEdit(task) : setEditing(true)}
           data-tooltip="Editar"
         >
-          <EditIcon />
+          <Pencil size={15} strokeWidth={1.8} aria-hidden="true" />
         </button>
         <button
           className="task-action-btn delete-btn"
@@ -179,7 +180,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTa
           data-tooltip="Deletar"
           disabled={deleting}
         >
-          <TrashIcon />
+          <Trash2 size={15} strokeWidth={1.8} aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -204,58 +205,15 @@ function formatReminderText(mins) {
   if (mins === 0) return 'Na hora'
   if (mins % 1440 === 0) return `${mins / 1440}d antes`
   if (mins % 60   === 0) return `${mins / 60}h antes`
-  return `${mins}min antes`
+  return `${mins} min antes`
 }
 
 function formatDuration(mins) {
   if (!mins) return ''
   const h = Math.floor(mins / 60)
   const m = mins % 60
-  if (h && m) return `${h}h ${m}min`
+  if (h && m) return `${h}h ${m} min`
   if (h) return `${h}h`
-  return `${m}min`
+  return `${m} min`
 }
 
-function CheckIcon() {
-  return (
-    <svg width="14" height="12" viewBox="0 0 14 12" fill="none" aria-hidden="true">
-      <path d="M1.5 6L5.5 10L12.5 1.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-function PlayIcon() {
-  return (
-    <svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" aria-hidden="true">
-      <path d="M1 1.5v7l7-3.5L1 1.5z"/>
-    </svg>
-  )
-}
-
-function EditIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M9.5 1.5l3 3-8.5 8.5H.5v-3L9.5 1.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-function TrashIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M1.5 3.5h11M5 3.5V2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v1M2.5 3.5l.8 8a.5.5 0 0 0 .5.5h5.4a.5.5 0 0 0 .5-.5l.8-8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-function BellMiniIcon() {
-  return (
-    <svg
-      width="10" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-      style={{ display: 'inline-block', verticalAlign: '-1px', opacity: 0.7 }}
-    >
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}

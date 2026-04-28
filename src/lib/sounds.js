@@ -28,7 +28,7 @@ function note(audioCtx, freq, startTime, duration, volume = 0.14, type = 'sine')
   osc.stop(startTime + duration + 0.06)
 }
 
-/** Opening a modal — G2 bass ground + ascending sweep C3→E3 */
+/** Opening a modal — D3 bass ground + ascending sweep G3→D4 */
 export function playModalOpen() {
   try {
     const c = ctx()
@@ -36,15 +36,15 @@ export function playModalOpen() {
     if (c.state === 'suspended') c.resume()
     const now = c.currentTime
     // Warm grounding bass
-    note(c, 98.00, now, 0.40, 0.048)
-    // Ascending sweep starts slightly after, C3 → E3
+    note(c, 147.00, now, 0.40, 0.048)
+    // Ascending sweep starts slightly after, G3 → D4
     const osc = c.createOscillator()
     const gain = c.createGain()
     osc.connect(gain)
     gain.connect(c.destination)
     osc.type = 'sine'
-    osc.frequency.setValueAtTime(130, now + 0.04)
-    osc.frequency.exponentialRampToValueAtTime(196, now + 0.20)
+    osc.frequency.setValueAtTime(196, now + 0.04)
+    osc.frequency.exponentialRampToValueAtTime(294, now + 0.20)
     gain.gain.setValueAtTime(0, now + 0.04)
     gain.gain.linearRampToValueAtTime(0.088, now + 0.08)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34)
@@ -54,7 +54,7 @@ export function playModalOpen() {
   } catch { /* silent fail */ }
 }
 
-/** Closing / cancelling a modal — descending sweep E3→C3 */
+/** Closing / cancelling a modal — descending sweep D4→G3 */
 export function playModalClose() {
   try {
     const c = ctx()
@@ -66,8 +66,8 @@ export function playModalClose() {
     osc.connect(gain)
     gain.connect(c.destination)
     osc.type = 'sine'
-    osc.frequency.setValueAtTime(196, now)
-    osc.frequency.exponentialRampToValueAtTime(130, now + 0.16)
+    osc.frequency.setValueAtTime(294, now)
+    osc.frequency.exponentialRampToValueAtTime(196, now + 0.16)
     gain.gain.setValueAtTime(0, now)
     gain.gain.linearRampToValueAtTime(0.09, now + 0.035)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26)
@@ -77,19 +77,19 @@ export function playModalClose() {
   } catch { /* silent fail */ }
 }
 
-/** Task created — low two-note resolution G2→C3 */
+/** Task created — two-note resolution D3→G3 */
 export function playTaskCreated() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
     const now = c.currentTime
-    note(c, 98.00,  now,       0.55, 0.095)   // G2
-    note(c, 130.81, now + 0.14, 0.80, 0.085)  // C3
+    note(c, 147.00, now,        0.55, 0.095)  // D3
+    note(c, 196.00, now + 0.14, 0.80, 0.085)  // G3
   } catch { /* silent fail */ }
 }
 
-/** Task marked complete — G2+G3 chord resolving to C4 */
+/** Task marked complete — D3+D4 chord resolving to G4 */
 export function playTaskComplete() {
   try {
     const c = ctx()
@@ -110,14 +110,14 @@ export function playTaskComplete() {
       osc.start(now + delay)
       osc.stop(now + delay + dur + 0.06)
     }
-    tone(98.00,  0,    0.80, 0.050)  // G2 — deep bass anchor
-    tone(196.00, 0,    0.80, 0.078)  // G3 — main
-    tone(261.63, 0.14, 0.95, 0.060)  // C4 — resolution
+    tone(147.00, 0,    0.80, 0.050)  // D3 — deep bass anchor
+    tone(294.00, 0,    0.80, 0.078)  // D4 — main
+    tone(392.00, 0.14, 0.95, 0.060)  // G4 — resolution
   } catch { /* silent fail */ }
 }
 
-/** Marking as priority — G2+D3 chord (bell attack) + G3 resolve.
- *  Bell envelope (0.008s attack) = instantly distinct from all other sounds. */
+/** Marking as priority — D3+A3 chord (bell attack) + D4 resolve.
+ *  Bell envelope = instantly distinct from all other sounds. */
 export function playPriorityMark() {
   try {
     const c = ctx()
@@ -138,13 +138,13 @@ export function playPriorityMark() {
       osc.start(startTime)
       osc.stop(startTime + duration + 0.06)
     }
-    bell(98.00,  now,        1.10, 0.078)  // G2 — simultaneous
-    bell(146.83, now,        1.30, 0.062)  // D3 — simultaneous (perfect fifth)
-    bell(196.00, now + 0.22, 0.85, 0.018)  // G3 — subtle resolve
+    bell(147.00, now,        1.10, 0.078)  // D3 — simultaneous
+    bell(220.00, now,        1.30, 0.062)  // A3 — simultaneous (perfect fifth)
+    bell(294.00, now + 0.22, 0.85, 0.018)  // D4 — subtle resolve
   } catch { /* silent fail */ }
 }
 
-/** Task deleted — descending 220→140 Hz */
+/** Task deleted — descending 330→210 Hz */
 export function playTaskDelete() {
   try {
     const c = ctx()
@@ -156,8 +156,8 @@ export function playTaskDelete() {
     osc.connect(gain)
     gain.connect(c.destination)
     osc.type = 'sine'
-    osc.frequency.setValueAtTime(220, now)
-    osc.frequency.exponentialRampToValueAtTime(140, now + 0.18)
+    osc.frequency.setValueAtTime(330, now)
+    osc.frequency.exponentialRampToValueAtTime(210, now + 0.18)
     gain.gain.setValueAtTime(0, now)
     gain.gain.linearRampToValueAtTime(0.085, now + 0.025)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28)
@@ -167,39 +167,39 @@ export function playTaskDelete() {
   } catch { /* silent fail */ }
 }
 
-/** Entering Focus Mode — C3→E3→G3→C4 ascending arpeggio */
+/** Entering Focus Mode — G3→B3→D4→G4 ascending arpeggio */
 export function playFocusEnter() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    const freqs = [130.81, 164.81, 196.00, 261.63]
+    const freqs = [196.00, 247.00, 294.00, 392.00]
     freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.12, 0.9, 0.10))
   } catch { /* silent fail */ }
 }
 
-/** Pausing — single soft low thud A3 */
+/** Pausing — single soft E4 */
 export function playPause() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    note(c, 220.00, c.currentTime, 0.22, 0.09)
+    note(c, 330.00, c.currentTime, 0.22, 0.09)
   } catch { /* silent fail */ }
 }
 
-/** Resuming — two rising low notes */
+/** Resuming — two rising notes D4→G4 */
 export function playResume() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    note(c, 196.00, c.currentTime,       0.2,  0.09)
-    note(c, 261.63, c.currentTime + 0.1, 0.35, 0.10)
+    note(c, 294.00, c.currentTime,       0.2,  0.09)
+    note(c, 392.00, c.currentTime + 0.1, 0.35, 0.10)
   } catch { /* silent fail */ }
 }
 
-/** Ending a focus session — C2+G2+C3+E3 warm chord resolution */
+/** Ending a focus session — G2+D3+G3+B3 warm chord resolution */
 export function playSessionEnd() {
   try {
     const c = ctx()
@@ -220,20 +220,20 @@ export function playSessionEnd() {
       osc.start(now + delay)
       osc.stop(now + delay + dur + 0.06)
     }
-    tone(65.41,  0,    2.2, 0.065)  // C2 deep bass
-    tone(98.00,  0.06, 2.0, 0.058)  // G2 fifth
-    tone(130.81, 0.12, 1.8, 0.052)  // C3
-    tone(164.81, 0.22, 1.5, 0.040)  // E3 major third
+    tone(98.00,  0,    2.2, 0.065)  // G2 deep bass
+    tone(147.00, 0.06, 2.0, 0.058)  // D3 fifth
+    tone(196.00, 0.12, 1.8, 0.052)  // G3
+    tone(247.00, 0.22, 1.5, 0.040)  // B3 major third
   } catch { /* silent fail */ }
 }
 
-/** Break suggestion — E3→G3→E3 gentle notice */
+/** Break suggestion — B3→D4→B3 gentle notice */
 export function playBreakSuggestion() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
-    const freqs = [164.81, 196.00, 164.81]
+    const freqs = [247.00, 294.00, 247.00]
     freqs.forEach((f, i) => note(c, f, c.currentTime + i * 0.25, 1.1, 0.09))
   } catch { /* silent fail */ }
 }

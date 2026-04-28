@@ -1,7 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider, useToast } from './contexts/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppShell from './components/AppShell'
@@ -83,12 +82,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </ToastProvider>
-    </ThemeProvider>
+    <ToastProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </ToastProvider>
   )
 }

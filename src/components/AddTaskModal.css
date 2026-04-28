@@ -33,7 +33,7 @@
   overflow: visible;
 }
 @keyframes mcSlideUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -124,6 +124,26 @@
   display: inline-block;
 }
 .intention-arrow.open { transform: rotate(90deg); }
+
+.intention-fields-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.intention-fields-wrap.open {
+  grid-template-rows: 1fr;
+}
+.intention-fields-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+/* After expand animation finishes, let absolutely-positioned children (calendar) overflow */
+.intention-fields-wrap.open .intention-fields-inner {
+  animation: intentionVisible 0s 0.22s forwards;
+}
+@keyframes intentionVisible {
+  to { overflow: visible; }
+}
 
 .intention-fields {
   display: flex;
@@ -425,80 +445,58 @@
    ═══════════════════════════════════════════════════════════════ */
 .modal-row--dur-rem {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
   align-items: end;
 }
 
-.rsel-root { position: relative; width: 100%; }
+/* ═══════════════════════════════════════════════════════════════
+   ReminderChips — inline pill selector
+   ═══════════════════════════════════════════════════════════════ */
+.rchip-root { width: 100%; }
+.rchip-root.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: default;
+}
 
-.rsel-trigger {
-  width: 100%;
+.rchip-wrap {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.65rem 0.875rem;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.rchip {
+  padding: 0.2rem 0.5rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  color: var(--color-text-primary);
-  font-size: 0.9375rem;
+  border-radius: 20px;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
   font-family: inherit;
   cursor: pointer;
-  outline: none;
-  transition: border-color 0.15s;
-  text-align: left;
-  box-sizing: border-box;
+  white-space: nowrap;
+  line-height: 1.6;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
 }
-.rsel-trigger:hover:not(.disabled),
-.rsel-trigger.open { border-color: var(--color-border-active); }
-.rsel-trigger.disabled { opacity: 0.38; cursor: default; pointer-events: none; }
-.rsel-trigger svg { color: var(--color-text-muted); transition: transform 0.15s; flex-shrink: 0; }
-.rsel-trigger.open svg { transform: rotate(180deg); }
-.rsel-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.rsel-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: var(--color-surface);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 0.25rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 310;
-  animation: udropIn 0.1s ease;
-}
-[data-theme="light"] .rsel-menu {
-  border-color: var(--color-border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.rsel-opt {
-  padding: 0.45rem 0.625rem;
-  border-radius: 5px;
-  font-size: 0.875rem;
+.rchip:hover {
+  border-color: var(--color-border-active);
   color: var(--color-text-primary);
-  cursor: pointer;
-  transition: background 0.1s;
 }
-.rsel-opt:hover { background: var(--color-surface-hover); }
-.rsel-opt.sel { color: var(--color-amber-bright); font-weight: 500; }
-
-.rsel-divider {
-  height: 1px;
-  background: var(--color-border);
-  margin: 0.25rem 0.625rem;
+.rchip.sel {
+  background: var(--color-amber);
+  border-color: transparent;
+  color: #0d1117;
+  font-weight: 600;
 }
 
-.rsel-custom {
+.rchip-custom {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem;
+  margin-top: 0.5rem;
 }
+
 .rsel-custom-input {
   width: 3.25rem;
   padding: 0.4rem 0.5rem;
@@ -533,12 +531,12 @@
 .btn-cancel {
   background: none;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--color-text-secondary);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-family: inherit;
-  padding: 0.72rem 1rem;
-  min-height: 2.75rem;
+  padding: 0.5rem 0.875rem;
+  min-height: 2.125rem;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
   display: flex;
@@ -550,24 +548,23 @@
   color: var(--color-text-primary);
 }
 
-/* Save button — fixed size so spinner swap doesn't resize it */
+/* Save button — size locked to text; spinner overlays absolutely */
 .btn-save {
   background: var(--color-amber);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #fff;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
-  padding: 0.72rem 1.375rem;
-  min-height: 2.75rem;
-  min-width: 8rem;          /* locked so spinner doesn't shrink the button */
+  padding: 0.5rem 1.25rem;
+  min-height: 2.125rem;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
+  position: relative;
 }
 .btn-save:hover:not(:disabled) {
   background: var(--color-amber-bright);
@@ -576,17 +573,27 @@
 .btn-save:active:not(:disabled) { transform: scale(0.98); }
 .btn-save:disabled { opacity: 0.5; cursor: default; }
 
-/* Hide text (not remove) so button keeps the same width */
+/* Text stays in layout (keeps button size); hidden when spinning */
 .btn-save-text { line-height: 1; }
-.btn-save-text.hidden { display: none; }
+.btn-save-text.hidden { visibility: hidden; }
+
+/* Spinner overlaid centered, never affects layout */
+.btn-spinner-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
 
 @keyframes spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
 .btn-spinner {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   animation: spin 0.65s linear infinite;
   flex-shrink: 0;
 }
