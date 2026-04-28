@@ -58,7 +58,10 @@ export function UserAvatar({ username, size = 32 }) {
         justifyContent: 'center',
         width: size,
         height: size,
+        minWidth: size,
+        minHeight: size,
         borderRadius: '50%',
+        overflow: 'hidden',
         background: '#3b6fd4',
         color: '#fff',
         fontSize,
@@ -67,6 +70,7 @@ export function UserAvatar({ username, size = 32 }) {
         flexShrink: 0,
         userSelect: 'none',
         lineHeight: 1,
+        boxSizing: 'border-box',
       }}
       aria-label={username ?? 'Avatar'}
     >

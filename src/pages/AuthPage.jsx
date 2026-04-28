@@ -115,7 +115,10 @@ export default function AuthPage() {
       .maybeSingle()
       .then(({ data }) => {
         if (data && data.username) {
-          navigateTo('/')
+          // Navigate directly — navigateTo() relies on card exit animation,
+          // but we're rendering the spinner here (no onAnimationEnd), so it
+          // would never fire and the spinner would hang forever.
+          navigate('/')
         } else {
           // New Google user or user without a profile — ask for username
           setProfileChecking(false)
@@ -124,7 +127,7 @@ export default function AuthPage() {
           setAnimKey(k => k + 1)
         }
       })
-      .catch(() => { setProfileChecking(false); navigateTo('/') })
+      .catch(() => navigate('/'))
   }, [session, authLoading, navigate])
 
   // Shake cleanup via animationend (avoids re-triggering cardIn)
