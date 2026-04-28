@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Avatar from 'boring-avatars'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { useToast } from '../contexts/ToastContext'
@@ -8,19 +7,23 @@ import { supabase } from '../lib/supabase'
 import { User, SlidersHorizontal, ChevronLeft, Eye, EyeOff } from 'lucide-react'
 import './SettingsPage.css'
 
-// ── Avatar constants ───────────────────────────────────────────────────────
-const AVATAR_COLORS = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
-const AVATAR_STYLES = [
-  { id: 'beam',    label: 'Beam'    },
-  { id: 'marble',  label: 'Marble'  },
-  { id: 'pixel',   label: 'Pixel'   },
-  { id: 'sunset',  label: 'Sunset'  },
-  { id: 'ring',    label: 'Ring'    },
-  { id: 'bauhaus', label: 'Bauhaus' },
+// ── DiceBear avatar helpers ────────────────────────────────────────────────
+const DICEBEAR_STYLES = [
+  { id: 'notionists', label: 'Notionists' },
+  { id: 'adventurer', label: 'Aventureiro' },
+  { id: 'micah',      label: 'Micah'       },
+  { id: 'pixel-art',  label: 'Pixel'       },
+  { id: 'shapes',     label: 'Shapes'      },
+  { id: 'fun-emoji',  label: 'Emoji'       },
 ]
 
+function dicebearUrl(name, style) {
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(name || '?')}`
+}
+
 function getAvatarStyle() {
-  return localStorage.getItem('eywa:avatarStyle') ?? 'beam'
+  const stored = localStorage.getItem('eywa:avatarStyle')
+  return DICEBEAR_STYLES.some(s => s.id === stored) ? stored : 'notionists'
 }
 
 // ── Avatar component ───────────────────────────────────────────────────────
@@ -35,15 +38,10 @@ function ProfileAvatar({ username }) {
   return (
     <div className="sp-avatar-wrap">
       <div className="sp-avatar">
-        <Avatar
-          size={80}
-          name={username || '?'}
-          variant={style}
-          colors={AVATAR_COLORS}
-        />
+        <img src={dicebearUrl(username, style)} alt="Avatar" />
       </div>
       <div className="sp-avatar-styles">
-        {AVATAR_STYLES.map(({ id }) => (
+        {DICEBEAR_STYLES.map(({ id }) => (
           <button
             key={id}
             type="button"
@@ -51,7 +49,7 @@ function ProfileAvatar({ username }) {
             onClick={() => handleStyleChange(id)}
             aria-label={id}
           >
-            <Avatar size={34} name={username || '?'} variant={id} colors={AVATAR_COLORS} />
+            <img src={dicebearUrl(username, id)} alt={id} />
           </button>
         ))}
       </div>
@@ -403,7 +401,7 @@ function SectionPreferencias() {
             className={`sp-toggle${soundEnabled ? ' active' : ''}`}
             role="switch"
             aria-checked={soundEnabled}
-            onClick={() => setSoundEnabled(v => !v)}
+            onClick={() => setSoundEnabled(!soundEnabled)}
           >
             <span className="sp-toggle-thumb" />
           </button>

@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Avatar from 'boring-avatars'
 import { useAuth } from '../contexts/AuthContext'
 import { Settings, LogOut } from 'lucide-react'
 import './UserMenu.css'
 
-const AVATAR_COLORS = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
-function getAvatarStyle() { return localStorage.getItem('eywa:avatarStyle') ?? 'beam' }
+function getAvatarUrl(name) {
+  const validStyles = ['notionists','adventurer','micah','pixel-art','shapes','fun-emoji']
+  const stored = localStorage.getItem('eywa:avatarStyle')
+  const style = validStyles.includes(stored) ? stored : 'notionists'
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(name || '?')}`
+}
 
 export default function UserMenu({ onSignOut }) {
   const { username, session } = useAuth()
@@ -34,11 +37,10 @@ export default function UserMenu({ onSignOut }) {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <Avatar
-          size={32}
-          name={username || '?'}
-          variant={getAvatarStyle()}
-          colors={AVATAR_COLORS}
+        <img
+          className="user-avatar-img"
+          src={getAvatarUrl(username)}
+          alt={username ?? 'Avatar'}
         />
       </button>
 

@@ -75,7 +75,7 @@ function ToastContainer() {
   return (
     <div className="toast-container" aria-live="polite">
       {toasts.map(t => (
-        <div key={t.id} className={`toast toast--${t.type}`} role="alert">
+        <div key={t.id} className={`toast toast--${t.type}${t.removing ? ' toast--out' : ''}`} role="alert">
           {icon(t.type)}
           <span className="toast-msg">{t.message}</span>
           <button className="toast-close" onClick={() => dismiss(t.id)} aria-label="Fechar">

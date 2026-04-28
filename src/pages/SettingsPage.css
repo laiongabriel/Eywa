@@ -180,6 +180,7 @@
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 /* ── Avatar style picker grid ─────────────────────────────────── */
@@ -212,10 +213,12 @@
   transform: scale(1.08);
 }
 
-.sp-avatar-style-btn svg {
+.sp-avatar-style-btn svg,
+.sp-avatar-style-btn img {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .sp-avatar-hint {
@@ -359,6 +362,9 @@
   text-decoration: underline;
   text-underline-offset: 2px;
   transition: color 0.15s;
+  align-self: flex-start;
+  text-align: left;
+  line-height: 1.4;
 }
 
 .sp-link-btn:hover { color: var(--color-text-secondary); }
@@ -405,13 +411,17 @@
   font-weight: 500;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  transition: background 0.13s, color 0.13s, border-color 0.13s, transform 0.1s;
   letter-spacing: -0.005em;
 }
 
 .sp-option-btn:hover:not(:disabled):not(.sp-option-btn--disabled) {
   background: var(--color-surface-hover);
   color: var(--color-text-primary);
+}
+
+.sp-option-btn:active:not(:disabled):not(.sp-option-btn--disabled) {
+  transform: scale(0.95);
 }
 
 .sp-option-btn.active {
