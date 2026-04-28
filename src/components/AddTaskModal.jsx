@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { playModalClose, playTaskCreated } from '../lib/sounds'
 import './AddTaskModal.css'
 
@@ -23,155 +23,12 @@ function parseReminderMinutes(mins) {
   return                        { enabled: true, now: false, value: String(mins),         unit: 'minutes' }
 }
 
-/* ─── Icons ──────────────────────────────────────────────────── */
-function ChevronUpIcon() {
-  return (
-    <svg width="8" height="5" viewBox="0 0 8 5" fill="none" aria-hidden="true">
-      <path d="M1 4.5L4 1 7 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-function ChevronDownIcon() {
-  return (
-    <svg width="8" height="5" viewBox="0 0 8 5" fill="none" aria-hidden="true">
-      <path d="M1 0.5L4 4 7 0.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
+/* ─── SmallChevron ───────────────────────────────────────────── */
 function SmallChevron() {
   return (
     <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
       <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
-  )
-}
-
-/* ─── SpinField ──────────────────────────────────────────────── */
-const SpinField = forwardRef(function SpinField(
-  { value, min, max, onChange, placeholder, onNext }, ref
-) {
-  const inputRef = useRef(null)
-  // Always-current callback ref so wheel handler never sees stale closures
-  const cb = useRef(null)
-  cb.current = { value, min, max, onChange }
-
-  useImperativeHandle(ref, () => ({ focus: () => inputRef.current?.focus() }), [])
-
-  // Wheel — must be non-passive to call preventDefault
-  useEffect(() => {
-    const el = inputRef.current
-    if (!el) return
-    const handler = (e) => {
-      e.preventDefault()
-      const { value, min, max, onChange } = cb.current
-      const v = parseInt(value) || 0
-      if (e.deltaY < 0) onChange(String(Math.min(max, v + 1)).padStart(2, '0'))
-      else if (v > min)  onChange(String(Math.max(min, v - 1)).padStart(2, '0'))
-    }
-    el.addEventListener('wheel', handler, { passive: false })
-    return () => el.removeEventListener('wheel', handler)
-  }, [])
-
-  function increment() {
-    const { value, max, onChange } = cb.current
-    onChange(String(Math.min(max, (parseInt(value) || 0) + 1)).padStart(2, '0'))
-  }
-  function decrement() {
-    const { value, min, onChange } = cb.current
-    const v = parseInt(value) || 0
-    if (v <= min) return
-    onChange(String(Math.max(min, v - 1)).padStart(2, '0'))
-  }
-
-  function handleChange(e) {
-    const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
-    if (raw === '') { onChange(''); return }
-    const num = parseInt(raw)
-    if (num > max) return
-    onChange(raw)
-    // Auto-advance when value is complete
-    if (raw.length === 2 || num * 10 > max) {
-      if (onNext) onNext()
-    }
-  }
-
-  function handleBlur() {
-    if (value !== '' && value != null) {
-      const num = parseInt(value)
-      if (!isNaN(num)) onChange(String(Math.min(max, Math.max(min, num))).padStart(2, '0'))
-    }
-  }
-
-  return (
-    <div className="spin-field">
-      <button type="button" className="spin-arrow" onClick={increment} tabIndex={-1} aria-label="Aumentar">
-        <ChevronUpIcon />
-      </button>
-      <input
-        ref={inputRef}
-        type="text"
-        className="spin-input"
-        value={value}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        maxLength={2}
-        inputMode="numeric"
-        autoComplete="off"
-      />
-      <button type="button" className="spin-arrow" onClick={decrement} tabIndex={-1} aria-label="Diminuir">
-        <ChevronDownIcon />
-      </button>
-    </div>
-  )
-})
-
-/* ─── CustomTimePicker ───────────────────────────────────────── */
-function CustomTimePicker({ hour, minute, onHourChange, onMinuteChange }) {
-  const minuteRef = useRef(null)
-  return (
-    <div className="ctp-root">
-      <SpinField
-        value={hour}
-        min={0} max={23}
-        onChange={onHourChange}
-        placeholder="HH"
-        onNext={() => minuteRef.current?.focus()}
-      />
-      <span className="ctp-colon">:</span>
-      <SpinField
-        ref={minuteRef}
-        value={minute}
-        min={0} max={59}
-        onChange={onMinuteChange}
-        placeholder="MM"
-      />
-    </div>
-  )
-}
-
-/* ─── CustomDuration ─────────────────────────────────────────── */
-function CustomDuration({ hours, minutes, onHoursChange, onMinutesChange }) {
-  const minutesRef = useRef(null)
-  return (
-    <div className="cdur-root">
-      <SpinField
-        value={hours}
-        min={0} max={99}
-        onChange={onHoursChange}
-        placeholder="0"
-        onNext={() => minutesRef.current?.focus()}
-      />
-      <span className="cdur-sep">h</span>
-      <SpinField
-        ref={minutesRef}
-        value={minutes}
-        min={0} max={59}
-        onChange={onMinutesChange}
-        placeholder="0"
-      />
-      <span className="cdur-sep">min</span>
-    </div>
   )
 }
 
@@ -205,23 +62,20 @@ function CustomDatePicker({ value, onChange }) {
     }
   }
 
-  const today      = (() => { const d = new Date(); d.setHours(0,0,0,0); return d })()
-  const firstDay   = new Date(viewYear, viewMonth, 1).getDay()
+  const today       = (() => { const d = new Date(); d.setHours(0,0,0,0); return d })()
+  const firstDay    = new Date(viewYear, viewMonth, 1).getDay()
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const daysInPrev  = new Date(viewYear, viewMonth, 0).getDate()
   const cells = []
 
-  // Leading days from previous month
   for (let i = firstDay - 1; i >= 0; i--) {
     const m = viewMonth === 0  ? 11 : viewMonth - 1
     const y = viewMonth === 0  ? viewYear - 1 : viewYear
     cells.push({ day: daysInPrev - i, month: m, year: y, outside: true })
   }
-  // Current month
   for (let d = 1; d <= daysInMonth; d++) {
     cells.push({ day: d, month: viewMonth, year: viewYear, outside: false })
   }
-  // Trailing days from next month (fill to 42 = 6 rows)
   let next = 1
   while (cells.length < 42) {
     const m = viewMonth === 11 ? 0  : viewMonth + 1
@@ -419,8 +273,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       const d = new Date(initialData.scheduled_at)
       scheduledDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
       if (d.getHours() !== 0 || d.getMinutes() !== 0) {
-        scheduledH = String(d.getHours()).padStart(2, '0')
-        scheduledM = String(d.getMinutes()).padStart(2, '0')
+        scheduledH = String(d.getHours())
+        scheduledM = String(d.getMinutes())
       }
     }
     const r = parseReminderMinutes(initialData?.reminder_offset_minutes ?? null)
@@ -443,9 +297,9 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
   const [saving, setSaving]     = useState(false)
   const titleRef                = useRef(null)
 
-  // Delay focus past the slide-up animation (removes text/caret jump)
+  // Short delay past the slide-up animation to avoid caret/text jump
   useEffect(() => {
-    const id = setTimeout(() => titleRef.current?.focus({ preventScroll: true }), 270)
+    const id = setTimeout(() => titleRef.current?.focus({ preventScroll: true }), 160)
     return () => clearTimeout(id)
   }, [])
 
@@ -546,6 +400,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
 
           {showWhen && (
             <div className="intention-fields">
+              {/* Date + Time */}
               <div className="modal-row">
                 <div className="modal-field modal-field--date">
                   <label className="modal-label">Data</label>
@@ -556,27 +411,52 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
                 <div className="modal-field modal-field--time">
                   <label className="modal-label">Horário</label>
-                  <CustomTimePicker
-                    hour={form.scheduledH}
-                    minute={form.scheduledM}
-                    onHourChange={(v) => set('scheduledH', v)}
-                    onMinuteChange={(v) => set('scheduledM', v)}
-                  />
+                  <div className="time-hhmm">
+                    <input
+                      className="modal-input time-part-input"
+                      type="number" min="0" max="23" step="1"
+                      placeholder="HH"
+                      value={form.scheduledH}
+                      onChange={(e) => set('scheduledH', e.target.value)}
+                    />
+                    <span className="time-colon">:</span>
+                    <input
+                      className="modal-input time-part-input"
+                      type="number" min="0" max="59" step="1"
+                      placeholder="MM"
+                      value={form.scheduledM}
+                      onChange={(e) => set('scheduledM', e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* Duration */}
               <div className="modal-row modal-row--single">
                 <div className="modal-field">
                   <label className="modal-label">Duração</label>
-                  <CustomDuration
-                    hours={form.durationH}
-                    minutes={form.durationM}
-                    onHoursChange={(v) => set('durationH', v)}
-                    onMinutesChange={(v) => set('durationM', v)}
-                  />
+                  <div className="duration-row">
+                    <input
+                      className="modal-input duration-input"
+                      type="number" min="0" max="99" step="1"
+                      placeholder="0"
+                      value={form.durationH}
+                      onChange={(e) => set('durationH', e.target.value)}
+                    />
+                    <span className="duration-sep">h</span>
+                    <input
+                      className="modal-input duration-input"
+                      type="number" min="0" max="59" step="1"
+                      placeholder="0"
+                      value={form.durationM}
+                      onChange={(e) => set('durationM', e.target.value)}
+                    />
+                    <span className="duration-sep">min</span>
+                  </div>
                 </div>
               </div>
 
+              {/* Reminder */}
               <ReminderField
                 visible={hasScheduledTime}
                 enabled={form.reminderEnabled}
@@ -594,7 +474,10 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={handleCancel}>Cancelar</button>
             <button type="submit" className="btn-save" disabled={saving || !form.title.trim()}>
-              {saving ? <ModalSpinner /> : isEdit ? 'Salvar' : 'Criar tarefa'}
+              <span className={`btn-save-text${saving ? ' hidden' : ''}`}>
+                {isEdit ? 'Salvar' : 'Criar tarefa'}
+              </span>
+              {saving && <ModalSpinner />}
             </button>
           </div>
         </form>
