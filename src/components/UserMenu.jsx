@@ -1,18 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Avatar from 'boring-avatars'
 import { useAuth } from '../contexts/AuthContext'
 import { Settings, LogOut } from 'lucide-react'
 import './UserMenu.css'
 
-function avatarColor(str) {
-  const palette = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
-  let h = 0
-  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h)
-  return palette[Math.abs(h) % palette.length]
-}
+const AVATAR_COLORS = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
+function getAvatarStyle() { return localStorage.getItem('eywa:avatarStyle') ?? 'beam' }
 
 export default function UserMenu({ onSignOut }) {
-  const { username, avatarUrl, session } = useAuth()
+  const { username, session } = useAuth()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const navigate = useNavigate()
@@ -26,9 +23,7 @@ export default function UserMenu({ onSignOut }) {
     return () => document.removeEventListener('mousedown', handle)
   }, [open])
 
-  const initial  = (username || '?')[0].toUpperCase()
-  const bgColor  = username ? avatarColor(username) : '#4a7fe0'
-  const email    = session?.user?.email ?? ''
+  const email = session?.user?.email ?? ''
 
   return (
     <div className="user-menu" ref={ref}>
@@ -39,10 +34,12 @@ export default function UserMenu({ onSignOut }) {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        {avatarUrl
-          ? <img className="user-avatar-img" src={avatarUrl} alt={username ?? 'Avatar'} />
-          : <span className="user-avatar-initial" style={{ background: bgColor }}>{initial}</span>
-        }
+        <Avatar
+          size={32}
+          name={username || '?'}
+          variant={getAvatarStyle()}
+          colors={AVATAR_COLORS}
+        />
       </button>
 
       {open && (

@@ -161,83 +161,65 @@
 /* ── Avatar ───────────────────────────────────────────────────────────────── */
 .sp-avatar-wrap {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.875rem;
   padding-bottom: 1.625rem;
   margin-bottom: 1.625rem;
   border-bottom: 1px solid var(--color-border);
 }
 
 .sp-avatar {
-  position: relative;
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  cursor: pointer;
   overflow: hidden;
   flex-shrink: 0;
-  border: none;
-  padding: 0;
-  background: none;
-  transition: opacity 0.15s;
 }
 
-.sp-avatar:disabled {
-  cursor: default;
-  opacity: 0.7;
-}
-
-.sp-avatar-initial {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.sp-avatar svg, .sp-avatar img {
+  display: block;
   width: 100%;
   height: 100%;
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #fff;
-  user-select: none;
-  pointer-events: none;
 }
 
-.sp-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-}
-
-.sp-avatar-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+/* ── Avatar style picker grid ─────────────────────────────────── */
+.sp-avatar-styles {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  opacity: 0;
-  transition: opacity 0.18s;
-  pointer-events: none;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.sp-avatar:hover .sp-avatar-overlay { opacity: 1; }
-
-.sp-avatar-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+.sp-avatar-style-btn {
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  animation: spSpin 0.7s linear infinite;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  transition: border-color 0.15s, transform 0.1s;
+  flex-shrink: 0;
 }
 
-@keyframes spSpin {
-  to { transform: rotate(360deg); }
+.sp-avatar-style-btn:hover {
+  border-color: var(--color-border-active);
+  transform: scale(1.08);
+}
+
+.sp-avatar-style-btn.active {
+  border-color: var(--color-amber);
+  transform: scale(1.08);
+}
+
+.sp-avatar-style-btn svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .sp-avatar-hint {
-  font-size: 0.8125rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
   margin: 0;
 }
@@ -340,6 +322,29 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+/* ── Forgot password confirmation panel ──────────────────────────────────── */
+.sp-forgot-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.sp-forgot-confirm .sp-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.sp-forgot-confirm strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 /* ── Link button (forgot password, etc.) ─────────────────────────────────── */

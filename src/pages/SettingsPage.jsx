@@ -1,74 +1,73 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Avatar from 'boring-avatars'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { useToast } from '../contexts/ToastContext'
 import { supabase } from '../lib/supabase'
-import { User, SlidersHorizontal, ChevronLeft, Camera, Eye, EyeOff } from 'lucide-react'
+import { User, SlidersHorizontal, ChevronLeft, Eye, EyeOff } from 'lucide-react'
 import './SettingsPage.css'
 
-// ── Deterministic avatar color from app palette only ───────────────────────
-// Uses only brand blues and ambers — no outside palette colors
-function avatarColor(str) {
-  const palette = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
-  let h = 0
-  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h)
-  return palette[Math.abs(h) % palette.length]
+// ── Avatar constants ───────────────────────────────────────────────────────
+const AVATAR_COLORS = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
+const AVATAR_STYLES = [
+  { id: 'beam',    label: 'Beam'    },
+  { id: 'marble',  label: 'Marble'  },
+  { id: 'pixel',   label: 'Pixel'   },
+  { id: 'sunset',  label: 'Sunset'  },
+  { id: 'ring',    label: 'Ring'    },
+  { id: 'bauhaus', label: 'Bauhaus' },
+]
+
+function getAvatarStyle() {
+  return localStorage.getItem('eywa:avatarStyle') ?? 'beam'
 }
 
 // ── Avatar component ───────────────────────────────────────────────────────
-function ProfileAvatar({ username, avatarUrl, onUpload, uploading }) {
-  const inputRef = useRef(null)
-  const initial  = (username || '?')[0].toUpperCase()
-  const bgColor  = username ? avatarColor(username) : '#4a7fe0'
+function ProfileAvatar({ username }) {
+  const [style, setStyle] = useState(getAvatarStyle)
+
+  function handleStyleChange(s) {
+    setStyle(s)
+    localStorage.setItem('eywa:avatarStyle', s)
+  }
 
   return (
     <div className="sp-avatar-wrap">
-      <button
-        className="sp-avatar"
-        type="button"
-        aria-label="Trocar foto de perfil"
-        disabled={uploading}
-        onClick={() => inputRef.current?.click()}
-      >
-        {avatarUrl
-          ? <img className="sp-avatar-img" src={avatarUrl} alt={username ?? 'Avatar'} />
-          : <span className="sp-avatar-initial" style={{ background: bgColor }}>{initial}</span>
-        }
-        <span className="sp-avatar-overlay" aria-hidden="true">
-          {uploading
-            ? <span className="sp-avatar-spinner" />
-            : <Camera size={22} strokeWidth={2} />
-          }
-        </span>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif"
-        style={{ display: 'none' }}
-        onChange={e => {
-          const file = e.target.files?.[0]
-          if (file) onUpload(file)
-          e.target.value = ''
-        }}
-      />
-      <span className="sp-avatar-hint">Clique para trocar a foto</span>
+      <div className="sp-avatar">
+        <Avatar
+          size={80}
+          name={username || '?'}
+          variant={style}
+          colors={AVATAR_COLORS}
+        />
+      </div>
+      <div className="sp-avatar-styles">
+        {AVATAR_STYLES.map(({ id }) => (
+          <button
+            key={id}
+            type="button"
+            className={`sp-avatar-style-btn${style === id ? ' active' : ''}`}
+            onClick={() => handleStyleChange(id)}
+            aria-label={id}
+          >
+            <Avatar size={34} name={username || '?'} variant={id} colors={AVATAR_COLORS} />
+          </button>
+        ))}
+      </div>
+      <span className="sp-avatar-hint">Escolha seu estilo de avatar</span>
     </div>
   )
 }
 
 // ── Section: Perfil ────────────────────────────────────────────────────────
 function SectionPerfil() {
-  const { session, username, avatarUrl, updateProfile } = useAuth()
+  const { session, username, updateProfile } = useAuth()
   const { addToast } = useToast()
 
   // Username
   const [newUsername, setNewUsername]     = useState(username ?? '')
   const [savingUsername, setSavingUsername] = useState(false)
-
-  // Avatar
-  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   // Email
   const [newEmail, setNewEmail]         = useState('')
@@ -76,12 +75,13 @@ function SectionPerfil() {
   const [emailSent, setEmailSent]       = useState(false)
 
   // Password
-  const [currentPw, setCurrentPw]       = useState('')
-  const [newPw, setNewPw]               = useState('')
-  const [confirmPw, setConfirmPw]       = useState('')
+  const [currentPw, setCurrentPw]         = useState('')
+  const [newPw, setNewPw]                 = useState('')
+  const [confirmPw, setConfirmPw]         = useState('')
   const [showCurrentPw, setShowCurrentPw] = useState(false)
   const [showNewPw, setShowNewPw]         = useState(false)
   const [savingPw, setSavingPw]           = useState(false)
+  const [showForgotConfirm, setShowForgotConfirm] = useState(false)
 
   async function handleSaveUsername() {
     const val = newUsername.trim()
@@ -105,36 +105,6 @@ function SectionPerfil() {
       }
     } finally {
       setSavingUsername(false)
-    }
-  }
-
-  async function handleUploadAvatar(file) {
-    if (file.size > 5 * 1024 * 1024) {
-      addToast('Imagem muito grande — máximo 5 MB')
-      return
-    }
-    setUploadingAvatar(true)
-    try {
-      const ext  = file.name.split('.').pop().toLowerCase()
-      const path = `${session.user.id}.${ext}`
-      const { error: upErr } = await supabase.storage
-        .from('avatars')
-        .upload(path, file, { upsert: true, contentType: file.type })
-      if (upErr) { addToast('Erro ao enviar a foto'); return }
-
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-      // Bust cache with timestamp
-      const url = `${publicUrl}?t=${Date.now()}`
-      const { error: dbErr } = await supabase
-        .from('profiles')
-        .update({ avatar_url: url })
-        .eq('id', session.user.id)
-      if (dbErr) { addToast('Erro ao salvar a foto'); return }
-
-      updateProfile({ avatarUrl: url })
-      addToast('Foto de perfil atualizada', 'success')
-    } finally {
-      setUploadingAvatar(false)
     }
   }
 
@@ -175,14 +145,22 @@ function SectionPerfil() {
     }
   }
 
-  async function handleForgotPassword() {
+  async function handleSendForgotEmail() {
     const email = session?.user?.email
     if (!email) return
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    })
-    if (error) addToast('Erro ao enviar o e-mail')
-    else addToast('Link de redefinição enviado para ' + email, 'success')
+    setSavingPw(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      if (error) addToast('Erro ao enviar o e-mail')
+      else {
+        setShowForgotConfirm(false)
+        addToast('Link de redefinição enviado para ' + email, 'success')
+      }
+    } finally {
+      setSavingPw(false)
+    }
   }
 
   return (
@@ -190,12 +168,7 @@ function SectionPerfil() {
       <h2 className="sp-section-title">Perfil</h2>
 
       {/* Avatar */}
-      <ProfileAvatar
-        username={username}
-        avatarUrl={avatarUrl}
-        onUpload={handleUploadAvatar}
-        uploading={uploadingAvatar}
-      />
+      <ProfileAvatar username={username} />
 
       {/* Username */}
       <div className="sp-group">
@@ -260,73 +233,181 @@ function SectionPerfil() {
       {/* Password */}
       <div className="sp-group">
         <h3 className="sp-group-title">Mudar senha</h3>
-        <form
-          className="sp-form-block"
-          onSubmit={e => { e.preventDefault(); handleSavePassword() }}
-        >
-          <div className="sp-pw-fields">
-            <div className="sp-pw-row">
-              <input
-                className="sp-input sp-input--pw"
-                type={showCurrentPw ? 'text' : 'password'}
-                value={currentPw}
-                onChange={e => setCurrentPw(e.target.value)}
-                placeholder="Senha atual"
-                autoComplete="current-password"
-              />
+        {showForgotConfirm ? (
+          <div className="sp-forgot-confirm">
+            <p className="sp-hint">
+              Vamos enviar um link para <strong>{session?.user?.email}</strong> para você redefinir sua senha.
+            </p>
+            <div className="sp-pw-actions">
               <button
-                className="sp-pw-eye"
+                className="sp-btn-save"
                 type="button"
-                onClick={() => setShowCurrentPw(v => !v)}
-                aria-label={showCurrentPw ? 'Ocultar senha' : 'Mostrar senha'}
+                disabled={savingPw}
+                onClick={handleSendForgotEmail}
               >
-                {showCurrentPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+                {savingPw ? 'Enviando…' : 'Enviar link'}
+              </button>
+              <button
+                type="button"
+                className="sp-link-btn"
+                onClick={() => setShowForgotConfirm(false)}
+              >
+                Cancelar
               </button>
             </div>
-            <div className="sp-pw-row">
+          </div>
+        ) : (
+          <form
+            className="sp-form-block"
+            onSubmit={e => { e.preventDefault(); handleSavePassword() }}
+          >
+            <div className="sp-pw-fields">
+              <div className="sp-pw-row">
+                <input
+                  className="sp-input sp-input--pw"
+                  type={showCurrentPw ? 'text' : 'password'}
+                  value={currentPw}
+                  onChange={e => setCurrentPw(e.target.value)}
+                  placeholder="Senha atual"
+                  autoComplete="current-password"
+                />
+                <button
+                  className="sp-pw-eye"
+                  type="button"
+                  onClick={() => setShowCurrentPw(v => !v)}
+                  aria-label={showCurrentPw ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showCurrentPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+                </button>
+              </div>
+              <button
+                type="button"
+                className="sp-link-btn"
+                onClick={() => setShowForgotConfirm(true)}
+              >
+                Esqueceu a senha?
+              </button>
+              <div className="sp-pw-row">
+                <input
+                  className="sp-input sp-input--pw"
+                  type={showNewPw ? 'text' : 'password'}
+                  value={newPw}
+                  onChange={e => setNewPw(e.target.value)}
+                  placeholder="Nova senha (mín. 8 caracteres)"
+                  autoComplete="new-password"
+                />
+                <button
+                  className="sp-pw-eye"
+                  type="button"
+                  onClick={() => setShowNewPw(v => !v)}
+                  aria-label={showNewPw ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showNewPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+                </button>
+              </div>
               <input
-                className="sp-input sp-input--pw"
-                type={showNewPw ? 'text' : 'password'}
-                value={newPw}
-                onChange={e => setNewPw(e.target.value)}
-                placeholder="Nova senha (mín. 8 caracteres)"
+                className="sp-input"
+                type="password"
+                value={confirmPw}
+                onChange={e => setConfirmPw(e.target.value)}
+                placeholder="Confirmar nova senha"
                 autoComplete="new-password"
               />
+            </div>
+            <div className="sp-pw-actions">
               <button
-                className="sp-pw-eye"
-                type="button"
-                onClick={() => setShowNewPw(v => !v)}
-                aria-label={showNewPw ? 'Ocultar senha' : 'Mostrar senha'}
+                className="sp-btn-save"
+                type="submit"
+                disabled={savingPw || !currentPw || !newPw || !confirmPw}
               >
-                {showNewPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+                {savingPw ? 'Salvando…' : 'Atualizar senha'}
               </button>
             </div>
-            <input
-              className="sp-input"
-              type="password"
-              value={confirmPw}
-              onChange={e => setConfirmPw(e.target.value)}
-              placeholder="Confirmar nova senha"
-              autoComplete="new-password"
-            />
-          </div>
-          <div className="sp-pw-actions">
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Section: Preferências ──────────────────────────────────────────────────
+function SectionPreferencias() {
+  const { theme, setTheme, weekStartsOn, setWeekStartsOn, language, setLanguage, soundEnabled, setSoundEnabled } = useSettings()
+
+  return (
+    <div className="sp-section">
+      <h2 className="sp-section-title">Preferências</h2>
+
+      <div className="sp-group">
+        <h3 className="sp-group-title">Tema</h3>
+        <div className="sp-option-group">
+          {[
+            { value: 'dark',   label: 'Escuro'  },
+            { value: 'light',  label: 'Claro'   },
+            { value: 'system', label: 'Sistema' },
+          ].map(opt => (
             <button
-              className="sp-btn-save"
-              type="submit"
-              disabled={savingPw || !currentPw || !newPw || !confirmPw}
+              key={opt.value}
+              className={`sp-option-btn${theme === opt.value ? ' active' : ''}`}
+              onClick={() => setTheme(opt.value)}
             >
-              {savingPw ? 'Salvando…' : 'Atualizar senha'}
+              {opt.label}
             </button>
+          ))}
+        </div>
+        {theme === 'system' && (
+          <p className="sp-hint">Segue a preferência do sistema operacional.</p>
+        )}
+      </div>
+
+      <div className="sp-group">
+        <h3 className="sp-group-title">Início da semana</h3>
+        <div className="sp-option-group">
+          {[
+            { value: 'sunday',   label: 'Domingo'       },
+            { value: 'monday',   label: 'Segunda-feira' },
+            { value: 'saturday', label: 'Sábado'        },
+          ].map(opt => (
             <button
-              type="button"
-              className="sp-link-btn"
-              onClick={handleForgotPassword}
+              key={opt.value}
+              className={`sp-option-btn${weekStartsOn === opt.value ? ' active' : ''}`}
+              onClick={() => setWeekStartsOn(opt.value)}
             >
-              Esqueceu a senha?
+              {opt.label}
             </button>
-          </div>
-        </form>
+          ))}
+        </div>
+      </div>
+
+      <div className="sp-group">
+        <h3 className="sp-group-title">Idioma</h3>
+        <div className="sp-option-group">
+          <button
+            className={`sp-option-btn${language === 'pt' ? ' active' : ''}`}
+            onClick={() => setLanguage('pt')}
+          >
+            Português
+          </button>
+          <button className="sp-option-btn sp-option-btn--disabled" disabled>
+            English
+            <span className="sp-badge-soon">em breve</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="sp-group">
+        <h3 className="sp-group-title">Sons</h3>
+        <div className="sp-toggle-row">
+          <span className="sp-toggle-label">Sons de interface</span>
+          <button
+            className={`sp-toggle${soundEnabled ? ' active' : ''}`}
+            role="switch"
+            aria-checked={soundEnabled}
+            onClick={() => setSoundEnabled(v => !v)}
+          >
+            <span className="sp-toggle-thumb" />
+          </button>
+        </div>
       </div>
     </div>
   )
