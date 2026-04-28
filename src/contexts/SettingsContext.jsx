@@ -19,7 +19,6 @@ function setLS(key, value) {
 export function SettingsProvider({ children }) {
   const [theme, setThemeState]               = useState(() => getLS('eywa:theme', 'dark'))
   const [weekStartsOn, setWeekStartsOnState] = useState(() => getLS('eywa:weekStartsOn', 'sunday'))
-  const [language, setLanguageState]         = useState(() => getLS('eywa:language', 'pt'))
   const [soundEnabled, setSoundEnabledState] = useState(() => getLS('eywa:soundEnabled', true))
 
   // Apply theme to document whenever it changes
@@ -37,25 +36,12 @@ export function SettingsProvider({ children }) {
 
   function setTheme(v)        { setLS('eywa:theme', v);         setThemeState(v) }
   function setWeekStartsOn(v) { setLS('eywa:weekStartsOn', v);  setWeekStartsOnState(v) }
-  function setLanguage(v)     { setLS('eywa:language', v);      setLanguageState(v) }
   function setSoundEnabled(v) { setLS('eywa:soundEnabled', v);  setSoundEnabledState(v) }
-
-  // Sync language when AuthContext writes it to localStorage on login
-  useEffect(() => {
-    function onStorage(e) {
-      if (e.key === 'eywa:language' && e.newValue !== null) {
-        try { setLanguageState(JSON.parse(e.newValue)) } catch { /* noop */ }
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
 
   return (
     <SettingsContext.Provider value={{
       theme, setTheme,
       weekStartsOn, setWeekStartsOn,
-      language, setLanguage,
       soundEnabled, setSoundEnabled,
     }}>
       {children}

@@ -15,7 +15,6 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
-import { useT } from '../hooks/useT'
 import { fetchTasks, createTask, updateTask } from '../lib/tasks'
 import { playModalOpen } from '../lib/sounds'
 import {
@@ -68,7 +67,6 @@ export default function TasksPage() {
   const { session } = useAuth()
   const userId = session.user.id
   const { addToast } = useToast()
-  const t = useT()
 
   const [tasks, setTasks]         = useState([])
   const [order, setOrder]         = useState([])   // IDs of active (non-completed) tasks
@@ -225,7 +223,7 @@ export default function TasksPage() {
       {/* MIT section — pinned, multiple allowed */}
       {mitTasks.length > 0 && (
         <section className="mit-section">
-          <div className="mit-label">{t('tasks.priority')}</div>
+          <div className="mit-label">Prioritárias</div>
           <ul className="tasks-list">
             {mitTasks.map(task => (
               <li key={task.id}>
@@ -247,11 +245,11 @@ export default function TasksPage() {
 
       <div className="tasks-header">
         <div className="tasks-header-left">
-          <h1 className="tasks-heading">{t('tasks.heading')}</h1>
+          <h1 className="tasks-heading">Tarefas</h1>
           {activeCount > 0 && <span className="tasks-count">{activeCount}</span>}
         </div>
         <button className="btn-add-task" onClick={openAddModal}>
-          {t('tasks.add')}
+          + Nova tarefa
         </button>
       </div>
 
@@ -260,7 +258,7 @@ export default function TasksPage() {
           <div className="loading-dot" />
         </div>
       ) : sortableTasks.length === 0 && completedTasks.length === 0 ? (
-        <div className="tasks-empty">{t('tasks.empty')}</div>
+        <div className="tasks-empty">Nenhuma tarefa criada ainda.</div>
       ) : (
         <>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -288,7 +286,7 @@ export default function TasksPage() {
 
           {completedTasks.length > 0 && (
             <>
-              <div className="tasks-divider">{t('tasks.completed')}</div>
+              <div className="tasks-divider">Concluídas</div>
               <ul className="tasks-list" style={{ gap: 0 }}>
                 {completedTasks.map((task, index) => (
                   <li

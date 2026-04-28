@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchEvents, createEvent, updateEvent, deleteEvent } from '../lib/events'
-import { useT } from '../hooks/useT'
 import AddEventModal from '../components/AddEventModal'
 import './CalendarPage.css'
+
+const WEEKDAYS_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 const COLOR_MAP = {
   blue:   '#3b6fd4',
@@ -16,9 +18,6 @@ const COLOR_MAP = {
 export default function CalendarPage() {
   const { session } = useAuth()
   const userId = session.user.id
-  const t = useT()
-  const MONTHS = t('cal.months')
-  const WEEKDAYS_SHORT = t('cal.days')
 
   const [view, setView] = useState('month') // 'month' | 'week'
   const [cursor, setCursor] = useState(new Date()) // current month/week reference
@@ -85,16 +84,16 @@ export default function CalendarPage() {
       <div className="cal-toolbar">
         <div className="cal-toolbar-left">
           <button className="cal-nav-btn" onClick={() => navigate(-1)}>‹</button>
-          <button className="cal-today-btn" onClick={goToday}>{t('cal.today')}</button>
+          <button className="cal-today-btn" onClick={goToday}>Hoje</button>
           <button className="cal-nav-btn" onClick={() => navigate(1)}>›</button>
           <span className="cal-header-label">{headerLabel}</span>
         </div>
         <div className="cal-toolbar-right">
           <div className="view-tabs">
-            <button className={`view-tab ${view === 'month' ? 'active' : ''}`} onClick={() => setView('month')}>{t('cal.month')}</button>
-            <button className={`view-tab ${view === 'week' ? 'active' : ''}`} onClick={() => setView('week')}>{t('cal.week')}</button>
+            <button className={`view-tab ${view === 'month' ? 'active' : ''}`} onClick={() => setView('month')}>Mês</button>
+            <button className={`view-tab ${view === 'week' ? 'active' : ''}`} onClick={() => setView('week')}>Semana</button>
           </div>
-          <button className="btn-add-event" onClick={() => openCreate(new Date())}>{t('cal.addEvent')}</button>
+          <button className="btn-add-event" onClick={() => openCreate(new Date())}>+ Evento</button>
         </div>
       </div>
 

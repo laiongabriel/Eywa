@@ -1,22 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { useToast } from '../contexts/ToastContext'
-import { useT } from '../hooks/useT'
 import { supabase } from '../lib/supabase'
 import { AvatarImg, Spinner } from '../lib/ui'
-import { User, SlidersHorizontal, ChevronLeft, Eye, EyeOff, Moon, Sun, Monitor } from 'lucide-react'
+import { User, SlidersHorizontal, ChevronLeft, Moon, Sun, Monitor, Check } from 'lucide-react'
 import './SettingsPage.css'
 
 // ── DiceBear avatar helpers ────────────────────────────────────────────────
 const DICEBEAR_STYLES = [
-  { id: 'notionists', label: 'Notionists' },
-  { id: 'adventurer', label: 'Adventurer' },
-  { id: 'micah',      label: 'Micah'      },
-  { id: 'pixel-art',  label: 'Pixel'      },
-  { id: 'shapes',     label: 'Shapes'     },
-  { id: 'fun-emoji',  label: 'Emoji'      },
+  { id: 'adventurer-neutral', label: 'Aventureiro'  },
+  { id: 'avataaars-neutral',  label: 'Avataaars'    },
+  { id: 'notionists-neutral', label: 'Notionists'   },
+  { id: 'bottts-neutral',     label: 'Bottts'       },
+  { id: 'big-smile',          label: 'Big Smile'    },
+  { id: 'avataaars',          label: 'Avataaars+'   },
 ]
 
 function dicebearUrl(name, style) {
@@ -24,28 +23,41 @@ function dicebearUrl(name, style) {
 }
 
 // ── Avatar component ───────────────────────────────────────────────────────
-function ProfileAvatar({ username, avatarStyle, onStyleSaved }) {
-  const t = useT()
-
+function ProfileAvatar({ username, avatarStyle, pickerOpen, onTogglePicker, onStyleSelect }) {
   return (
-    <div className="sp-avatar-wrap">
-      <div className="sp-avatar">
-        <AvatarImg src={dicebearUrl(username, avatarStyle)} alt="Avatar" size={80} />
+    <div className="sp-avatar-center">
+      <div className="sp-avatar-main-col">
+        <AvatarImg
+          src={dicebearUrl(username, avatarStyle)}
+          alt={username ?? 'Avatar'}
+          size={80}
+          ready={!!username}
+        />
+        <button className="sp-avatar-change-btn" type="button" onClick={onTogglePicker}>
+          {pickerOpen ? 'Fechar' : 'Trocar avatar'}
+        </button>
       </div>
-      <div className="sp-avatar-styles">
-        {DICEBEAR_STYLES.map(({ id }) => (
-          <button
-            key={id}
-            type="button"
-            className={`sp-avatar-style-btn${avatarStyle === id ? ' active' : ''}`}
-            onClick={() => onStyleSaved(id)}
-            aria-label={id}
-          >
-            <AvatarImg src={dicebearUrl(username, id)} alt={id} size={42} />
-          </button>
-        ))}
+      <div className={`sp-avatar-picker-wrap${pickerOpen ? ' open' : ''}`} aria-hidden={!pickerOpen}>
+        <div className="sp-avatar-picker-grid">
+          {DICEBEAR_STYLES.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className={`sp-avatar-grid-btn${avatarStyle === id ? ' active' : ''}`}
+              onClick={() => onStyleSelect(id)}
+              title={label}
+              tabIndex={pickerOpen ? 0 : -1}
+            >
+              <AvatarImg src={dicebearUrl(username, id)} alt={label} size={64} ready={!!username && pickerOpen} />
+              {avatarStyle === id && (
+                <span className="sp-avatar-check" aria-hidden="true">
+                  <Check size={10} strokeWidth={3} />
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
-      <span className="sp-avatar-hint">{t('sp.avatarHint')}</span>
     </div>
   )
 }
@@ -54,343 +66,349 @@ function ProfileAvatar({ username, avatarStyle, onStyleSaved }) {
 function SectionPerfil() {
   const { session, username, avatarStyle, updateProfile } = useAuth()
   const { addToast } = useToast()
-  const t = useT()
 
-  // Username
-  const [newUsername, setNewUsername]       = useState(username ?? '')
-  const [savingUsername, setSavingUsername] = useState(false)
+  // Avatar
+  const [pickerOpen, setPickerOpen]           = useState(false)
 
-  // Email
-  const [newEmail, setNewEmail]       = useState('')
-  const [savingEmail, setSavingEmail] = useState(false)
-  const [emailSent, setEmailSent]     = useState(false)
+  // Username (editable)
+  const [newUsername, setNewUsername]         = useState(username ?? '')
+  const [savingName, setSavingName]           = useState(false)
+  const [nameSaved, setNameSaved]             = useState(false)
 
-  // Password
-  const [currentPw, setCurrentPw]         = useState('')
-  const [newPw, setNewPw]                 = useState('')
-  const [confirmPw, setConfirmPw]         = useState('')
-  const [showCurrentPw, setShowCurrentPw] = useState(false)
-  const [showNewPw, setShowNewPw]         = useState(false)
-  const [savingPw, setSavingPw]           = useState(false)
-  const [showForgotConfirm, setShowForgotConfirm] = useState(false)
+  // Change password
+  const [curPw, setCurPw]                     = useState('')
+  const [newPw, setNewPw]                     = useState('')
+  const [confirmPw, setConfirmPw]             = useState('')
+  const [savingPw, setSavingPw]               = useState(false)
+  const [pwError, setPwError]                 = useState(null)
+  const [pwSaved, setPwSaved]                 = useState(false)
 
-  async function handleSaveAvatarStyle(styleId) {
+  // Change email
+  const [newEmail, setNewEmail]               = useState('')
+  const [savingEmail, setSavingEmail]         = useState(false)
+  const [emailSent, setEmailSent]             = useState(false)
+  const [emailError, setEmailError]           = useState(null)
+
+  // Delete modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletePw, setDeletePw]               = useState('')
+  const [deletePwError, setDeletePwError]     = useState(null)
+  const [deleting, setDeleting]               = useState(false)
+
+  useEffect(() => { setNewUsername(username ?? '') }, [username])
+
+  async function handleSelectStyle(styleId) {
+    if (styleId === avatarStyle) { setPickerOpen(false); return }
     updateProfile({ avatarStyle: styleId })
+    setPickerOpen(false)
     await supabase.from('profiles').update({ avatar_style: styleId }).eq('id', session.user.id)
   }
 
-  async function handleSaveUsername() {
+  async function handleSaveName(e) {
+    e?.preventDefault()
     const val = newUsername.trim()
-    if (!val || val === username) return
-    if (val.length < 3 || val.length > 30) {
-      addToast(t('sp.usernameHint'))
-      return
-    }
-    setSavingUsername(true)
+    if (!val || val === (username ?? '')) return
+    if (val.length > 50) { addToast('Máximo 50 caracteres'); return }
+    setSavingName(true)
     try {
       const { error } = await supabase
-        .from('profiles')
-        .update({ username: val })
-        .eq('id', session.user.id)
-      if (error) {
-        if (error.code === '23505') addToast('Esse nome já está em uso')
-        else addToast('Erro ao salvar nome')
-      } else {
-        updateProfile({ username: val })
-        addToast(t('sp.username') + ' atualizado', 'success')
-      }
-    } finally {
-      setSavingUsername(false)
-    }
+        .from('profiles').update({ username: val }).eq('id', session.user.id)
+      if (error) { addToast('Erro ao salvar nome'); return }
+      updateProfile({ username: val })
+      setNameSaved(true)
+      setTimeout(() => setNameSaved(false), 2000)
+    } finally { setSavingName(false) }
   }
 
-  async function handleSaveEmail() {
-    const val = newEmail.trim()
-    if (!val) return
-    setSavingEmail(true)
-    try {
-      const { error } = await supabase.auth.updateUser({ email: val })
-      if (error) addToast('Erro ao atualizar e-mail')
-      else { setEmailSent(true); setNewEmail('') }
-    } finally {
-      setSavingEmail(false)
-    }
-  }
-
-  async function handleSavePassword() {
-    if (!currentPw || !newPw || !confirmPw) return
-    if (newPw !== confirmPw) { addToast('As senhas não coincidem'); return }
-    if (newPw.length < 8)    { addToast('A nova senha deve ter pelo menos 8 caracteres'); return }
+  async function handleSavePassword(e) {
+    e?.preventDefault()
+    if (!curPw || !newPw || !confirmPw) return
+    if (newPw !== confirmPw) { setPwError('As senhas não coincidem'); return }
+    if (newPw.length < 6) { setPwError('A nova senha deve ter pelo menos 6 caracteres'); return }
+    setPwError(null)
     setSavingPw(true)
     try {
       const { error: authErr } = await supabase.auth.signInWithPassword({
-        email: session.user.email,
-        password: currentPw,
+        email: session.user.email, password: curPw,
       })
-      if (authErr) { addToast('Senha atual incorreta'); return }
+      if (authErr) { setPwError('Senha atual incorreta'); setSavingPw(false); return }
       const { error } = await supabase.auth.updateUser({ password: newPw })
-      if (error) addToast('Erro ao atualizar senha')
-      else {
-        setCurrentPw(''); setNewPw(''); setConfirmPw('')
-        addToast('Senha atualizada com sucesso', 'success')
-      }
-    } finally {
-      setSavingPw(false)
+      if (error) { setPwError('Erro ao atualizar senha'); setSavingPw(false); return }
+      setCurPw(''); setNewPw(''); setConfirmPw('')
+      setPwSaved(true)
+      setTimeout(() => setPwSaved(false), 2500)
+    } finally { setSavingPw(false) }
+  }
+
+  async function handleSaveEmail(e) {
+    e?.preventDefault()
+    const val = newEmail.trim()
+    if (!val) return
+    setEmailError(null)
+    setSavingEmail(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ email: val })
+      if (error) { setEmailError('Erro ao atualizar email'); setSavingEmail(false); return }
+      setEmailSent(true)
+      setNewEmail('')
+    } finally { setSavingEmail(false) }
+  }
+
+  function closeDeleteModal() {
+    setShowDeleteModal(false); setDeletePw(''); setDeletePwError(null)
+  }
+
+  async function handleDelete(e) {
+    e?.preventDefault()
+    if (!deletePw.trim()) return
+    setDeletePwError(null)
+    setDeleting(true)
+    try {
+      const { error: authErr } = await supabase.auth.signInWithPassword({
+        email: session?.user?.email, password: deletePw,
+      })
+      if (authErr) { setDeletePwError('Senha incorreta. Tente novamente.'); setDeleting(false); return }
+      const { error } = await supabase.rpc('delete_account')
+      if (error) { setDeletePwError('Erro ao excluir conta. Tente novamente.'); setDeleting(false); return }
+      await supabase.auth.signOut()
+    } catch {
+      setDeletePwError('Erro ao excluir conta. Tente novamente.')
+      setDeleting(false)
     }
   }
 
-  async function handleSendForgotEmail() {
-    const email = session?.user?.email
-    if (!email) return
-    setSavingPw(true)
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      })
-      if (error) addToast('Erro ao enviar o e-mail')
-      else {
-        setShowForgotConfirm(false)
-        addToast(t('sp.sendLink') + ' enviado para ' + email, 'success')
-      }
-    } finally {
-      setSavingPw(false)
-    }
-  }
+  const nameChanged = newUsername.trim() !== (username ?? '')
 
   return (
     <div className="sp-section">
-      <h2 className="sp-section-title">{t('settings.profile')}</h2>
+      <h2 className="sp-section-title">Perfil</h2>
 
       {/* Avatar */}
-      <ProfileAvatar
-        username={username}
-        avatarStyle={avatarStyle}
-        onStyleSaved={handleSaveAvatarStyle}
-      />
-
-      {/* Username */}
       <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.username')}</h3>
-        <form
-          className="sp-field-row"
-          onSubmit={e => { e.preventDefault(); handleSaveUsername() }}
-        >
+        <ProfileAvatar
+          username={username}
+          avatarStyle={avatarStyle}
+          pickerOpen={pickerOpen}
+          onTogglePicker={() => setPickerOpen(v => !v)}
+          onStyleSelect={handleSelectStyle}
+        />
+      </div>
+
+      {/* Username (editable) */}
+      <div className="sp-group">
+        <label className="sp-field-label">Nome de usuário</label>
+        <form className="sp-field-row" onSubmit={handleSaveName}>
           <input
             className="sp-input"
             value={newUsername}
             onChange={e => setNewUsername(e.target.value)}
-            placeholder={username ?? 'Seu nome'}
-            maxLength={30}
+            placeholder="Nome de usuário"
+            maxLength={50}
             autoComplete="off"
           />
-          <button
-            className="sp-btn-save"
-            type="submit"
-            disabled={savingUsername || !newUsername.trim() || newUsername.trim() === username}
-          >
-            {savingUsername ? <><Spinner /> {t('common.saving')}</> : t('common.save')}
-          </button>
-        </form>
-        <p className="sp-hint">{t('sp.usernameHint')}</p>
-      </div>
-
-      {/* Email */}
-      <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.email')}</h3>
-        <p className="sp-current-value">{session?.user?.email}</p>
-        {emailSent
-          ? <p className="sp-success">{t('sp.emailSent')}</p>
-          : (
-            <form
-              className="sp-form-block"
-              onSubmit={e => { e.preventDefault(); handleSaveEmail() }}
+          {nameChanged && (
+            <button
+              className="sp-btn-save"
+              type="submit"
+              disabled={savingName || !newUsername.trim()}
             >
-              <div className="sp-field-row">
-                <input
-                  className="sp-input"
-                  type="email"
-                  value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
-                  placeholder={t('sp.emailNew')}
-                  autoComplete="off"
-                />
-                <button
-                  className="sp-btn-save"
-                  type="submit"
-                  disabled={savingEmail || !newEmail.trim()}
-                >
-                  {savingEmail ? <><Spinner /> {t('common.sending')}</> : t('sp.changeEmail')}
-                </button>
-              </div>
-              <p className="sp-hint">{t('sp.emailHint')}</p>
-            </form>
-          )
+              {savingName ? <><Spinner /> Salvando…</> : 'Salvar'}
+            </button>
+          )}
+        </form>
+        {nameSaved
+          ? <p className="sp-field-success">Salvo</p>
+          : <p className="sp-hint">Aparece em todo o app. Entre 1 e 50 caracteres.</p>
         }
       </div>
 
-      {/* Password */}
+      {/* Email (read-only) */}
       <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.password')}</h3>
-        {showForgotConfirm ? (
-          <div className="sp-forgot-confirm">
-            <p className="sp-hint">
-              Vamos enviar um link para <strong>{session?.user?.email}</strong> para você redefinir sua senha.
-            </p>
-            <div className="sp-pw-actions">
-              <button
-                className="sp-btn-save"
-                type="button"
-                disabled={savingPw}
-                onClick={handleSendForgotEmail}
-              >
-                {savingPw ? <><Spinner /> {t('common.sending')}</> : t('sp.sendLink')}
-              </button>
-              <button
-                type="button"
-                className="sp-link-btn"
-                onClick={() => setShowForgotConfirm(false)}
-              >
-                {t('common.cancel')}
-              </button>
-            </div>
-          </div>
+        <label className="sp-field-label">Email</label>
+        <p className="sp-field-value">{session?.user?.email}</p>
+      </div>
+
+      {/* Change email */}
+      <div className="sp-group">
+        <h3 className="sp-group-title">Alterar email</h3>
+        {emailSent ? (
+          <p className="sp-field-success">Confirmação enviada para o novo endereço.</p>
         ) : (
-          <form
-            className="sp-form-block"
-            onSubmit={e => { e.preventDefault(); handleSavePassword() }}
-          >
-            {/* 2-column labeled layout */}
-            <div className="sp-labeled-form">
-              {/* Current password row */}
-              <span className="sp-labeled-form-label">{t('sp.currentPw')}</span>
-              <div className="sp-pw-row">
-                <input
-                  className="sp-input sp-input--pw"
-                  type={showCurrentPw ? 'text' : 'password'}
-                  value={currentPw}
-                  onChange={e => setCurrentPw(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                />
-                <button
-                  className="sp-pw-eye"
-                  type="button"
-                  onClick={() => setShowCurrentPw(v => !v)}
-                  aria-label={showCurrentPw ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showCurrentPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
-                </button>
-              </div>
-
-              {/* Forgot password — aligned right col */}
-              <span />
-              <button
-                type="button"
-                className="sp-link-btn"
-                onClick={() => setShowForgotConfirm(true)}
-              >
-                {t('sp.forgotPw')}
-              </button>
-
-              {/* New password row */}
-              <span className="sp-labeled-form-label">{t('sp.newPw')}</span>
-              <div className="sp-pw-row">
-                <input
-                  className="sp-input sp-input--pw"
-                  type={showNewPw ? 'text' : 'password'}
-                  value={newPw}
-                  onChange={e => setNewPw(e.target.value)}
-                  placeholder={t('sp.newPwHint')}
-                  autoComplete="new-password"
-                />
-                <button
-                  className="sp-pw-eye"
-                  type="button"
-                  onClick={() => setShowNewPw(v => !v)}
-                  aria-label={showNewPw ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showNewPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
-                </button>
-              </div>
-
-              {/* Confirm password row */}
-              <span className="sp-labeled-form-label">{t('sp.confirmPw')}</span>
-              <input
-                className="sp-input"
-                type="password"
-                value={confirmPw}
-                onChange={e => setConfirmPw(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="new-password"
-              />
-
-              {/* Actions — aligned right col */}
-              <span />
-              <div className="sp-pw-actions">
-                <button
-                  className="sp-btn-save"
-                  type="submit"
-                  disabled={savingPw || !currentPw || !newPw || !confirmPw}
-                >
-                  {savingPw ? <><Spinner /> {t('common.saving')}</> : t('sp.updatePw')}
-                </button>
-              </div>
-            </div>
+          <form className="sp-field-row" onSubmit={handleSaveEmail}>
+            <input
+              className="sp-input"
+              type="email"
+              value={newEmail}
+              onChange={e => setNewEmail(e.target.value)}
+              placeholder="novo@email.com"
+              autoComplete="off"
+            />
+            <button
+              className="sp-btn-save"
+              type="submit"
+              disabled={savingEmail || !newEmail.trim()}
+            >
+              {savingEmail ? <><Spinner /> Enviando…</> : 'Alterar'}
+            </button>
           </form>
         )}
+        {emailError && <p className="sp-field-error">{emailError}</p>}
+        {!emailSent && <p className="sp-hint">Um link de confirmação será enviado para o novo endereço.</p>}
       </div>
+
+      {/* Change password */}
+      <div className="sp-group">
+        <h3 className="sp-group-title">Alterar senha</h3>
+        <form className="sp-form-block" onSubmit={handleSavePassword}>
+          <input
+            className="sp-input"
+            type="password"
+            value={curPw}
+            onChange={e => setCurPw(e.target.value)}
+            placeholder="Senha atual"
+            autoComplete="current-password"
+          />
+          <input
+            className="sp-input"
+            type="password"
+            value={newPw}
+            onChange={e => setNewPw(e.target.value)}
+            placeholder="Nova senha (mín. 6 caracteres)"
+            autoComplete="new-password"
+          />
+          <input
+            className="sp-input"
+            type="password"
+            value={confirmPw}
+            onChange={e => setConfirmPw(e.target.value)}
+            placeholder="Confirmar nova senha"
+            autoComplete="new-password"
+          />
+          {pwError && <p className="sp-field-error">{pwError}</p>}
+          {pwSaved && <p className="sp-field-success">Senha atualizada.</p>}
+          <div className="sp-form-actions">
+            <button
+              className="sp-btn-save"
+              type="submit"
+              disabled={savingPw || !curPw || !newPw || !confirmPw}
+            >
+              {savingPw ? <><Spinner /> Salvando…</> : 'Atualizar senha'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Danger zone */}
+      <div className="sp-section-divider" />
+      <div className="sp-group">
+        <div className="sp-danger-row">
+          <div>
+            <p className="sp-danger-label">Excluir conta</p>
+            <p className="sp-hint" style={{ margin: 0 }}>Remove permanentemente todos os seus dados.</p>
+          </div>
+          <button className="sp-delete-btn" type="button" onClick={() => setShowDeleteModal(true)}>
+            Excluir conta
+          </button>
+        </div>
+      </div>
+
+      {/* Delete modal */}
+      {showDeleteModal && (
+        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) closeDeleteModal() }}>
+          <div className="modal-card" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <h2 className="modal-title">Excluir conta</h2>
+              <button className="modal-close" onClick={closeDeleteModal} aria-label="Fechar">✕</button>
+            </div>
+            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }} onSubmit={handleDelete}>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+                Todos os seus dados serão permanentemente removidos. Esta ação não pode ser desfeita.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label className="sp-field-label">Para confirmar, digite sua senha:</label>
+                <input
+                  className="sp-input"
+                  type="password"
+                  value={deletePw}
+                  onChange={e => { setDeletePw(e.target.value); setDeletePwError(null) }}
+                  placeholder="Sua senha atual"
+                  autoComplete="current-password"
+                  autoFocus
+                />
+                {deletePwError && <p className="sp-field-error" style={{ margin: 0 }}>{deletePwError}</p>}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.625rem', paddingTop: '0.25rem' }}>
+                <button type="button" className="btn-cancel" onClick={closeDeleteModal}>Cancelar</button>
+                <button
+                  type="submit"
+                  className="sp-btn-danger"
+                  disabled={!deletePw.trim() || deleting}
+                >
+                  {deleting ? <><Spinner /> Excluindo…</> : 'Excluir minha conta'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 // ── Section: Preferências ──────────────────────────────────────────────────
 function SectionPreferencias() {
-  const { session } = useAuth()
-  const { theme, setTheme, weekStartsOn, setWeekStartsOn, language, setLanguage, soundEnabled, setSoundEnabled } = useSettings()
-  const t = useT()
+  const { theme, setTheme, weekStartsOn, setWeekStartsOn, soundEnabled, setSoundEnabled } = useSettings()
+  const [permission, setPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  )
+  const [notifEnabled, setNotifEnabled] = useState(
+    typeof Notification !== 'undefined' && Notification.permission === 'granted'
+  )
 
-  async function handleSaveLanguage(lang) {
-    setLanguage(lang)
-    if (session?.user?.id) {
-      await supabase.from('profiles').update({ language: lang }).eq('id', session.user.id)
-    }
+  async function handleNotifToggle() {
+    if (permission === 'denied') return
+    if (notifEnabled) { setNotifEnabled(false); return }
+    if (typeof Notification === 'undefined') return
+    const result = await Notification.requestPermission()
+    setPermission(result)
+    setNotifEnabled(result === 'granted')
   }
 
   return (
     <div className="sp-section">
-      <h2 className="sp-section-title">{t('settings.preferences')}</h2>
+      <h2 className="sp-section-title">Preferências</h2>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.theme')}</h3>
+        <h3 className="sp-group-title">Tema</h3>
         <div className="sp-option-group">
           <button
             className={`sp-option-btn${theme === 'dark' ? ' active' : ''}`}
             onClick={() => setTheme('dark')}
           >
-            <Moon size={14} strokeWidth={2} /> {t('sp.dark')}
+            <Moon size={14} strokeWidth={2} /> Escuro
           </button>
           <button
             className={`sp-option-btn${theme === 'light' ? ' active' : ''}`}
             onClick={() => setTheme('light')}
           >
-            <Sun size={14} strokeWidth={2} /> {t('sp.light')}
+            <Sun size={14} strokeWidth={2} /> Claro
           </button>
           <button
             className={`sp-option-btn${theme === 'system' ? ' active' : ''}`}
             onClick={() => setTheme('system')}
           >
-            <Monitor size={14} strokeWidth={2} /> {t('sp.system')}
+            <Monitor size={14} strokeWidth={2} /> Sistema
           </button>
         </div>
       </div>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.weekStart')}</h3>
+        <h3 className="sp-group-title">Início da semana</h3>
         <div className="sp-option-group">
           {[
-            { value: 'sunday',   label: t('sp.sunday')   },
-            { value: 'monday',   label: t('sp.monday')   },
-            { value: 'saturday', label: t('sp.saturday') },
+            { value: 'sunday',   label: 'Domingo'       },
+            { value: 'monday',   label: 'Segunda-feira' },
+            { value: 'saturday', label: 'Sábado'        },
           ].map(opt => (
             <button
               key={opt.value}
@@ -404,27 +422,9 @@ function SectionPreferencias() {
       </div>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.language')}</h3>
-        <div className="sp-option-group">
-          <button
-            className={`sp-option-btn${language === 'pt' ? ' active' : ''}`}
-            onClick={() => handleSaveLanguage('pt')}
-          >
-            Português
-          </button>
-          <button
-            className={`sp-option-btn${language === 'en' ? ' active' : ''}`}
-            onClick={() => handleSaveLanguage('en')}
-          >
-            English
-          </button>
-        </div>
-      </div>
-
-      <div className="sp-group">
-        <h3 className="sp-group-title">{t('sp.sounds')}</h3>
+        <h3 className="sp-group-title">Sons</h3>
         <div className="sp-toggle-row">
-          <span className="sp-toggle-label">{t('sp.soundLabel')}</span>
+          <span className="sp-toggle-label">Sons de interface</span>
           <button
             className={`sp-toggle${soundEnabled ? ' active' : ''}`}
             role="switch"
@@ -435,20 +435,44 @@ function SectionPreferencias() {
           </button>
         </div>
       </div>
+
+      <div className="sp-group">
+        <h3 className="sp-group-title">Notificações</h3>
+        <div className="sp-toggle-row" style={{ alignItems: 'flex-start', gap: '1rem' }}>
+          <div className="sp-notif-info">
+            <span className="sp-toggle-label">Notificações do navegador</span>
+            <span className="sp-notif-desc">Receba lembretes mesmo com o app em segundo plano.</span>
+          </div>
+          <button
+            className={`sp-toggle${notifEnabled ? ' active' : ''}`}
+            role="switch"
+            aria-checked={notifEnabled}
+            disabled={permission === 'denied'}
+            onClick={handleNotifToggle}
+            style={{ flexShrink: 0, marginTop: '0.125rem' }}
+          >
+            <span className="sp-toggle-thumb" />
+          </button>
+        </div>
+        {permission === 'denied' && (
+          <p className="sp-notif-denied">
+            Notificações bloqueadas. Para reativar, clique no ícone de cadeado na barra de endereço e permita as notificações para este site.
+          </p>
+        )}
+      </div>
     </div>
   )
 }
 
 // ── Main page ──────────────────────────────────────────────────────────────
+const SECTIONS = [
+  { id: 'perfil',       label: 'Perfil',       Icon: User              },
+  { id: 'preferencias', label: 'Preferências', Icon: SlidersHorizontal },
+]
+
 export default function SettingsPage() {
   const [active, setActive] = useState('perfil')
   const navigate = useNavigate()
-  const t = useT()
-
-  const SECTIONS = [
-    { id: 'perfil',       label: t('settings.profile'),     Icon: User              },
-    { id: 'preferencias', label: t('settings.preferences'), Icon: SlidersHorizontal },
-  ]
 
   return (
     <div className="sp-root">
@@ -460,11 +484,11 @@ export default function SettingsPage() {
             <button
               className="sp-back-btn"
               onClick={() => navigate(-1)}
-              aria-label={t('settings.back')}
+              aria-label="Voltar"
             >
               <ChevronLeft size={16} strokeWidth={2.5} />
             </button>
-            <span className="sp-sidebar-title">{t('settings.title')}</span>
+            <span className="sp-sidebar-title">Configurações</span>
           </div>
 
           <nav className="sp-nav">

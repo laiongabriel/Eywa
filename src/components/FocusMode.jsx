@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useFocusTimer, formatElapsed } from '../hooks/useFocusTimer'
 import { playFocusEnter, playPause, playResume, playSessionEnd } from '../lib/sounds'
-import { useT } from '../hooks/useT'
 import { Pause, Play } from 'lucide-react'
 import './FocusMode.css'
 
@@ -12,7 +11,6 @@ export default function FocusMode({ task, onEnd }) {
   const { elapsed, paused, pause, resume, progress } = useFocusTimer(task.estimated_minutes)
   const enteredRef = useRef(false)
   const [exiting, setExiting] = useState(false)
-  const t = useT()
 
   // Play entry sound once on mount
   useEffect(() => {
@@ -53,7 +51,7 @@ export default function FocusMode({ task, onEnd }) {
       <div className="focus-content">
 
         {/* Task label */}
-        <p className="focus-label">{t('focus.on')}</p>
+        <p className="focus-label">Focando em</p>
         <h1 className="focus-task-title">{task.title}</h1>
 
         {/* Progress ring + timer */}
@@ -101,14 +99,14 @@ export default function FocusMode({ task, onEnd }) {
         {/* Ultradian break banner */}
         {showBreakBanner && (
           <div className="focus-break-banner">
-            {t('focus.breakBanner')}
+            90 minutos atingidos — seu cérebro está pedindo uma pausa (Ritmos Ultradianos)
           </div>
         )}
 
         {/* Cycle hint — only before the mark */}
         {!isUltradianReached && !task.estimated_minutes && (
           <p className="focus-cycle-hint">
-            {t('focus.cycleHint')}
+            Ciclo sugerido: 90 min de foco
           </p>
         )}
 
@@ -116,15 +114,15 @@ export default function FocusMode({ task, onEnd }) {
         <div className="focus-controls">
           {paused ? (
             <button className="focus-btn focus-btn-resume" onClick={handleResume}>
-              <Play size={14} fill="currentColor" stroke="none" aria-hidden="true" /> {t('focus.resume')}
+              <Play size={14} fill="currentColor" stroke="none" aria-hidden="true" /> Retomar
             </button>
           ) : (
             <button className="focus-btn focus-btn-pause" onClick={handlePause}>
-              <Pause size={14} fill="currentColor" stroke="none" aria-hidden="true" /> {t('focus.pause')}
+              <Pause size={14} fill="currentColor" stroke="none" aria-hidden="true" /> Pausar
             </button>
           )}
           <button className="focus-btn focus-btn-end" onClick={handleEnd}>
-            {t('focus.end')}
+            Encerrar sessão
           </button>
         </div>
       </div>

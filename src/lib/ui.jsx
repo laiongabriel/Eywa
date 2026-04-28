@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export function AvatarImg({ src, alt = '', size = 32, style: extraStyle, className }) {
+export function AvatarImg({ src, alt = '', size = 32, style: extraStyle, className, ready = true }) {
   const [loaded, setLoaded] = useState(false)
   return (
     <span
@@ -15,32 +15,34 @@ export function AvatarImg({ src, alt = '', size = 32, style: extraStyle, classNa
         ...extraStyle,
       }}
     >
-      {!loaded && (
+      {(!ready || !loaded) && (
         <span
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'var(--color-surface-raised)',
+            background: '#1e2535',
             animation: 'shimmer 1.4s ease-in-out infinite',
           }}
           aria-hidden="true"
         />
       )}
-      <img
-        src={src}
-        alt={alt}
-        className={className}
-        style={{
-          display: 'block',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.2s',
-        }}
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
-      />
+      {ready && (
+        <img
+          src={src}
+          alt={alt}
+          className={className}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.2s',
+          }}
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+        />
+      )}
     </span>
   )
 }

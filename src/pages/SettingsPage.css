@@ -55,7 +55,7 @@
 
 .sp-sidebar-title {
   font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: var(--color-text-primary);
   letter-spacing: -0.025em;
@@ -184,47 +184,84 @@
 }
 
 /* ── Avatar style picker grid ─────────────────────────────────── */
-.sp-avatar-styles {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.sp-avatar-picker-wrap {
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: max-width 300ms ease, opacity 250ms ease;
+  align-self: flex-start;
 }
 
-.sp-avatar-style-btn {
-  width: 42px;
-  height: 42px;
+.sp-avatar-picker-wrap.open {
+  max-width: 260px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sp-avatar-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  width: 240px;
+  padding: 0.125rem 0.25rem;
+  transform: translateX(-10px);
+  transition: transform 300ms ease;
+}
+
+.sp-avatar-picker-wrap.open .sp-avatar-picker-grid {
+  transform: translateX(0);
+}
+
+.sp-avatar-grid-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   border: 2px solid transparent;
   padding: 0;
   cursor: pointer;
   background: none;
-  transition: border-color 0.15s, transform 0.1s;
+  transition: border-color 0.15s, transform 0.12s;
   flex-shrink: 0;
 }
 
-.sp-avatar-style-btn:hover {
+.sp-avatar-grid-btn:hover {
   border-color: var(--color-border-active);
-  transform: scale(1.08);
+  transform: scale(1.07);
 }
 
-.sp-avatar-style-btn.active {
+.sp-avatar-grid-btn.active {
   border-color: var(--color-amber);
-  transform: scale(1.08);
+  transform: scale(1.07);
 }
 
-.sp-avatar-style-btn svg,
-.sp-avatar-style-btn img {
+.sp-avatar-grid-btn > * {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
-.sp-avatar-hint {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  margin: 0;
+.sp-avatar-check {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-bg);
+  pointer-events: none;
 }
 
 /* ── Inputs ───────────────────────────────────────────────────────────────── */
@@ -469,6 +506,180 @@
   padding: 0.1rem 0.425rem;
   border-radius: 99px;
 }
+
+/* ── Danger zone ──────────────────────────────────────────────────────────── */
+.sp-btn-danger {
+  padding: 0.575rem 1.25rem;
+  background: transparent;
+  color: #ef4444;
+  border: 1.5px solid #ef4444;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  letter-spacing: -0.005em;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.sp-btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.08); }
+.sp-btn-danger:active:not(:disabled) { transform: scale(0.97); }
+.sp-btn-danger:disabled { opacity: 0.35; cursor: default; }
+.sp-hint--danger { color: #ef4444; }
+
+/* ── Avatar container ───────────────────────────────────────── */
+.sp-avatar-center {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.sp-avatar-main-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .sp-avatar-center { flex-direction: column; }
+  .sp-avatar-picker-wrap {
+    max-width: unset;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 300ms ease, opacity 250ms ease;
+  }
+  .sp-avatar-picker-wrap.open { max-width: unset; max-height: 300px; }
+  .sp-avatar-picker-grid { width: 100%; transform: none; }
+  .sp-avatar-picker-wrap.open .sp-avatar-picker-grid { transform: none; }
+}
+
+.sp-avatar-change-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+  letter-spacing: -0.005em;
+}
+.sp-avatar-change-btn:hover { color: var(--color-text-secondary); }
+
+/* ── Field label / value (new read-only display) ──────────────────────────── */
+.sp-field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+  display: block;
+}
+
+.sp-field-value {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+.sp-field-success {
+  font-size: 0.8125rem;
+  color: #6ee7b7;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+/* ── Notifications section ────────────────────────────────────────────────── */
+.sp-notif-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.sp-notif-desc {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.sp-notif-denied {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  padding: 0.625rem 0.875rem;
+  background: var(--color-surface-raised);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-amber);
+  margin: 0;
+}
+
+/* ── Danger row (Conta section) ───────────────────────────────────────────── */
+.sp-danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sp-danger-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.005em;
+}
+
+.sp-delete-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #f87171;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+  letter-spacing: -0.005em;
+  flex-shrink: 0;
+}
+.sp-delete-btn:hover { color: #ef4444; }
+
+/* ── Form utilities ───────────────────────────────────────────────────────── */
+.sp-form-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.25rem;
+}
+
+.sp-field-error {
+  font-size: 0.8125rem;
+  color: #f87171;
+  margin: 0.125rem 0 0;
+  line-height: 1.4;
+}
+
+/* ── Section divider (danger zone separator) ─────────────────────────────── */
+.sp-section-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 1rem 0 0.5rem;
+  border: none;
+  opacity: 0.6;
+}
+
 
 /* ── Toggle switch ────────────────────────────────────────────────────────── */
 .sp-toggle-row {

@@ -1,20 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useT } from '../hooks/useT'
 import { AvatarImg } from '../lib/ui'
 import { Settings, LogOut } from 'lucide-react'
 import './UserMenu.css'
 
 function dicebearUrl(name, style) {
-  const validStyles = ['notionists','adventurer','micah','pixel-art','shapes','fun-emoji']
-  const s = validStyles.includes(style) ? style : 'notionists'
+  const validStyles = ['adventurer-neutral','avataaars-neutral','notionists-neutral','bottts-neutral','big-smile','avataaars']
+  const s = validStyles.includes(style) ? style : 'adventurer-neutral'
   return `https://api.dicebear.com/9.x/${s}/svg?seed=${encodeURIComponent(name || '?')}`
 }
 
 export default function UserMenu({ onSignOut }) {
   const { username, session, avatarStyle } = useAuth()
-  const t = useT()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const navigate = useNavigate()
@@ -44,6 +42,7 @@ export default function UserMenu({ onSignOut }) {
           alt={username ?? 'Avatar'}
           size={32}
           className="user-avatar-img"
+          ready={!!username}
         />
       </button>
 
@@ -62,7 +61,7 @@ export default function UserMenu({ onSignOut }) {
             onClick={() => { setOpen(false); navigate('/settings') }}
           >
             <Settings size={15} strokeWidth={2} />
-            {t('menu.settings')}
+            Configurações
           </button>
 
           <button
@@ -71,7 +70,7 @@ export default function UserMenu({ onSignOut }) {
             onClick={() => { setOpen(false); onSignOut() }}
           >
             <LogOut size={15} strokeWidth={2} />
-            {t('menu.signout')}
+            Sair
           </button>
         </div>
       )}

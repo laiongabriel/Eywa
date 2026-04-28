@@ -42,16 +42,12 @@ function validateField(field, value, allValues, mode) {
   switch (field) {
     case 'username':
       if (!value) return 'Nome de usuário é obrigatório.'
-      if (value.length < 3) return 'Mínimo 3 caracteres.'
-      if (value.length > 20) return 'Máximo 20 caracteres.'
-      if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Apenas letras, números e underscores.'
+      if (value.length < 1) return 'Mínimo 1 caractere.'
+      if (value.length > 50) return 'Máximo 50 caracteres.'
       return null
     case 'email':
       if (mode === 'signin') {
-        if (!value) return 'Email ou nome de usuário é obrigatório.'
-        // If it looks like a username (not an email), require at least 3 chars
-        if (!value.includes('@') && value.length < 3)
-          return 'Mínimo 3 caracteres.'
+        if (!value) return 'Email é obrigatório.'
         return null
       }
       if (!value) return 'Email é obrigatório.'
@@ -73,7 +69,7 @@ function validateField(field, value, allValues, mode) {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AuthPage() {
   const navigate = useNavigate()
-  const { session, loading: authLoading } = useAuth()
+  const { session, loading: authLoading, updateProfile } = useAuth()
 
   // mode: 'signin' | 'signup' | 'forgot' | 'forgot-sent' | 'choose-username'
   const [mode, setMode]               = useState('signin')
@@ -88,6 +84,7 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm,  setShowConfirm]  = useState(false)
   const [exiting, setExiting]           = useState(false)
+  const [profileChecking, setProfileChecking] = useState(false)
   const innerRef          = useRef(null)
   const profileCheckedRef = useRef(false)
   const exitPathRef       = useRef('/')
@@ -109,6 +106,7 @@ export default function AuthPage() {
     if (authLoading || !session) return
     if (profileCheckedRef.current) return
     profileCheckedRef.current = true
+    setProfileChecking(true)
 
     supabase
       .from('profiles')
@@ -120,12 +118,13 @@ export default function AuthPage() {
           navigateTo('/')
         } else {
           // New Google user or user without a profile — ask for username
+          setProfileChecking(false)
           resetRouteProgress()
           setMode('choose-username')
           setAnimKey(k => k + 1)
         }
       })
-      .catch(() => navigateTo('/'))
+      .catch(() => { setProfileChecking(false); navigateTo('/') })
   }, [session, authLoading, navigate])
 
   // Shake cleanup via animationend (avoids re-triggering cardIn)
@@ -167,6 +166,7 @@ export default function AuthPage() {
   function switchMode(next) {
     setMode(next); setAnimKey(k => k + 1); setServerError(null); setInfo(null)
     setErrors({}); setTouched({}); setShake(false); setShowPassword(false); setShowConfirm(false)
+    setFields({ username: '', email: '', password: '', confirmPassword: '' })
   }
 
   // ── Google OAuth ───────────────────────────────────────────────────────────
@@ -250,34 +250,9 @@ export default function AuthPage() {
         return
       }
 
-      // signin — accept email or username
-      const loginVal = fields.email.trim()
-      let emailToUse = loginVal
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginVal)) {
-        // Exact case-sensitive match: if the user types "gabriel" but registered
-        // as "Gabriel", this query returns no row and we reject the login.
-        const { data: exactUser } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('username', loginVal)
-          .maybeSingle()
-        if (!exactUser) {
-          resetRouteProgress()
-          setServerError('Usuário não encontrado.')
-          return
-        }
-
-        const { data: resolved, error: rpcErr } = await supabase
-          .rpc('get_email_by_username', { p_username: loginVal })
-        if (rpcErr || !resolved) {
-          resetRouteProgress()
-          setServerError('Usuário não encontrado.')
-          return
-        }
-        emailToUse = resolved
-      }
+      // signin — only email
       const { error } = await supabase.auth.signInWithPassword({
-        email: emailToUse,
+        email: fields.email.trim(),
         password: fields.password,
       })
       if (error) throw error
@@ -291,11 +266,12 @@ export default function AuthPage() {
     }
   }
 
-  // ── Save username (Google users / accounts without profile) ───────────────
+  // ── Save username (Google users / accounts without profile) ────────────────
   async function handleSaveUsername(e) {
     e.preventDefault()
     setServerError(null)
     const usernameVal = fields.username.trim()
+
     setTouched(prev => ({ ...prev, username: true }))
     const err = validateField('username', usernameVal, fields, 'signup')
     if (err) {
@@ -309,16 +285,10 @@ export default function AuthPage() {
 
     setLoading(true)
     try {
-      const { data: taken } = await supabase.from('profiles').select('id')
-        .eq('username', usernameVal).maybeSingle()
-      if (taken) {
-        resetRouteProgress()
-        setErrors(prev => ({ ...prev, username: 'Nome de usuário já em uso.' }))
-        setShake(true); return
-      }
       const { error } = await supabase.from('profiles')
         .upsert({ id: session.user.id, username: usernameVal })
       if (error) throw error
+      updateProfile({ username: usernameVal })
       navigateTo('/')
     } catch (err) {
       resetRouteProgress()
@@ -331,7 +301,7 @@ export default function AuthPage() {
   const strength = getPasswordStrength(fields.password)
 
   // ── Confirmation screens ──────────────────────────────────────────────────────────────
-  if (authLoading) {
+  if (authLoading || profileChecking) {
     return (
       <div className="auth-root">
         <div className="auth-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
@@ -376,10 +346,14 @@ export default function AuthPage() {
           <div ref={innerRef} className={`auth-inner${shake ? ' shake' : ''}`}>
             <div className="auth-logo">
               <span className="auth-logo-text">Eywa</span>
-              <p className="auth-tagline">Quase lá. Escolha como quer ser conhecido.</p>
+              <p className="auth-tagline">Quase lá. Escolha como quer ser chamado.</p>
             </div>
             <form key={animKey} className="auth-form" onSubmit={handleSaveUsername} noValidate>
-              <FieldWrap label="Nome de usuário" error={errors.username} touched={touched.username} value={fields.username}>
+              <FieldWrap
+                label="Nome de usuário"
+                error={errors.username} touched={touched.username} value={fields.username}
+                hint={null}
+              >
                 <input
                   className={`auth-input ${touched.username ? (errors.username ? 'invalid' : 'valid') : ''}`}
                   type="text"
@@ -387,8 +361,8 @@ export default function AuthPage() {
                   value={fields.username}
                   onChange={e => handleChange('username', e.target.value)}
                   onBlur={() => handleBlur('username')}
-                  autoComplete="username"
-                  maxLength={20}
+                  autoComplete="nickname"
+                  maxLength={50}
                   autoFocus
                 />
               </FieldWrap>
@@ -437,13 +411,13 @@ export default function AuthPage() {
           <form key={animKey} className="auth-form" onSubmit={handleSubmit} noValidate>
 
             <FieldWrap
-              label={mode === 'signin' ? 'Email ou nome de usuário' : 'Email'}
+              label="Email"
               error={errors.email} touched={touched.email} value={fields.email}
             >
               <input
                 className={`auth-input ${touched.email ? (errors.email ? 'invalid' : 'valid') : ''}`}
-                type={mode === 'signin' ? 'text' : 'email'}
-                placeholder={mode === 'signin' ? 'seu@email.com ou nome de usuário' : 'seu@email.com'}
+                type="email"
+                placeholder="seu@email.com"
                 value={fields.email}
                 onChange={e => handleChange('email', e.target.value)}
                 onBlur={() => handleBlur('email')}
