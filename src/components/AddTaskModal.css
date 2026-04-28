@@ -159,9 +159,6 @@
   align-items: end;
 }
 .modal-row--single { grid-template-columns: 1fr; }
-.modal-row--dts {
-  grid-template-columns: 1fr auto auto;
-}
 
 .modal-field {
   display: flex;
@@ -173,7 +170,6 @@
   overflow: visible;
 }
 .modal-field--time { flex-shrink: 0; }
-.modal-field--dur  { flex-shrink: 0; }
 
 .modal-label {
   font-size: 0.8125rem;
@@ -447,6 +443,12 @@
 /* ═══════════════════════════════════════════════════════════════
    ReminderSelect
    ═══════════════════════════════════════════════════════════════ */
+.modal-row--dur-rem {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+  align-items: end;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    ReminderChips — inline pill selector

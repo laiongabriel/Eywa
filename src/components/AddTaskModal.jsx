@@ -524,8 +524,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
           <div className={`intention-fields-wrap${showWhen ? ' open' : ''}`}>
             <div className="intention-fields-inner">
             <div className="intention-fields">
-              {/* Date + Time + Duration on one line */}
-              <div className="modal-row modal-row--dts">
+              {/* Date + Time */}
+              <div className="modal-row">
                 <div className="modal-field modal-field--date">
                   <label className="modal-label">Data</label>
                   <CustomDatePicker
@@ -542,7 +542,11 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     onChangeM={(v) => set('scheduledM', v)}
                   />
                 </div>
-                <div className="modal-field modal-field--dur">
+              </div>
+
+              {/* Duration + Reminder */}
+              <div className="modal-row modal-row--dur-rem">
+                <div className="modal-field">
                   <label className="modal-label">Duração</label>
                   <div className="duration-row">
                     <input
@@ -563,10 +567,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     <span className="duration-sep">min</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Reminder */}
-              <div className="modal-row modal-row--single">
                 <div className="modal-field">
                   <label className="modal-label">Lembrete</label>
                   <ReminderSelect
