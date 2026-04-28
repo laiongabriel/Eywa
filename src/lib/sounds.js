@@ -21,10 +21,10 @@ function note(audioCtx, freq, startTime, duration, volume = 0.14, type = 'sine')
   osc.type = type
   osc.frequency.value = freq
   gain.gain.setValueAtTime(0, startTime)
-  gain.gain.linearRampToValueAtTime(volume, startTime + 0.04)
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration)
+  gain.gain.setTargetAtTime(volume, startTime, 0.02)
+  gain.gain.setTargetAtTime(0, startTime + duration * 0.7, duration * 0.15)
   osc.start(startTime)
-  osc.stop(startTime + duration + 0.06)
+  osc.stop(startTime + duration + 0.01)
 }
 
 /** Opening a modal — G2 bass ground + ascending sweep C3→E3 */
@@ -45,10 +45,10 @@ export function playModalOpen() {
     osc.frequency.setValueAtTime(130, now + 0.04)
     osc.frequency.exponentialRampToValueAtTime(196, now + 0.20)
     gain.gain.setValueAtTime(0, now + 0.04)
-    gain.gain.linearRampToValueAtTime(0.088, now + 0.08)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34)
+    gain.gain.setTargetAtTime(0.088, now + 0.04, 0.02)
+    gain.gain.setTargetAtTime(0, now + 0.25, 0.045)
     osc.start(now + 0.04)
-    osc.stop(now + 0.36)
+    osc.stop(now + 0.35)
   } catch { /* silent fail */ }
 }
 
@@ -67,10 +67,10 @@ export function playModalClose() {
     osc.frequency.setValueAtTime(196, now)
     osc.frequency.exponentialRampToValueAtTime(130, now + 0.16)
     gain.gain.setValueAtTime(0, now)
-    gain.gain.linearRampToValueAtTime(0.09, now + 0.035)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26)
+    gain.gain.setTargetAtTime(0.09, now, 0.02)
+    gain.gain.setTargetAtTime(0, now + 0.182, 0.039)
     osc.start(now)
-    osc.stop(now + 0.28)
+    osc.stop(now + 0.27)
   } catch { /* silent fail */ }
 }
 
@@ -101,10 +101,10 @@ export function playTaskComplete() {
       osc.type = 'sine'
       osc.frequency.value = freq
       gain.gain.setValueAtTime(0, now + delay)
-      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.04)
-      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur)
+      gain.gain.setTargetAtTime(vol, now + delay, 0.02)
+      gain.gain.setTargetAtTime(0, now + delay + dur * 0.7, dur * 0.15)
       osc.start(now + delay)
-      osc.stop(now + delay + dur + 0.05)
+      osc.stop(now + delay + dur + 0.01)
     }
     tone(98.00,  0,    0.80, 0.050)  // G2 — deep bass anchor
     tone(196.00, 0,    0.80, 0.078)  // G3 — main
@@ -128,14 +128,14 @@ export function playPriorityMark() {
       osc.type = 'sine'
       osc.frequency.value = freq
       gain.gain.setValueAtTime(0, startTime)
-      gain.gain.linearRampToValueAtTime(volume, startTime + 0.008)
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration)
+      gain.gain.setTargetAtTime(volume, startTime, 0.02)
+      gain.gain.setTargetAtTime(0, startTime + duration * 0.7, duration * 0.15)
       osc.start(startTime)
-      osc.stop(startTime + duration + 0.05)
+      osc.stop(startTime + duration + 0.01)
     }
     bell(98.00,  now,        1.10, 0.078)  // G2 — simultaneous
     bell(146.83, now,        1.30, 0.062)  // D3 — simultaneous (perfect fifth)
-    bell(196.00, now + 0.22, 0.85, 0.036)  // G3 — gentle resolve
+    bell(196.00, now + 0.22, 0.85, 0.018)  // G3 — subtle resolve
   } catch { /* silent fail */ }
 }
 
@@ -154,10 +154,10 @@ export function playTaskDelete() {
     osc.frequency.setValueAtTime(220, now)
     osc.frequency.exponentialRampToValueAtTime(140, now + 0.18)
     gain.gain.setValueAtTime(0, now)
-    gain.gain.linearRampToValueAtTime(0.085, now + 0.025)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28)
+    gain.gain.setTargetAtTime(0.085, now, 0.02)
+    gain.gain.setTargetAtTime(0, now + 0.196, 0.042)
     osc.start(now)
-    osc.stop(now + 0.30)
+    osc.stop(now + 0.29)
   } catch { /* silent fail */ }
 }
 
@@ -208,10 +208,10 @@ export function playSessionEnd() {
       osc.type = 'sine'
       osc.frequency.value = freq
       gain.gain.setValueAtTime(0, now + delay)
-      gain.gain.linearRampToValueAtTime(vol, now + delay + 0.055)
-      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + dur)
+      gain.gain.setTargetAtTime(vol, now + delay, 0.02)
+      gain.gain.setTargetAtTime(0, now + delay + dur * 0.7, dur * 0.15)
       osc.start(now + delay)
-      osc.stop(now + delay + dur + 0.05)
+      osc.stop(now + delay + dur + 0.01)
     }
     tone(65.41,  0,    2.2, 0.065)  // C2 deep bass
     tone(98.00,  0.06, 2.0, 0.058)  // G2 fifth
