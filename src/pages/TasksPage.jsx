@@ -14,8 +14,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import { fetchTasks, createTask, updateTask } from '../lib/tasks'
-import { playModalOpen, playTaskCreated } from '../lib/sounds'
+import { playModalOpen } from '../lib/sounds'
 import {
   rescheduleAll,
   scheduleTaskNotification,
@@ -65,6 +66,7 @@ function SortableTaskItem({ task, isFadingOut, index, ...props }) {
 export default function TasksPage() {
   const { session } = useAuth()
   const userId = session.user.id
+  const { addToast } = useToast()
 
   const [tasks, setTasks]         = useState([])
   const [order, setOrder]         = useState([])   // IDs of active (non-completed) tasks
@@ -101,21 +103,41 @@ export default function TasksPage() {
   }
 
   async function handleCreate(payload) {
-    const task = await createTask(userId, payload)
-    setTasks(prev => [...prev, task])
-    if (task.scheduled_at) {
-      // Timed task: prepend (before untimed tasks)
-      setOrder(prev => [task.id, ...prev])
+    const tempId = 'pending-' + Date.now()
+    const tempTask = {
+      id: tempId,
+      user_id: userId,
+      title: payload.title,
+      scheduled_at: payload.scheduled_at ?? null,
+      estimated_minutes: payload.estimated_minutes ?? null,
+      reminder_offset_minutes: payload.reminder_offset_minutes ?? null,
+      completed: false,
+      is_mit: false,
+      created_at: new Date().toISOString(),
+      _pending: true,
+    }
+    setTasks(prev => [...prev, tempTask])
+    if (tempTask.scheduled_at) {
+      setOrder(prev => [tempId, ...prev])
     } else {
-      // Untimed task: append
-      setOrder(prev => [...prev, task.id])
+      setOrder(prev => [...prev, tempId])
     }
-    if (task.reminder_offset_minutes != null) {
-      requestNotificationPermission().then(perm => {
-        if (perm === 'granted') scheduleTaskNotification(task)
+    // DB call in background — don't await
+    createTask(userId, payload)
+      .then(realTask => {
+        setTasks(prev => prev.map(t => t.id === tempId ? realTask : t))
+        setOrder(prev => prev.map(id => id === tempId ? realTask.id : id))
+        if (realTask.reminder_offset_minutes != null) {
+          requestNotificationPermission().then(perm => {
+            if (perm === 'granted') scheduleTaskNotification(realTask)
+          })
+        }
       })
-    }
-    playTaskCreated()
+      .catch(() => {
+        setTasks(prev => prev.filter(t => t.id !== tempId))
+        setOrder(prev => prev.filter(id => id !== tempId))
+        addToast('Erro ao criar tarefa')
+      })
   }
 
   async function handleEditOpen(task) {
@@ -125,15 +147,25 @@ export default function TasksPage() {
   }
 
   async function handleEditSave(payload) {
-    const updated = await updateTask(editingTask.id, payload)
-    setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
-    setEditingTask(null)
-    cancelTaskNotification(updated.id)
-    if (updated.reminder_offset_minutes != null) {
+    const taskToEdit = editingTask
+    const snapshot = { ...taskToEdit }
+    const optimistic = { ...taskToEdit, ...payload }
+    setTasks(prev => prev.map(t => t.id === taskToEdit.id ? optimistic : t))
+    cancelTaskNotification(taskToEdit.id)
+    if (optimistic.reminder_offset_minutes != null) {
       requestNotificationPermission().then(perm => {
-        if (perm === 'granted') scheduleTaskNotification(updated)
+        if (perm === 'granted') scheduleTaskNotification(optimistic)
       })
     }
+    // DB call in background — don't await
+    updateTask(taskToEdit.id, payload)
+      .then(updated => {
+        setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
+      })
+      .catch(() => {
+        setTasks(prev => prev.map(t => t.id === snapshot.id ? snapshot : t))
+        addToast('Erro ao salvar tarefa')
+      })
   }
 
   function handleUpdate(updated) {
@@ -150,6 +182,16 @@ export default function TasksPage() {
 
   function handleDeleteStart(id) {
     setDeletingIds(prev => new Set([...prev, id]))
+  }
+
+  function handleDeleteCancel(id) {
+    setDeletingIds(prev => { const s = new Set(prev); s.delete(id); return s })
+  }
+
+  function handleRestoreTask(task) {
+    setTasks(prev => prev.find(t => t.id === task.id) ? prev : [...prev, task])
+    setOrder(prev => prev.includes(task.id) ? prev : [task.id, ...prev])
+    setDeletingIds(prev => { const s = new Set(prev); s.delete(task.id); return s })
   }
 
   function handleDelete(id) {
@@ -212,6 +254,9 @@ export default function TasksPage() {
                   userId={userId}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
+                  onDeleteStart={handleDeleteStart}
+                  onRestoreTask={handleRestoreTask}
+                  onDeleteCancel={handleDeleteCancel}
                   onEdit={() => handleEditOpen(task)}
                   onStartFocus={setFocusTask}
                 />
@@ -254,6 +299,8 @@ export default function TasksPage() {
                       onUpdate={handleUpdate}
                       onDelete={handleDelete}
                       onDeleteStart={handleDeleteStart}
+                      onRestoreTask={handleRestoreTask}
+                      onDeleteCancel={handleDeleteCancel}
                       onEdit={() => handleEditOpen(task)}
                       onStartFocus={setFocusTask}
                     />
@@ -286,6 +333,8 @@ export default function TasksPage() {
                       onUpdate={handleUpdate}
                       onDelete={handleDelete}
                       onDeleteStart={handleDeleteStart}
+                      onRestoreTask={handleRestoreTask}
+                      onDeleteCancel={handleDeleteCancel}
                       onEdit={() => handleEditOpen(task)}
                     />
                     </div>

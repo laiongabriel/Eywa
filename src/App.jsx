@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ToastProvider, useToast } from './contexts/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppShell from './components/AppShell'
 import AuthPage from './pages/AuthPage'
@@ -45,10 +46,28 @@ function RouteProgressBar() {
   )
 }
 
+function ToastContainer() {
+  const { toasts, dismiss } = useToast()
+  if (!toasts.length) return null
+  return (
+    <div className="toast-container" aria-live="polite">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast toast--${t.type}`} role="alert">
+          <span className="toast-msg">{t.message}</span>
+          <button className="toast-close" onClick={() => dismiss(t.id)} aria-label="Fechar">
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function AppContent() {
   return (
     <>
       <RouteProgressBar />
+      <ToastContainer />
       <AuthProvider>
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
@@ -65,9 +84,11 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </ToastProvider>
     </ThemeProvider>
   )
 }

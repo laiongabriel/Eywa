@@ -14,13 +14,28 @@ const UNIT_OPTIONS = [
   { value: 'days',    label: 'dias'    },
 ]
 
+/* ─── Reminder presets ───────────────────────────────────────── */
+const REMINDER_PRESETS = [
+  { id: '',    label: 'Sem lembrete',  mins: null },
+  { id: 'now', label: 'Na hora',       mins: 0    },
+  { id: '5m',  label: '5 min antes',   mins: 5    },
+  { id: '10m', label: '10 min antes',  mins: 10   },
+  { id: '15m', label: '15 min antes',  mins: 15   },
+  { id: '30m', label: '30 min antes',  mins: 30   },
+  { id: '1h',  label: '1 hora antes',  mins: 60   },
+  { id: '2h',  label: '2 horas antes', mins: 120  },
+  { id: '1d',  label: '1 dia antes',   mins: 1440 },
+]
+
 /* ─── Parse reminder_offset_minutes → form state ─────────────── */
 function parseReminderMinutes(mins) {
-  if (mins == null) return { now: false, value: '',             unit: 'minutes' }
-  if (mins === 0)   return { now: true,  value: '',             unit: 'minutes' }
-  if (mins % 1440 === 0) return { now: false, value: String(mins / 1440), unit: 'days'    }
-  if (mins % 60   === 0) return { now: false, value: String(mins / 60),   unit: 'hours'   }
-  return                        { now: false, value: String(mins),         unit: 'minutes' }
+  if (mins == null) return { preset: '',     customValue: '30', customUnit: 'minutes' }
+  if (mins === 0)   return { preset: 'now',  customValue: '30', customUnit: 'minutes' }
+  const found = REMINDER_PRESETS.find(p => p.id !== '' && p.id !== 'now' && p.mins === mins)
+  if (found) return { preset: found.id, customValue: '30', customUnit: 'minutes' }
+  if (mins % 1440 === 0) return { preset: 'custom', customValue: String(mins / 1440), customUnit: 'days'    }
+  if (mins % 60   === 0) return { preset: 'custom', customValue: String(mins / 60),   customUnit: 'hours'   }
+  return                        { preset: 'custom', customValue: String(mins),         customUnit: 'minutes' }
 }
 
 /* ─── SmallChevron ───────────────────────────────────────────── */
@@ -295,55 +310,87 @@ function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
   )
 }
 
-/* ─── BellIcon ───────────────────────────────────────────────── */
-function BellIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="reminder-bell-icon">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
+/* ─── ReminderSelect ─────────────────────────────────────────── */
+function ReminderSelect({ disabled, preset, customValue, customUnit, onPresetChange, onCustomValueChange, onCustomUnitChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
 
-/* ─── ReminderInlineField ────────────────────────────────────── */
-function ReminderInlineField({ hasTime, now, value, unit, onNowChange, onValueChange, onUnitChange }) {
-  const disabled = !hasTime
+  useEffect(() => {
+    if (!open) return
+    function onDown(e) {
+      if (!ref.current?.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const triggerLabel = preset === 'custom'
+    ? (() => {
+        const v = parseInt(customValue) || 0
+        if (!v) return 'Personalizado'
+        if (customUnit === 'days')  return `${v}d antes`
+        if (customUnit === 'hours') return `${v}h antes`
+        return `${v}min antes`
+      })()
+    : (REMINDER_PRESETS.find(p => p.id === preset)?.label ?? 'Sem lembrete')
+
   return (
     <div
-      className="modal-field"
+      className="rsel-root"
+      ref={ref}
       {...(disabled ? { 'data-tooltip': 'Defina um horário para ativar o lembrete' } : {})}
     >
-      <div className="reminder-label-row">
-        <label className="modal-label">Lembrete</label>
-        {!disabled && (
-          <button
-            type="button"
-            className={`reminder-na-hora-btn${now ? ' active' : ''}`}
-            onClick={() => onNowChange(!now)}
+      <button
+        type="button"
+        className={`rsel-trigger${disabled ? ' disabled' : ''}${open ? ' open' : ''}`}
+        onClick={() => !disabled && setOpen(v => !v)}
+        tabIndex={disabled ? -1 : 0}
+      >
+        <span className="rsel-label">{triggerLabel}</span>
+        <SmallChevron />
+      </button>
+      {open && (
+        <div className="rsel-menu">
+          {REMINDER_PRESETS.map(p => (
+            <div
+              key={p.id}
+              className={`rsel-opt${preset === p.id ? ' sel' : ''}`}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                onPresetChange(p.id)
+                setOpen(false)
+              }}
+            >
+              {p.label}
+            </div>
+          ))}
+          <div className="rsel-divider" />
+          <div
+            className={`rsel-opt${preset === 'custom' ? ' sel' : ''}`}
+            onMouseDown={(e) => {
+              e.preventDefault()
+              onPresetChange('custom')
+            }}
           >
-            Na hora
-          </button>
-        )}
-      </div>
-      <div className={`reminder-control${disabled ? ' disabled' : ''}`}>
-        <BellIcon />
-        {now ? (
-          <span className="reminder-now-text">Na hora</span>
-        ) : (
-          <>
-            <input
-              type="text"
-              inputMode="numeric"
-              className="modal-input duration-input"
-              placeholder="–"
-              value={value}
-              onChange={(e) => onValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            />
-            <UnitDropdown value={unit} onChange={onUnitChange} />
-            <span className="duration-sep">antes</span>
-          </>
-        )}
-      </div>
+            Personalizado...
+          </div>
+          {preset === 'custom' && (
+            <div className="rsel-custom" onMouseDown={(e) => e.stopPropagation()}>
+              <input
+                type="text"
+                inputMode="numeric"
+                className="rsel-custom-input"
+                placeholder="30"
+                value={customValue}
+                onChange={(e) => onCustomValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                autoFocus
+              />
+              <UnitDropdown value={customUnit} onChange={onCustomUnitChange} />
+              <span className="rsel-custom-sep">antes</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -381,9 +428,9 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       scheduledM,
       durationH:       mins ? String(Math.floor(mins / 60) || '') : '',
       durationM:       mins ? String(mins % 60 || '')             : '',
-      reminderNow:     r.now,
-      reminderValue:   r.value,
-      reminderUnit:    r.unit,
+      reminderPreset:      r.preset,
+      reminderCustomValue: r.customValue,
+      reminderCustomUnit:  r.customUnit,
     }
   }
 
@@ -430,13 +477,17 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
 
     let reminder_offset_minutes = null
     if (hasScheduledTime) {
-      if (form.reminderNow) {
+      if (form.reminderPreset === 'now') {
         reminder_offset_minutes = 0
-      } else if (form.reminderValue && parseInt(form.reminderValue) > 0) {
-        const v = parseInt(form.reminderValue)
-        reminder_offset_minutes =
-          form.reminderUnit === 'hours' ? v * 60  :
-          form.reminderUnit === 'days'  ? v * 1440 : v
+      } else if (form.reminderPreset === 'custom') {
+        const v = parseInt(form.reminderCustomValue)
+        if (v > 0) {
+          reminder_offset_minutes =
+            form.reminderCustomUnit === 'hours' ? v * 60   :
+            form.reminderCustomUnit === 'days'  ? v * 1440 : v
+        }
+      } else if (form.reminderPreset !== '') {
+        reminder_offset_minutes = REMINDER_PRESETS.find(p => p.id === form.reminderPreset)?.mins ?? null
       }
     }
 
@@ -538,15 +589,18 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     <span className="duration-sep">min</span>
                   </div>
                 </div>
-                <ReminderInlineField
-                  hasTime={hasScheduledTime}
-                  now={form.reminderNow}
-                  value={form.reminderValue}
-                  unit={form.reminderUnit}
-                  onNowChange={(v)   => set('reminderNow', v)}
-                  onValueChange={(v) => set('reminderValue', v)}
-                  onUnitChange={(v)  => set('reminderUnit', v)}
-                />
+                <div className="modal-field">
+                  <label className="modal-label">Lembrete</label>
+                  <ReminderSelect
+                    disabled={!hasScheduledTime}
+                    preset={form.reminderPreset}
+                    customValue={form.reminderCustomValue}
+                    customUnit={form.reminderCustomUnit}
+                    onPresetChange={(v)      => set('reminderPreset', v)}
+                    onCustomValueChange={(v) => set('reminderCustomValue', v)}
+                    onCustomUnitChange={(v)  => set('reminderCustomUnit', v)}
+                  />
+                </div>
               </div>
             </div>
           )}

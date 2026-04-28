@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react'
 import { updateTask, deleteTask } from '../lib/tasks'
 import { playPriorityMark, playTaskComplete, playTaskDelete } from '../lib/sounds'
+import { useToast } from '../contexts/ToastContext'
 import './TaskItem.css'
 
-export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
+export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTask, onDeleteCancel, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
+  const { addToast } = useToast()
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [pop, setPop] = useState(false)
   const [localCompleted, setLocalCompleted] = useState(task.completed)
-  const [toggleError, setToggleError] = useState(null)
+  const [localMIT, setLocalMIT] = useState(task.is_mit)
 
   // Keep in sync with parent (e.g. external undo or refresh)
   useEffect(() => { setLocalCompleted(task.completed) }, [task.completed])
+  useEffect(() => { setLocalMIT(task.is_mit) }, [task.is_mit])
 
   async function handleToggle() {
     const nowCompleted = !localCompleted
@@ -27,36 +30,64 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
       onUpdate(updated)
     } catch {
       setLocalCompleted(!nowCompleted)  // revert
-      setToggleError('Erro ao atualizar')
-      setTimeout(() => setToggleError(null), 3000)
+      addToast('Erro ao atualizar tarefa')
     }
   }
 
   async function handleDelete() {
-    onDeleteStart?.(task.id)
     setDeleting(true)
     playTaskDelete()
+    onDeleteStart?.(task.id)
+    let removed = false
+    const timer = setTimeout(() => {
+      removed = true
+      onDelete(task.id)
+    }, 380)
     try {
       await deleteTask(task.id)
-      setTimeout(() => onDelete(task.id), 380)
     } catch {
-      setDeleting(false)
+      clearTimeout(timer)
+      if (removed) {
+        onRestoreTask?.(task)
+      } else {
+        setDeleting(false)
+        onDeleteCancel?.(task.id)
+      }
+      addToast('Erro ao deletar tarefa')
     }
   }
 
   async function handleSetMIT() {
-    const willBePriority = !task.is_mit
-    const updated = await updateTask(task.id, { is_mit: willBePriority })
+    const original = { ...task }
+    const willBePriority = !localMIT
+    setLocalMIT(willBePriority)
+    onUpdate({ ...task, is_mit: willBePriority })
     if (willBePriority) playPriorityMark()
-    onUpdate(updated)
+    try {
+      const updated = await updateTask(task.id, { is_mit: willBePriority })
+      onUpdate(updated)
+    } catch {
+      setLocalMIT(original.is_mit)
+      onUpdate(original)
+      addToast('Erro ao atualizar tarefa')
+    }
   }
 
   async function handleEditSubmit(e) {
     e.preventDefault()
     if (!editTitle.trim()) return
-    const updated = await updateTask(task.id, { title: editTitle.trim() })
-    onUpdate(updated)
+    const original = { ...task }
+    const newTitle = editTitle.trim()
+    onUpdate({ ...task, title: newTitle })
     setEditing(false)
+    try {
+      const updated = await updateTask(task.id, { title: newTitle })
+      onUpdate(updated)
+    } catch {
+      onUpdate(original)
+      setEditTitle(original.title)
+      addToast('Erro ao atualizar tarefa')
+    }
   }
 
   function handleEditKeyDown(e) {
@@ -67,7 +98,7 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
   }
 
   return (
-    <div className={`task-item ${task.completed ? 'completed' : ''} ${task.is_mit ? 'is-mit' : ''} ${deleting ? 'deleting' : ''}`}>
+    <div className={`task-item ${localCompleted ? 'completed' : ''} ${localMIT ? 'is-mit' : ''} ${deleting ? 'deleting' : ''} ${task._pending ? 'pending' : ''}`}>
       {dragHandle && (
         <span className="task-drag-handle" {...dragHandle}>⠿</span>
       )}
@@ -97,24 +128,26 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
           </span>
         )}
 
-        {(task.scheduled_at || task.estimated_minutes) && (
+        {(task.scheduled_at || task.estimated_minutes || task.reminder_offset_minutes != null) && (
           <div className="task-meta">
             <span className="task-scheduled">
               {task.scheduled_at && formatScheduled(task.scheduled_at)}
               {task.scheduled_at && task.estimated_minutes ? ' · ' : ''}
               {task.estimated_minutes ? formatDuration(task.estimated_minutes) : ''}
-              {task.reminder_offset_minutes != null && ' · '}
-              {task.reminder_offset_minutes != null && formatReminder(task.reminder_offset_minutes)}
+              {task.reminder_offset_minutes != null && (
+                <>
+                  {(task.scheduled_at || task.estimated_minutes) ? ' · ' : ''}
+                  <BellMiniIcon />
+                  {' '}{formatReminderText(task.reminder_offset_minutes)}
+                </>
+              )}
             </span>
           </div>
-        )}
-        {toggleError && (
-          <span className="task-toggle-error">{toggleError}</span>
         )}
       </div>
 
       <div className="task-actions">
-        {!task.completed && onStartFocus && (
+        {!localCompleted && onStartFocus && (
           <button
             className="task-action-btn start-btn"
             onClick={() => onStartFocus(task)}
@@ -124,11 +157,11 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
             Focar
           </button>
         )}
-        {!task.completed && (
+        {!localCompleted && (
           <button
-            className={`task-action-btn mit-btn ${task.is_mit ? 'active' : ''}`}
+            className={`task-action-btn mit-btn ${localMIT ? 'active' : ''}`}
             onClick={handleSetMIT}
-            data-tooltip={task.is_mit ? 'Remover prioridade' : 'Marcar como prioritária'}
+            data-tooltip={localMIT ? 'Remover prioridade' : 'Marcar como prioritária'}
           >
             ★
           </button>
@@ -167,11 +200,11 @@ function formatScheduled(ts) {
   return hasTime ? `${day} · ${time}` : day
 }
 
-function formatReminder(mins) {
-  if (mins === 0) return '🔔 Na hora'
-  if (mins % 1440 === 0) return `🔔 ${mins / 1440}d antes`
-  if (mins % 60   === 0) return `🔔 ${mins / 60}h antes`
-  return `🔔 ${mins}min antes`
+function formatReminderText(mins) {
+  if (mins === 0) return 'Na hora'
+  if (mins % 1440 === 0) return `${mins / 1440}d antes`
+  if (mins % 60   === 0) return `${mins / 60}h antes`
+  return `${mins}min antes`
 }
 
 function formatDuration(mins) {
@@ -211,6 +244,18 @@ function TrashIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <path d="M1.5 3.5h11M5 3.5V2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v1M2.5 3.5l.8 8a.5.5 0 0 0 .5.5h5.4a.5.5 0 0 0 .5-.5l.8-8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+function BellMiniIcon() {
+  return (
+    <svg
+      width="10" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+      style={{ display: 'inline-block', verticalAlign: '-1px', opacity: 0.7 }}
+    >
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }
