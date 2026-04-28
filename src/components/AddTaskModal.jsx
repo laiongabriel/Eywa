@@ -39,6 +39,9 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       scheduledM,
       durationH: mins ? String(Math.floor(mins / 60) || '') : '',
       durationM: mins ? String(mins % 60 || '')           : '',
+      reminderOffset: initialData?.reminder_offset_minutes != null
+        ? String(initialData.reminder_offset_minutes)
+        : '',
     }
   }
 
@@ -83,6 +86,9 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       title: form.title.trim(),
       scheduled_at,
       estimated_minutes: totalMins > 0 ? totalMins : null,
+      reminder_offset_minutes: (form.reminderOffset !== '' && scheduled_at)
+        ? Number(form.reminderOffset)
+        : null,
     }
 
     try {
@@ -195,6 +201,25 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     />
                     <span className="duration-sep">min</span>
                   </div>
+                </div>
+              </div>
+
+              <div className="modal-row modal-row--reminder">
+                <div className="modal-field">
+                  <label className="modal-label">Lembrete</label>
+                  <select
+                    className="modal-select"
+                    value={form.reminderOffset}
+                    onChange={(e) => set('reminderOffset', e.target.value)}
+                  >
+                    <option value="">Sem lembrete</option>
+                    <option value="0">Na hora</option>
+                    <option value="5">5 minutos antes</option>
+                    <option value="15">15 minutos antes</option>
+                    <option value="30">30 minutos antes</option>
+                    <option value="60">1 hora antes</option>
+                    <option value="1440">1 dia antes</option>
+                  </select>
                 </div>
               </div>
             </div>

@@ -17,6 +17,9 @@
   --task-title-size:      0.95rem;
   --task-title-focus-size: clamp(1.35rem, 3.6vw, 2rem);
 
+  --skeleton-base:  #1d2535;
+  --skeleton-shine: #263049;
+
   --font-body:    'Lexend', system-ui, -apple-system, sans-serif;
   --font-display: 'Cabinet Grotesk', 'Lexend', system-ui, sans-serif;
 
@@ -50,6 +53,9 @@
   --color-text-secondary: #4c4c44;
   --color-text-muted:     #72716a;
   color-scheme: light;
+
+  --skeleton-base:  #e5e2db;
+  --skeleton-shine: #d9d6cf;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
