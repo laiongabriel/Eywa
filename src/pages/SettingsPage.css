@@ -158,112 +158,6 @@
   margin: 0;
 }
 
-/* ── Avatar ───────────────────────────────────────────────────────────────── */
-.sp-avatar-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-  padding-bottom: 1.625rem;
-  margin-bottom: 1.625rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.sp-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.sp-avatar svg, .sp-avatar img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ── Avatar style picker grid ─────────────────────────────────── */
-.sp-avatar-picker-wrap {
-  overflow: hidden;
-  max-width: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: max-width 300ms ease, opacity 250ms ease;
-  align-self: flex-start;
-}
-
-.sp-avatar-picker-wrap.open {
-  max-width: 260px;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.sp-avatar-picker-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  width: 240px;
-  padding: 0.125rem 0.25rem;
-  transform: translateX(-10px);
-  transition: transform 300ms ease;
-}
-
-.sp-avatar-picker-wrap.open .sp-avatar-picker-grid {
-  transform: translateX(0);
-}
-
-.sp-avatar-grid-btn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  overflow: visible;
-  border: 2px solid transparent;
-  padding: 0;
-  cursor: pointer;
-  background: none;
-  transition: border-color 0.15s, transform 0.12s;
-  flex-shrink: 0;
-}
-
-.sp-avatar-grid-btn:hover {
-  border-color: var(--color-border-active);
-  transform: scale(1.07);
-}
-
-.sp-avatar-grid-btn.active {
-  border-color: var(--color-amber);
-  transform: scale(1.07);
-}
-
-.sp-avatar-grid-btn > * {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: block;
-}
-
-.sp-avatar-check {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-amber);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--color-bg);
-  pointer-events: none;
-}
-
 /* ── Inputs ───────────────────────────────────────────────────────────────── */
 .sp-field-row {
   display: flex;
@@ -531,49 +425,6 @@
 .sp-btn-danger:disabled { opacity: 0.35; cursor: default; }
 .sp-hint--danger { color: #ef4444; }
 
-/* ── Avatar container ───────────────────────────────────────── */
-.sp-avatar-center {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 1.25rem;
-}
-
-.sp-avatar-main-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.625rem;
-  flex-shrink: 0;
-}
-
-@media (max-width: 480px) {
-  .sp-avatar-center { flex-direction: column; }
-  .sp-avatar-picker-wrap {
-    max-width: unset;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 300ms ease, opacity 250ms ease;
-  }
-  .sp-avatar-picker-wrap.open { max-width: unset; max-height: 300px; }
-  .sp-avatar-picker-grid { width: 100%; transform: none; }
-  .sp-avatar-picker-wrap.open .sp-avatar-picker-grid { transform: none; }
-}
-
-.sp-avatar-change-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: color 0.15s;
-  letter-spacing: -0.005em;
-}
-.sp-avatar-change-btn:hover { color: var(--color-text-secondary); }
-
 /* ── Field label / value (new read-only display) ──────────────────────────── */
 .sp-field-label {
   font-size: 0.75rem;
@@ -670,16 +521,6 @@
   margin: 0.125rem 0 0;
   line-height: 1.4;
 }
-
-/* ── Section divider (danger zone separator) ─────────────────────────────── */
-.sp-section-divider {
-  height: 1px;
-  background: var(--color-border);
-  margin: 1rem 0 0.5rem;
-  border: none;
-  opacity: 0.6;
-}
-
 
 /* ── Toggle switch ────────────────────────────────────────────────────────── */
 .sp-toggle-row {

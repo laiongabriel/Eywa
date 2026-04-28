@@ -4,71 +4,14 @@ import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { useToast } from '../contexts/ToastContext'
 import { supabase } from '../lib/supabase'
-import { AvatarImg, Spinner } from '../lib/ui'
-import { User, SlidersHorizontal, ChevronLeft, Moon, Sun, Monitor, Check } from 'lucide-react'
+import { Spinner, UserAvatar } from '../lib/ui'
+import { User, SlidersHorizontal, ChevronLeft, Moon, Sun, Monitor } from 'lucide-react'
 import './SettingsPage.css'
-
-// ── DiceBear avatar helpers ────────────────────────────────────────────────
-const DICEBEAR_STYLES = [
-  { id: 'adventurer-neutral', label: 'Aventureiro'  },
-  { id: 'avataaars-neutral',  label: 'Avataaars'    },
-  { id: 'notionists-neutral', label: 'Notionists'   },
-  { id: 'bottts-neutral',     label: 'Bottts'       },
-  { id: 'big-smile',          label: 'Big Smile'    },
-  { id: 'avataaars',          label: 'Avataaars+'   },
-]
-
-function dicebearUrl(name, style) {
-  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(name || '?')}`
-}
-
-// ── Avatar component ───────────────────────────────────────────────────────
-function ProfileAvatar({ username, avatarStyle, pickerOpen, onTogglePicker, onStyleSelect }) {
-  return (
-    <div className="sp-avatar-center">
-      <div className="sp-avatar-main-col">
-        <AvatarImg
-          src={dicebearUrl(username, avatarStyle)}
-          alt={username ?? 'Avatar'}
-          size={80}
-          ready={!!username}
-        />
-        <button className="sp-avatar-change-btn" type="button" onClick={onTogglePicker}>
-          {pickerOpen ? 'Fechar' : 'Trocar avatar'}
-        </button>
-      </div>
-      <div className={`sp-avatar-picker-wrap${pickerOpen ? ' open' : ''}`} aria-hidden={!pickerOpen}>
-        <div className="sp-avatar-picker-grid">
-          {DICEBEAR_STYLES.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              className={`sp-avatar-grid-btn${avatarStyle === id ? ' active' : ''}`}
-              onClick={() => onStyleSelect(id)}
-              title={label}
-              tabIndex={pickerOpen ? 0 : -1}
-            >
-              <AvatarImg src={dicebearUrl(username, id)} alt={label} size={64} ready={!!username && pickerOpen} />
-              {avatarStyle === id && (
-                <span className="sp-avatar-check" aria-hidden="true">
-                  <Check size={10} strokeWidth={3} />
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Section: Perfil ────────────────────────────────────────────────────────
 function SectionPerfil() {
-  const { session, username, avatarStyle, updateProfile } = useAuth()
+  const { session, username, updateProfile } = useAuth()
   const { addToast } = useToast()
-
-  // Avatar
-  const [pickerOpen, setPickerOpen]           = useState(false)
 
   // Username (editable)
   const [newUsername, setNewUsername]         = useState(username ?? '')
@@ -96,13 +39,6 @@ function SectionPerfil() {
   const [deleting, setDeleting]               = useState(false)
 
   useEffect(() => { setNewUsername(username ?? '') }, [username])
-
-  async function handleSelectStyle(styleId) {
-    if (styleId === avatarStyle) { setPickerOpen(false); return }
-    updateProfile({ avatarStyle: styleId })
-    setPickerOpen(false)
-    await supabase.from('profiles').update({ avatar_style: styleId }).eq('id', session.user.id)
-  }
 
   async function handleSaveName(e) {
     e?.preventDefault()
@@ -185,13 +121,7 @@ function SectionPerfil() {
 
       {/* Avatar */}
       <div className="sp-group">
-        <ProfileAvatar
-          username={username}
-          avatarStyle={avatarStyle}
-          pickerOpen={pickerOpen}
-          onTogglePicker={() => setPickerOpen(v => !v)}
-          onStyleSelect={handleSelectStyle}
-        />
+        <UserAvatar username={username} size={80} />
       </div>
 
       {/* Username (editable) */}
@@ -299,7 +229,6 @@ function SectionPerfil() {
       </div>
 
       {/* Danger zone */}
-      <div className="sp-section-divider" />
       <div className="sp-group">
         <div className="sp-danger-row">
           <div>

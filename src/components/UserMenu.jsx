@@ -1,18 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { AvatarImg } from '../lib/ui'
+import { UserAvatar } from '../lib/ui'
 import { Settings, LogOut } from 'lucide-react'
 import './UserMenu.css'
 
-function dicebearUrl(name, style) {
-  const validStyles = ['adventurer-neutral','avataaars-neutral','notionists-neutral','bottts-neutral','big-smile','avataaars']
-  const s = validStyles.includes(style) ? style : 'adventurer-neutral'
-  return `https://api.dicebear.com/9.x/${s}/svg?seed=${encodeURIComponent(name || '?')}`
-}
-
 export default function UserMenu({ onSignOut }) {
-  const { username, session, avatarStyle } = useAuth()
+  const { username, session } = useAuth()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const navigate = useNavigate()
@@ -37,13 +31,7 @@ export default function UserMenu({ onSignOut }) {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <AvatarImg
-          src={dicebearUrl(username, avatarStyle)}
-          alt={username ?? 'Avatar'}
-          size={32}
-          className="user-avatar-img"
-          ready={!!username}
-        />
+        <UserAvatar username={username} size={32} />
       </button>
 
       {open && (

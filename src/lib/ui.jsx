@@ -47,6 +47,34 @@ export function AvatarImg({ src, alt = '', size = 32, style: extraStyle, classNa
   )
 }
 
+export function UserAvatar({ username, size = 32 }) {
+  const letter = username ? username[0].toUpperCase() : '?'
+  const fontSize = Math.round(size * 0.42)
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: '#3b6fd4',
+        color: '#fff',
+        fontSize,
+        fontWeight: 600,
+        fontFamily: 'inherit',
+        flexShrink: 0,
+        userSelect: 'none',
+        lineHeight: 1,
+      }}
+      aria-label={username ?? 'Avatar'}
+    >
+      {letter}
+    </span>
+  )
+}
+
 export function Spinner() {
   return (
     <svg
