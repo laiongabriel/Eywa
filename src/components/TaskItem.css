@@ -49,6 +49,9 @@
   border-color: var(--color-amber);
   background: rgba(217, 119, 6, 0.04);
 }
+[data-theme="light"] .task-item.is-mit {
+  background: rgba(184, 94, 0, 0.05);
+}
 
 .task-item.pending {
   opacity: 0.65;

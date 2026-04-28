@@ -1,5 +1,9 @@
 /** Web Audio API sound effects — no external files needed */
 
+function isSoundEnabled() {
+  try { return localStorage.getItem('eywa:soundEnabled') !== 'false' } catch { return true }
+}
+
 function ctx() {
   if (typeof window === 'undefined') return null
   if (!window.__eywaAudioCtx) {
@@ -31,6 +35,7 @@ function note(audioCtx, freq, startTime, duration, volume = 0.14, type = 'sine')
 /** Opening a modal — D3 bass ground + ascending sweep G3→D4 */
 export function playModalOpen() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -57,6 +62,7 @@ export function playModalOpen() {
 /** Closing / cancelling a modal — descending sweep D4→G3 */
 export function playModalClose() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -80,6 +86,7 @@ export function playModalClose() {
 /** Task created — two-note resolution D3→G3 */
 export function playTaskCreated() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -92,6 +99,7 @@ export function playTaskCreated() {
 /** Task marked complete — D3+D4 chord resolving to G4 */
 export function playTaskComplete() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -120,6 +128,7 @@ export function playTaskComplete() {
  *  Bell envelope = instantly distinct from all other sounds. */
 export function playPriorityMark() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -147,6 +156,7 @@ export function playPriorityMark() {
 /** Task deleted — descending 330→210 Hz */
 export function playTaskDelete() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -170,6 +180,7 @@ export function playTaskDelete() {
 /** Entering Focus Mode — G3→B3→D4→G4 ascending arpeggio */
 export function playFocusEnter() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -181,6 +192,7 @@ export function playFocusEnter() {
 /** Pausing — single soft E4 */
 export function playPause() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -191,6 +203,7 @@ export function playPause() {
 /** Resuming — two rising notes D4→G4 */
 export function playResume() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -202,6 +215,7 @@ export function playResume() {
 /** Ending a focus session — G2+D3+G3+B3 warm chord resolution */
 export function playSessionEnd() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
@@ -230,6 +244,7 @@ export function playSessionEnd() {
 /** Break suggestion — B3→D4→B3 gentle notice */
 export function playBreakSuggestion() {
   try {
+    if (!isSoundEnabled()) return
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()

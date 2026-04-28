@@ -50,13 +50,36 @@ function RouteProgressBar() {
 function ToastContainer() {
   const { toasts, dismiss } = useToast()
   if (!toasts.length) return null
+
+  function icon(type) {
+    if (type === 'success') return (
+      <svg className="toast-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M5 8.5l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    )
+    if (type === 'error') return (
+      <svg className="toast-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M8 5v3.5M8 11h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    )
+    return (
+      <svg className="toast-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M8 7.5v3.5M8 5h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    )
+  }
+
   return (
     <div className="toast-container" aria-live="polite">
       {toasts.map(t => (
         <div key={t.id} className={`toast toast--${t.type}`} role="alert">
+          {icon(t.type)}
           <span className="toast-msg">{t.message}</span>
           <button className="toast-close" onClick={() => dismiss(t.id)} aria-label="Fechar">
-            ✕
+            <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
         </div>
       ))}

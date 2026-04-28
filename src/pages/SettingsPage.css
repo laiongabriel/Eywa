@@ -300,7 +300,65 @@
 
 .sp-pw-eye:hover { color: var(--color-text-secondary); }
 
-/* ── Primary button ───────────────────────────────────────────────────────── */
+/* ── Form block (wraps field-row + hint) ──────────────────────────────────── */
+.sp-form-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Save button — matches app's pill action button style ─────────────────── */
+.sp-btn-save {
+  padding: 0.575rem 1.25rem;
+  background: var(--color-amber);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  letter-spacing: -0.005em;
+  flex-shrink: 0;
+}
+
+.sp-btn-save:hover:not(:disabled) {
+  background: var(--color-amber-bright);
+}
+
+.sp-btn-save:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.sp-btn-save:disabled { opacity: 0.35; cursor: default; }
+
+/* ── Password actions row ─────────────────────────────────────────────────── */
+.sp-pw-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── Link button (forgot password, etc.) ─────────────────────────────────── */
+.sp-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.sp-link-btn:hover { color: var(--color-text-secondary); }
+
+/* ── Primary button (kept for any future use) ─────────────────────────────── */
 .sp-btn-primary {
   padding: 0.575rem 1.125rem;
   background: var(--color-text-primary);

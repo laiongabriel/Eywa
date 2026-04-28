@@ -5,10 +5,7 @@ import { Settings, LogOut } from 'lucide-react'
 import './UserMenu.css'
 
 function avatarColor(str) {
-  const palette = [
-    '#4a7fe0', '#d97706', '#10b981', '#8b5cf6',
-    '#ef4444', '#06b6d4', '#f59e0b', '#6366f1',
-  ]
+  const palette = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
   let h = 0
   for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h)
   return palette[Math.abs(h) % palette.length]

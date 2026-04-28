@@ -4,15 +4,13 @@ import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { useToast } from '../contexts/ToastContext'
 import { supabase } from '../lib/supabase'
-import { User, Palette, SlidersHorizontal, ChevronLeft, Camera, Eye, EyeOff } from 'lucide-react'
+import { User, SlidersHorizontal, ChevronLeft, Camera, Eye, EyeOff } from 'lucide-react'
 import './SettingsPage.css'
 
-// ── Shared: deterministic avatar color (mirrors UserMenu) ─────────────────
+// ── Deterministic avatar color from app palette only ───────────────────────
+// Uses only brand blues and ambers — no outside palette colors
 function avatarColor(str) {
-  const palette = [
-    '#4a7fe0', '#d97706', '#10b981', '#8b5cf6',
-    '#ef4444', '#06b6d4', '#f59e0b', '#6366f1',
-  ]
+  const palette = ['#4a7fe0', '#d97706', '#3a6fd0', '#b85e00']
   let h = 0
   for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h)
   return palette[Math.abs(h) % palette.length]
@@ -88,8 +86,8 @@ function SectionPerfil() {
   async function handleSaveUsername() {
     const val = newUsername.trim()
     if (!val || val === username) return
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(val)) {
-      addToast('Nome de usuário inválido — 3 a 20 caracteres (letras, números ou _)')
+    if (val.length < 3 || val.length > 30) {
+      addToast('Nome deve ter entre 3 e 30 caracteres')
       return
     }
     setSavingUsername(true)
@@ -99,11 +97,11 @@ function SectionPerfil() {
         .update({ username: val })
         .eq('id', session.user.id)
       if (error) {
-        if (error.code === '23505') addToast('Esse nome de usuário já está em uso')
-        else addToast('Erro ao salvar nome de usuário')
+        if (error.code === '23505') addToast('Esse nome já está em uso')
+        else addToast('Erro ao salvar nome')
       } else {
         updateProfile({ username: val })
-        addToast('Nome de usuário atualizado')
+        addToast('Nome atualizado', 'success')
       }
     } finally {
       setSavingUsername(false)
@@ -134,7 +132,7 @@ function SectionPerfil() {
       if (dbErr) { addToast('Erro ao salvar a foto'); return }
 
       updateProfile({ avatarUrl: url })
-      addToast('Foto de perfil atualizada')
+      addToast('Foto de perfil atualizada', 'success')
     } finally {
       setUploadingAvatar(false)
     }
@@ -170,11 +168,21 @@ function SectionPerfil() {
       if (error) addToast('Erro ao atualizar senha')
       else {
         setCurrentPw(''); setNewPw(''); setConfirmPw('')
-        addToast('Senha atualizada com sucesso')
+        addToast('Senha atualizada com sucesso', 'success')
       }
     } finally {
       setSavingPw(false)
     }
+  }
+
+  async function handleForgotPassword() {
+    const email = session?.user?.email
+    if (!email) return
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    if (error) addToast('Erro ao enviar o e-mail')
+    else addToast('Link de redefinição enviado para ' + email, 'success')
   }
 
   return (
@@ -191,35 +199,41 @@ function SectionPerfil() {
 
       {/* Username */}
       <div className="sp-group">
-        <h3 className="sp-group-title">Nome de usuário</h3>
-        <div className="sp-field-row">
+        <h3 className="sp-group-title">Mudar nome de usuário</h3>
+        <form
+          className="sp-field-row"
+          onSubmit={e => { e.preventDefault(); handleSaveUsername() }}
+        >
           <input
             className="sp-input"
             value={newUsername}
             onChange={e => setNewUsername(e.target.value)}
-            placeholder="usuario"
-            maxLength={20}
+            placeholder={username ?? 'Seu nome'}
+            maxLength={30}
             autoComplete="off"
           />
           <button
-            className="sp-btn-primary"
-            onClick={handleSaveUsername}
+            className="sp-btn-save"
+            type="submit"
             disabled={savingUsername || !newUsername.trim() || newUsername.trim() === username}
           >
             {savingUsername ? '…' : 'Salvar'}
           </button>
-        </div>
-        <p className="sp-hint">3 a 20 caracteres: letras, números ou _</p>
+        </form>
+        <p className="sp-hint">Entre 3 e 30 caracteres.</p>
       </div>
 
       {/* Email */}
       <div className="sp-group">
-        <h3 className="sp-group-title">E-mail</h3>
+        <h3 className="sp-group-title">Mudar e-mail</h3>
         <p className="sp-current-value">{session?.user?.email}</p>
         {emailSent
           ? <p className="sp-success">Confirmação enviada. Verifique sua caixa de entrada.</p>
           : (
-            <>
+            <form
+              className="sp-form-block"
+              onSubmit={e => { e.preventDefault(); handleSaveEmail() }}
+            >
               <div className="sp-field-row">
                 <input
                   className="sp-input"
@@ -230,172 +244,89 @@ function SectionPerfil() {
                   autoComplete="off"
                 />
                 <button
-                  className="sp-btn-primary"
-                  onClick={handleSaveEmail}
+                  className="sp-btn-save"
+                  type="submit"
                   disabled={savingEmail || !newEmail.trim()}
                 >
                   {savingEmail ? '…' : 'Alterar'}
                 </button>
               </div>
               <p className="sp-hint">Um link de confirmação será enviado para o novo endereço.</p>
-            </>
+            </form>
           )
         }
       </div>
 
       {/* Password */}
       <div className="sp-group">
-        <h3 className="sp-group-title">Senha</h3>
-        <div className="sp-pw-fields">
-          <div className="sp-pw-row">
+        <h3 className="sp-group-title">Mudar senha</h3>
+        <form
+          className="sp-form-block"
+          onSubmit={e => { e.preventDefault(); handleSavePassword() }}
+        >
+          <div className="sp-pw-fields">
+            <div className="sp-pw-row">
+              <input
+                className="sp-input sp-input--pw"
+                type={showCurrentPw ? 'text' : 'password'}
+                value={currentPw}
+                onChange={e => setCurrentPw(e.target.value)}
+                placeholder="Senha atual"
+                autoComplete="current-password"
+              />
+              <button
+                className="sp-pw-eye"
+                type="button"
+                onClick={() => setShowCurrentPw(v => !v)}
+                aria-label={showCurrentPw ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showCurrentPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+              </button>
+            </div>
+            <div className="sp-pw-row">
+              <input
+                className="sp-input sp-input--pw"
+                type={showNewPw ? 'text' : 'password'}
+                value={newPw}
+                onChange={e => setNewPw(e.target.value)}
+                placeholder="Nova senha (mín. 8 caracteres)"
+                autoComplete="new-password"
+              />
+              <button
+                className="sp-pw-eye"
+                type="button"
+                onClick={() => setShowNewPw(v => !v)}
+                aria-label={showNewPw ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showNewPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+              </button>
+            </div>
             <input
-              className="sp-input sp-input--pw"
-              type={showCurrentPw ? 'text' : 'password'}
-              value={currentPw}
-              onChange={e => setCurrentPw(e.target.value)}
-              placeholder="Senha atual"
-              autoComplete="current-password"
-            />
-            <button
-              className="sp-pw-eye"
-              type="button"
-              onClick={() => setShowCurrentPw(v => !v)}
-              aria-label={showCurrentPw ? 'Ocultar senha' : 'Mostrar senha'}
-            >
-              {showCurrentPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
-            </button>
-          </div>
-          <div className="sp-pw-row">
-            <input
-              className="sp-input sp-input--pw"
-              type={showNewPw ? 'text' : 'password'}
-              value={newPw}
-              onChange={e => setNewPw(e.target.value)}
-              placeholder="Nova senha (mín. 8 caracteres)"
+              className="sp-input"
+              type="password"
+              value={confirmPw}
+              onChange={e => setConfirmPw(e.target.value)}
+              placeholder="Confirmar nova senha"
               autoComplete="new-password"
             />
+          </div>
+          <div className="sp-pw-actions">
             <button
-              className="sp-pw-eye"
-              type="button"
-              onClick={() => setShowNewPw(v => !v)}
-              aria-label={showNewPw ? 'Ocultar senha' : 'Mostrar senha'}
+              className="sp-btn-save"
+              type="submit"
+              disabled={savingPw || !currentPw || !newPw || !confirmPw}
             >
-              {showNewPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
+              {savingPw ? 'Salvando…' : 'Atualizar senha'}
+            </button>
+            <button
+              type="button"
+              className="sp-link-btn"
+              onClick={handleForgotPassword}
+            >
+              Esqueceu a senha?
             </button>
           </div>
-          <input
-            className="sp-input"
-            type="password"
-            value={confirmPw}
-            onChange={e => setConfirmPw(e.target.value)}
-            placeholder="Confirmar nova senha"
-            autoComplete="new-password"
-          />
-        </div>
-        <button
-          className="sp-btn-primary sp-btn-block"
-          onClick={handleSavePassword}
-          disabled={savingPw || !currentPw || !newPw || !confirmPw}
-        >
-          {savingPw ? 'Salvando…' : 'Atualizar senha'}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Section: Aparência ─────────────────────────────────────────────────────
-function SectionAparencia() {
-  const { theme, setTheme } = useSettings()
-
-  return (
-    <div className="sp-section">
-      <h2 className="sp-section-title">Aparência</h2>
-
-      <div className="sp-group">
-        <h3 className="sp-group-title">Tema</h3>
-        <div className="sp-option-group">
-          {[
-            { value: 'dark',   label: 'Escuro' },
-            { value: 'light',  label: 'Claro'  },
-            { value: 'system', label: 'Sistema' },
-          ].map(opt => (
-            <button
-              key={opt.value}
-              className={`sp-option-btn${theme === opt.value ? ' active' : ''}`}
-              onClick={() => setTheme(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-        <p className="sp-hint">
-          {theme === 'system' ? 'Segue a preferência do sistema operacional.' : ''}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// ── Section: Preferências ──────────────────────────────────────────────────
-function SectionPreferencias() {
-  const { weekStartsOn, setWeekStartsOn, language, setLanguage, soundEnabled, setSoundEnabled } = useSettings()
-
-  return (
-    <div className="sp-section">
-      <h2 className="sp-section-title">Preferências</h2>
-
-      <div className="sp-group">
-        <h3 className="sp-group-title">Início da semana</h3>
-        <div className="sp-option-group">
-          {[
-            { value: 'sunday',   label: 'Domingo' },
-            { value: 'monday',   label: 'Segunda-feira' },
-            { value: 'saturday', label: 'Sábado' },
-          ].map(opt => (
-            <button
-              key={opt.value}
-              className={`sp-option-btn${weekStartsOn === opt.value ? ' active' : ''}`}
-              onClick={() => setWeekStartsOn(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="sp-group">
-        <h3 className="sp-group-title">Idioma</h3>
-        <div className="sp-option-group">
-          <button
-            className={`sp-option-btn${language === 'pt' ? ' active' : ''}`}
-            onClick={() => setLanguage('pt')}
-          >
-            Português
-          </button>
-          <button
-            className="sp-option-btn sp-option-btn--disabled"
-            disabled
-          >
-            English
-            <span className="sp-badge-soon">em breve</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="sp-group">
-        <h3 className="sp-group-title">Sons</h3>
-        <div className="sp-toggle-row">
-          <span className="sp-toggle-label">Sons de interface</span>
-          <button
-            className={`sp-toggle${soundEnabled ? ' active' : ''}`}
-            role="switch"
-            aria-checked={soundEnabled}
-            onClick={() => setSoundEnabled(v => !v)}
-          >
-            <span className="sp-toggle-thumb" />
-          </button>
-        </div>
+        </form>
       </div>
     </div>
   )
@@ -404,7 +335,7 @@ function SectionPreferencias() {
 // ── Nav config ─────────────────────────────────────────────────────────────
 const SECTIONS = [
   { id: 'perfil',       label: 'Perfil',       Icon: User              },
-  { id: 'aparencia',    label: 'Aparência',    Icon: Palette           },
+
   { id: 'preferencias', label: 'Preferências', Icon: SlidersHorizontal },
 ]
 
@@ -447,7 +378,6 @@ export default function SettingsPage() {
         {/* ── Content ─────────────────────────────────────────── */}
         <div className="sp-content">
           {active === 'perfil'       && <SectionPerfil />}
-          {active === 'aparencia'    && <SectionAparencia />}
           {active === 'preferencias' && <SectionPreferencias />}
         </div>
       </div>

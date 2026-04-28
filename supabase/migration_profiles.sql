@@ -7,7 +7,7 @@ create table if not exists public.profiles (
   username   text not null,
   created_at timestamptz not null default now(),
   constraint profiles_username_unique unique (username),
-  constraint profiles_username_format check (username ~ '^[a-zA-Z0-9_]{3,20}$')
+  constraint profiles_username_format check (char_length(username) >= 3 and char_length(username) <= 30)
 );
 
 alter table public.profiles enable row level security;

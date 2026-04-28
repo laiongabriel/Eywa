@@ -36,6 +36,13 @@
   background-clip: text;
 }
 
+[data-theme="light"] .shell-logo {
+  background: linear-gradient(135deg, #111110 0%, #3a6fd0 55%, #1e4fa8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .shell-nav-links {
   display: flex;
   gap: 0.125rem;
