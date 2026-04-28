@@ -103,6 +103,8 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
               {task.scheduled_at && formatScheduled(task.scheduled_at)}
               {task.scheduled_at && task.estimated_minutes ? ' · ' : ''}
               {task.estimated_minutes ? formatDuration(task.estimated_minutes) : ''}
+              {task.reminder_offset_minutes != null && ' · '}
+              {task.reminder_offset_minutes != null && formatReminder(task.reminder_offset_minutes)}
             </span>
           </div>
         )}
@@ -163,6 +165,13 @@ function formatScheduled(ts) {
   if (isTomorrow) return hasTime ? `Amanhã · ${time}` : 'Amanhã'
   const day = d.toLocaleDateString('pt-BR', { weekday: 'short' })
   return hasTime ? `${day} · ${time}` : day
+}
+
+function formatReminder(mins) {
+  if (mins === 0) return '🔔 Na hora'
+  if (mins % 1440 === 0) return `🔔 ${mins / 1440}d antes`
+  if (mins % 60   === 0) return `🔔 ${mins / 60}h antes`
+  return `🔔 ${mins}min antes`
 }
 
 function formatDuration(mins) {

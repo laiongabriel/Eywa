@@ -16,11 +16,11 @@ const UNIT_OPTIONS = [
 
 /* ─── Parse reminder_offset_minutes → form state ─────────────── */
 function parseReminderMinutes(mins) {
-  if (mins == null) return { enabled: false, now: false, value: '30', unit: 'minutes' }
-  if (mins === 0)   return { enabled: true,  now: true,  value: '30', unit: 'minutes' }
-  if (mins % 1440 === 0) return { enabled: true, now: false, value: String(mins / 1440), unit: 'days'    }
-  if (mins % 60   === 0) return { enabled: true, now: false, value: String(mins / 60),   unit: 'hours'   }
-  return                        { enabled: true, now: false, value: String(mins),         unit: 'minutes' }
+  if (mins == null) return { now: false, value: '',             unit: 'minutes' }
+  if (mins === 0)   return { now: true,  value: '',             unit: 'minutes' }
+  if (mins % 1440 === 0) return { now: false, value: String(mins / 1440), unit: 'days'    }
+  if (mins % 60   === 0) return { now: false, value: String(mins / 60),   unit: 'hours'   }
+  return                        { now: false, value: String(mins),         unit: 'minutes' }
 }
 
 /* ─── SmallChevron ───────────────────────────────────────────── */
@@ -35,11 +35,20 @@ function SmallChevron() {
 /* ─── CustomDatePicker ───────────────────────────────────────── */
 function CustomDatePicker({ value, onChange }) {
   const [open, setOpen]           = useState(false)
-  const [viewYear, setViewYear]   = useState(() => value?.getFullYear() ?? new Date().getFullYear())
-  const [viewMonth, setViewMonth] = useState(() => value?.getMonth()    ?? new Date().getMonth())
+  const [viewYear, setViewYear]   = useState(() => new Date().getFullYear())
+  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth())
   const [animKey, setAnimKey]     = useState(0)
   const [slideDir, setSlideDir]   = useState('left')
   const containerRef              = useRef(null)
+
+  // Reset to current month every time the calendar opens
+  useEffect(() => {
+    if (open) {
+      const now = new Date()
+      setViewYear(now.getFullYear())
+      setViewMonth(now.getMonth())
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -202,52 +211,57 @@ function UnitDropdown({ value, onChange }) {
   )
 }
 
-/* ─── ReminderField ──────────────────────────────────────────── */
-function ReminderField({
-  visible, enabled, now, value, unit,
-  onEnabledChange, onNowChange, onValueChange, onUnitChange,
-}) {
-  if (!visible) return null
-
+/* ─── BellIcon ───────────────────────────────────────────────── */
+function BellIcon() {
   return (
-    <div className="reminder-field">
-      <label className="reminder-toggle-row">
-        <input
-          type="checkbox"
-          className="reminder-check"
-          checked={enabled}
-          onChange={(e) => onEnabledChange(e.target.checked)}
-        />
-        <span className="reminder-toggle-label">Lembrete</span>
-      </label>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="reminder-bell-icon">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
 
-      {enabled && (
-        <div className="reminder-details">
-          {!now && (
-            <div className="reminder-before-row">
-              <input
-                type="number"
-                className="reminder-value-input"
-                min="1"
-                max="9999"
-                value={value}
-                onChange={(e) => onValueChange(e.target.value)}
-              />
-              <UnitDropdown value={unit} onChange={onUnitChange} />
-              <span className="reminder-before-text">antes</span>
-            </div>
-          )}
-          <label className="reminder-now-row">
+/* ─── ReminderInlineField ────────────────────────────────────── */
+function ReminderInlineField({ hasTime, now, value, unit, onNowChange, onValueChange, onUnitChange }) {
+  const disabled = !hasTime
+  return (
+    <div
+      className="modal-field"
+      data-tooltip={disabled ? 'Defina um horário para ativar o lembrete' : undefined}
+    >
+      <label className="modal-label">Lembrete</label>
+      <div className={`reminder-inline-row${disabled ? ' disabled' : ''}`}>
+        <BellIcon />
+        {now ? (
+          <button
+            type="button"
+            className="reminder-now-pill active"
+            onClick={() => onNowChange(false)}
+          >
+            Na hora
+          </button>
+        ) : (
+          <>
             <input
-              type="checkbox"
-              className="reminder-check"
-              checked={now}
-              onChange={(e) => onNowChange(e.target.checked)}
+              type="number"
+              className="modal-input duration-input"
+              min="1" max="9999"
+              value={value}
+              placeholder="–"
+              onChange={(e) => onValueChange(e.target.value)}
             />
-            <span>Na hora</span>
-          </label>
-        </div>
-      )}
+            <UnitDropdown value={unit} onChange={onUnitChange} />
+            <span className="duration-sep">antes</span>
+            <button
+              type="button"
+              className="reminder-now-pill"
+              onClick={() => onNowChange(true)}
+            >
+              Na hora
+            </button>
+          </>
+        )}
+      </div>
     </div>
   )
 }
@@ -285,7 +299,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       scheduledM,
       durationH:       mins ? String(Math.floor(mins / 60) || '') : '',
       durationM:       mins ? String(mins % 60 || '')             : '',
-      reminderEnabled: r.enabled,
       reminderNow:     r.now,
       reminderValue:   r.value,
       reminderUnit:    r.unit,
@@ -334,11 +347,11 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     }
 
     let reminder_offset_minutes = null
-    if (hasScheduledTime && form.reminderEnabled) {
+    if (hasScheduledTime) {
       if (form.reminderNow) {
         reminder_offset_minutes = 0
-      } else {
-        const v = parseInt(form.reminderValue) || 0
+      } else if (form.reminderValue && parseInt(form.reminderValue) > 0) {
+        const v = parseInt(form.reminderValue)
         reminder_offset_minutes =
           form.reminderUnit === 'hours' ? v * 60  :
           form.reminderUnit === 'days'  ? v * 1440 : v
@@ -431,8 +444,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Duration */}
-              <div className="modal-row modal-row--single">
+              {/* Duration + Reminder */}
+              <div className="modal-row modal-row--dur-rem">
                 <div className="modal-field">
                   <label className="modal-label">Duração</label>
                   <div className="duration-row">
@@ -454,20 +467,16 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     <span className="duration-sep">min</span>
                   </div>
                 </div>
+                <ReminderInlineField
+                  hasTime={hasScheduledTime}
+                  now={form.reminderNow}
+                  value={form.reminderValue}
+                  unit={form.reminderUnit}
+                  onNowChange={(v)   => set('reminderNow', v)}
+                  onValueChange={(v) => set('reminderValue', v)}
+                  onUnitChange={(v)  => set('reminderUnit', v)}
+                />
               </div>
-
-              {/* Reminder */}
-              <ReminderField
-                visible={hasScheduledTime}
-                enabled={form.reminderEnabled}
-                now={form.reminderNow}
-                value={form.reminderValue}
-                unit={form.reminderUnit}
-                onEnabledChange={(v) => set('reminderEnabled', v)}
-                onNowChange={(v)     => set('reminderNow', v)}
-                onValueChange={(v)   => set('reminderValue', v)}
-                onUnitChange={(v)    => set('reminderUnit', v)}
-              />
             </div>
           )}
 
