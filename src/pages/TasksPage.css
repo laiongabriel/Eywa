@@ -45,22 +45,15 @@
 
 .tasks-greeting {
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.125rem;
+  font-weight: 700;
   color: var(--color-text-secondary);
-  letter-spacing: -0.035em;
-  white-space: nowrap;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
 .tasks-greeting-name {
   color: var(--color-amber-bright);
-}
-
-.tasks-header-sep {
-  color: var(--color-border);
-  font-size: 1.25rem;
-  font-weight: 400;
-  user-select: none;
 }
 
 .tasks-count {
