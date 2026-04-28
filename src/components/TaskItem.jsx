@@ -5,7 +5,7 @@ import { useToast } from '../contexts/ToastContext'
 import { Check, Play, Pencil, Trash2, BellRing } from 'lucide-react'
 import './TaskItem.css'
 
-export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTask, onDeleteCancel, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
+export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDeleteCancel, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
   const { addToast } = useToast()
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -15,7 +15,9 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onRestoreTa
   const [localMIT, setLocalMIT] = useState(task.is_mit)
 
   // Keep in sync with parent (e.g. external undo or refresh)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setLocalCompleted(task.completed) }, [task.completed])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setLocalMIT(task.is_mit) }, [task.is_mit])
 
   async function handleToggle() {

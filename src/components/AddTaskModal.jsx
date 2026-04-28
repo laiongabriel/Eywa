@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { playModalClose, playTaskCreated } from '../lib/sounds'
 import { ChevronDown } from 'lucide-react'
 import './AddTaskModal.css'
@@ -53,6 +53,7 @@ function CustomDatePicker({ value, onChange }) {
   useEffect(() => {
     if (open) {
       const now = new Date()
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewYear(now.getFullYear())
       setViewMonth(now.getMonth())
     }
@@ -230,7 +231,9 @@ function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
   const mRef = useRef(null)
   // Store latest state in ref so wheel listeners never stale-close over values
   const api = useRef({ valueH, valueM, onChangeH, onChangeM })
-  api.current = { valueH, valueM, onChangeH, onChangeM }
+  useLayoutEffect(() => {
+    api.current = { valueH, valueM, onChangeH, onChangeM }
+  })
 
   useEffect(() => {
     const hEl = hRef.current

@@ -1,5 +1,6 @@
 // Eywa Service Worker — handles notification display and click
 // Served from /sw.js (public/sw.js in the repo)
+/* global clients */
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', e => e.waitUntil(clients.claim()))

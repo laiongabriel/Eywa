@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchEvents, createEvent, updateEvent, deleteEvent } from '../lib/events'
 import AddEventModal from '../components/AddEventModal'
@@ -28,14 +28,16 @@ export default function CalendarPage() {
   // Compute visible range based on view
   const range = useMemo(() => computeRange(cursor, view), [cursor, view])
 
-  const loadEvents = useCallback(async () => {
-    setLoading(true)
-    const data = await fetchEvents(userId, range.start, range.end)
-    setEvents(data)
-    setLoading(false)
+  useEffect(() => {
+    let active = true
+    async function load() {
+      setLoading(true)
+      const data = await fetchEvents(userId, range.start, range.end)
+      if (active) { setEvents(data); setLoading(false) }
+    }
+    load()
+    return () => { active = false }
   }, [userId, range.start, range.end])
-
-  useEffect(() => { loadEvents() }, [loadEvents])
 
   async function handleCreateEvent(payload) {
     const ev = await createEvent(userId, payload)
@@ -43,8 +45,9 @@ export default function CalendarPage() {
   }
 
   async function handleEditEvent(payload) {
-    const ev = await updateEvent(modal.event._original_id ?? modal.event.id, payload)
-    loadEvents() // reload to re-expand recurring events correctly
+    await updateEvent(modal.event._original_id ?? modal.event.id, payload)
+    const data = await fetchEvents(userId, range.start, range.end)
+    setEvents(data)
   }
 
   async function handleDeleteEvent(id) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -78,24 +78,25 @@ export default function TasksPage() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
-  const loadTasks = useCallback(async () => {
-    const data = await fetchTasks(userId)
-    setTasks(data)
-    const saved = JSON.parse(localStorage.getItem(`eywa_task_order_${userId}`) || 'null')
-    if (saved && Array.isArray(saved)) {
-      setOrder(saved)
-    } else {
-      // Default order: timed tasks first sorted by scheduled_at, then untimed
-      const active = data.filter(t => !t.completed && !t.is_mit)
-      const timed   = active.filter(t => t.scheduled_at).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
-      const untimed = active.filter(t => !t.scheduled_at)
-      setOrder([...timed, ...untimed].map(t => t.id))
+  useEffect(() => {
+    async function loadTasks() {
+      const data = await fetchTasks(userId)
+      setTasks(data)
+      const saved = JSON.parse(localStorage.getItem(`eywa_task_order_${userId}`) || 'null')
+      if (saved && Array.isArray(saved)) {
+        setOrder(saved)
+      } else {
+        // Default order: timed tasks first sorted by scheduled_at, then untimed
+        const active = data.filter(t => !t.completed && !t.is_mit)
+        const timed   = active.filter(t => t.scheduled_at).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
+        const untimed = active.filter(t => !t.scheduled_at)
+        setOrder([...timed, ...untimed].map(t => t.id))
+      }
+      setLoading(false)
+      rescheduleAll(data)
     }
-    setLoading(false)
-    rescheduleAll(data)
+    loadTasks()
   }, [userId])
-
-  useEffect(() => { loadTasks() }, [loadTasks])
 
   function persistOrder(newOrder) {
     localStorage.setItem(`eywa_task_order_${userId}`, JSON.stringify(newOrder))
