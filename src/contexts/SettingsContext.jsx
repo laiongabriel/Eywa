@@ -40,6 +40,17 @@ export function SettingsProvider({ children }) {
   function setLanguage(v)     { setLS('eywa:language', v);      setLanguageState(v) }
   function setSoundEnabled(v) { setLS('eywa:soundEnabled', v);  setSoundEnabledState(v) }
 
+  // Sync language when AuthContext writes it to localStorage on login
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key === 'eywa:language' && e.newValue !== null) {
+        try { setLanguageState(JSON.parse(e.newValue)) } catch { /* noop */ }
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   return (
     <SettingsContext.Provider value={{
       theme, setTheme,

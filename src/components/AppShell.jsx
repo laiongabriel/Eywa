@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { resetRouteProgress, startRouteProgress } from '../lib/routeProgress'
+import { useT } from '../hooks/useT'
 import { Check, X } from 'lucide-react'
 import UserMenu from './UserMenu'
 import './AppShell.css'
 
 export default function AppShell({ children }) {
   const [showSignOut, setShowSignOut] = useState(false)
+  const t = useT()
 
   async function confirmSignOut() {
     setShowSignOut(false)
@@ -27,10 +29,10 @@ export default function AppShell({ children }) {
         <span className="shell-logo">Eywa</span>
         <div className="shell-nav-links">
           <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-            Tarefas
+            {t('nav.tasks')}
           </NavLink>
           <NavLink to="/agenda" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-            Agenda
+            {t('nav.calendar')}
           </NavLink>
         </div>
         <div className="shell-nav-right">
@@ -49,14 +51,14 @@ export default function AppShell({ children }) {
             role="dialog"
             aria-modal="true"
           >
-            <h2 className="signout-title">Sair</h2>
-            <p className="signout-body">Tem certeza que deseja sair?</p>
+            <h2 className="signout-title">{t('signout.title')}</h2>
+            <p className="signout-body">{t('signout.body')}</p>
             <div className="signout-actions">
               <button className="signout-cancel" onClick={() => setShowSignOut(false)}>
-                <X size={13} strokeWidth={2} aria-hidden="true" /> Cancelar
+                <X size={13} strokeWidth={2} aria-hidden="true" /> {t('signout.cancel')}
               </button>
               <button className="signout-confirm" onClick={confirmSignOut}>
-                <Check size={13} strokeWidth={2.5} aria-hidden="true" /> Sair
+                <Check size={13} strokeWidth={2.5} aria-hidden="true" /> {t('signout.confirm')}
               </button>
             </div>
           </div>

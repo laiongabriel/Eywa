@@ -1,18 +1,20 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useT } from '../hooks/useT'
+import { AvatarImg } from '../lib/ui'
 import { Settings, LogOut } from 'lucide-react'
 import './UserMenu.css'
 
-function getAvatarUrl(name) {
+function dicebearUrl(name, style) {
   const validStyles = ['notionists','adventurer','micah','pixel-art','shapes','fun-emoji']
-  const stored = localStorage.getItem('eywa:avatarStyle')
-  const style = validStyles.includes(stored) ? stored : 'notionists'
-  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(name || '?')}`
+  const s = validStyles.includes(style) ? style : 'notionists'
+  return `https://api.dicebear.com/9.x/${s}/svg?seed=${encodeURIComponent(name || '?')}`
 }
 
 export default function UserMenu({ onSignOut }) {
-  const { username, session } = useAuth()
+  const { username, session, avatarStyle } = useAuth()
+  const t = useT()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const navigate = useNavigate()
@@ -37,10 +39,11 @@ export default function UserMenu({ onSignOut }) {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <img
-          className="user-avatar-img"
-          src={getAvatarUrl(username)}
+        <AvatarImg
+          src={dicebearUrl(username, avatarStyle)}
           alt={username ?? 'Avatar'}
+          size={32}
+          className="user-avatar-img"
         />
       </button>
 
@@ -59,7 +62,7 @@ export default function UserMenu({ onSignOut }) {
             onClick={() => { setOpen(false); navigate('/settings') }}
           >
             <Settings size={15} strokeWidth={2} />
-            Configurações
+            {t('menu.settings')}
           </button>
 
           <button
@@ -68,7 +71,7 @@ export default function UserMenu({ onSignOut }) {
             onClick={() => { setOpen(false); onSignOut() }}
           >
             <LogOut size={15} strokeWidth={2} />
-            Sair
+            {t('menu.signout')}
           </button>
         </div>
       )}

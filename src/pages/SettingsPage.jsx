@@ -3,74 +3,67 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useSettings } from '../contexts/SettingsContext'
 import { useToast } from '../contexts/ToastContext'
+import { useT } from '../hooks/useT'
 import { supabase } from '../lib/supabase'
-import { User, SlidersHorizontal, ChevronLeft, Eye, EyeOff } from 'lucide-react'
+import { AvatarImg, Spinner } from '../lib/ui'
+import { User, SlidersHorizontal, ChevronLeft, Eye, EyeOff, Moon, Sun, Monitor } from 'lucide-react'
 import './SettingsPage.css'
 
 // ── DiceBear avatar helpers ────────────────────────────────────────────────
 const DICEBEAR_STYLES = [
   { id: 'notionists', label: 'Notionists' },
-  { id: 'adventurer', label: 'Aventureiro' },
-  { id: 'micah',      label: 'Micah'       },
-  { id: 'pixel-art',  label: 'Pixel'       },
-  { id: 'shapes',     label: 'Shapes'      },
-  { id: 'fun-emoji',  label: 'Emoji'       },
+  { id: 'adventurer', label: 'Adventurer' },
+  { id: 'micah',      label: 'Micah'      },
+  { id: 'pixel-art',  label: 'Pixel'      },
+  { id: 'shapes',     label: 'Shapes'     },
+  { id: 'fun-emoji',  label: 'Emoji'      },
 ]
 
 function dicebearUrl(name, style) {
   return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(name || '?')}`
 }
 
-function getAvatarStyle() {
-  const stored = localStorage.getItem('eywa:avatarStyle')
-  return DICEBEAR_STYLES.some(s => s.id === stored) ? stored : 'notionists'
-}
-
 // ── Avatar component ───────────────────────────────────────────────────────
-function ProfileAvatar({ username }) {
-  const [style, setStyle] = useState(getAvatarStyle)
-
-  function handleStyleChange(s) {
-    setStyle(s)
-    localStorage.setItem('eywa:avatarStyle', s)
-  }
+function ProfileAvatar({ username, avatarStyle, onStyleSaved }) {
+  const t = useT()
 
   return (
     <div className="sp-avatar-wrap">
       <div className="sp-avatar">
-        <img src={dicebearUrl(username, style)} alt="Avatar" />
+        <AvatarImg src={dicebearUrl(username, avatarStyle)} alt="Avatar" size={80} />
       </div>
       <div className="sp-avatar-styles">
         {DICEBEAR_STYLES.map(({ id }) => (
           <button
             key={id}
             type="button"
-            className={`sp-avatar-style-btn${style === id ? ' active' : ''}`}
-            onClick={() => handleStyleChange(id)}
+            className={`sp-avatar-style-btn${avatarStyle === id ? ' active' : ''}`}
+            onClick={() => onStyleSaved(id)}
             aria-label={id}
           >
-            <img src={dicebearUrl(username, id)} alt={id} />
+            <AvatarImg src={dicebearUrl(username, id)} alt={id} size={42} />
           </button>
         ))}
       </div>
-      <span className="sp-avatar-hint">Escolha seu estilo de avatar</span>
+      <span className="sp-avatar-hint">{t('sp.avatarHint')}</span>
     </div>
   )
 }
 
 // ── Section: Perfil ────────────────────────────────────────────────────────
 function SectionPerfil() {
-  const { session, username, updateProfile } = useAuth()
+  const { session, username, avatarStyle, updateProfile } = useAuth()
   const { addToast } = useToast()
+  const t = useT()
 
   // Username
-  const [newUsername, setNewUsername]     = useState(username ?? '')
+  const [newUsername, setNewUsername]       = useState(username ?? '')
   const [savingUsername, setSavingUsername] = useState(false)
 
   // Email
-  const [newEmail, setNewEmail]         = useState('')
-  const [savingEmail, setSavingEmail]   = useState(false)
-  const [emailSent, setEmailSent]       = useState(false)
+  const [newEmail, setNewEmail]       = useState('')
+  const [savingEmail, setSavingEmail] = useState(false)
+  const [emailSent, setEmailSent]     = useState(false)
 
   // Password
   const [currentPw, setCurrentPw]         = useState('')
@@ -81,11 +74,16 @@ function SectionPerfil() {
   const [savingPw, setSavingPw]           = useState(false)
   const [showForgotConfirm, setShowForgotConfirm] = useState(false)
 
+  async function handleSaveAvatarStyle(styleId) {
+    updateProfile({ avatarStyle: styleId })
+    await supabase.from('profiles').update({ avatar_style: styleId }).eq('id', session.user.id)
+  }
+
   async function handleSaveUsername() {
     const val = newUsername.trim()
     if (!val || val === username) return
     if (val.length < 3 || val.length > 30) {
-      addToast('Nome deve ter entre 3 e 30 caracteres')
+      addToast(t('sp.usernameHint'))
       return
     }
     setSavingUsername(true)
@@ -99,7 +97,7 @@ function SectionPerfil() {
         else addToast('Erro ao salvar nome')
       } else {
         updateProfile({ username: val })
-        addToast('Nome atualizado', 'success')
+        addToast(t('sp.username') + ' atualizado', 'success')
       }
     } finally {
       setSavingUsername(false)
@@ -125,13 +123,11 @@ function SectionPerfil() {
     if (newPw.length < 8)    { addToast('A nova senha deve ter pelo menos 8 caracteres'); return }
     setSavingPw(true)
     try {
-      // Verify current password first
       const { error: authErr } = await supabase.auth.signInWithPassword({
         email: session.user.email,
         password: currentPw,
       })
       if (authErr) { addToast('Senha atual incorreta'); return }
-
       const { error } = await supabase.auth.updateUser({ password: newPw })
       if (error) addToast('Erro ao atualizar senha')
       else {
@@ -154,7 +150,7 @@ function SectionPerfil() {
       if (error) addToast('Erro ao enviar o e-mail')
       else {
         setShowForgotConfirm(false)
-        addToast('Link de redefinição enviado para ' + email, 'success')
+        addToast(t('sp.sendLink') + ' enviado para ' + email, 'success')
       }
     } finally {
       setSavingPw(false)
@@ -163,14 +159,18 @@ function SectionPerfil() {
 
   return (
     <div className="sp-section">
-      <h2 className="sp-section-title">Perfil</h2>
+      <h2 className="sp-section-title">{t('settings.profile')}</h2>
 
       {/* Avatar */}
-      <ProfileAvatar username={username} />
+      <ProfileAvatar
+        username={username}
+        avatarStyle={avatarStyle}
+        onStyleSaved={handleSaveAvatarStyle}
+      />
 
       {/* Username */}
       <div className="sp-group">
-        <h3 className="sp-group-title">Mudar nome de usuário</h3>
+        <h3 className="sp-group-title">{t('sp.username')}</h3>
         <form
           className="sp-field-row"
           onSubmit={e => { e.preventDefault(); handleSaveUsername() }}
@@ -188,18 +188,18 @@ function SectionPerfil() {
             type="submit"
             disabled={savingUsername || !newUsername.trim() || newUsername.trim() === username}
           >
-            {savingUsername ? '…' : 'Salvar'}
+            {savingUsername ? <><Spinner /> {t('common.saving')}</> : t('common.save')}
           </button>
         </form>
-        <p className="sp-hint">Entre 3 e 30 caracteres.</p>
+        <p className="sp-hint">{t('sp.usernameHint')}</p>
       </div>
 
       {/* Email */}
       <div className="sp-group">
-        <h3 className="sp-group-title">Mudar e-mail</h3>
+        <h3 className="sp-group-title">{t('sp.email')}</h3>
         <p className="sp-current-value">{session?.user?.email}</p>
         {emailSent
-          ? <p className="sp-success">Confirmação enviada. Verifique sua caixa de entrada.</p>
+          ? <p className="sp-success">{t('sp.emailSent')}</p>
           : (
             <form
               className="sp-form-block"
@@ -211,7 +211,7 @@ function SectionPerfil() {
                   type="email"
                   value={newEmail}
                   onChange={e => setNewEmail(e.target.value)}
-                  placeholder="novo@email.com"
+                  placeholder={t('sp.emailNew')}
                   autoComplete="off"
                 />
                 <button
@@ -219,10 +219,10 @@ function SectionPerfil() {
                   type="submit"
                   disabled={savingEmail || !newEmail.trim()}
                 >
-                  {savingEmail ? '…' : 'Alterar'}
+                  {savingEmail ? <><Spinner /> {t('common.sending')}</> : t('sp.changeEmail')}
                 </button>
               </div>
-              <p className="sp-hint">Um link de confirmação será enviado para o novo endereço.</p>
+              <p className="sp-hint">{t('sp.emailHint')}</p>
             </form>
           )
         }
@@ -230,7 +230,7 @@ function SectionPerfil() {
 
       {/* Password */}
       <div className="sp-group">
-        <h3 className="sp-group-title">Mudar senha</h3>
+        <h3 className="sp-group-title">{t('sp.password')}</h3>
         {showForgotConfirm ? (
           <div className="sp-forgot-confirm">
             <p className="sp-hint">
@@ -243,14 +243,14 @@ function SectionPerfil() {
                 disabled={savingPw}
                 onClick={handleSendForgotEmail}
               >
-                {savingPw ? 'Enviando…' : 'Enviar link'}
+                {savingPw ? <><Spinner /> {t('common.sending')}</> : t('sp.sendLink')}
               </button>
               <button
                 type="button"
                 className="sp-link-btn"
                 onClick={() => setShowForgotConfirm(false)}
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -259,14 +259,17 @@ function SectionPerfil() {
             className="sp-form-block"
             onSubmit={e => { e.preventDefault(); handleSavePassword() }}
           >
-            <div className="sp-pw-fields">
+            {/* 2-column labeled layout */}
+            <div className="sp-labeled-form">
+              {/* Current password row */}
+              <span className="sp-labeled-form-label">{t('sp.currentPw')}</span>
               <div className="sp-pw-row">
                 <input
                   className="sp-input sp-input--pw"
                   type={showCurrentPw ? 'text' : 'password'}
                   value={currentPw}
                   onChange={e => setCurrentPw(e.target.value)}
-                  placeholder="Senha atual"
+                  placeholder="••••••••"
                   autoComplete="current-password"
                 />
                 <button
@@ -278,20 +281,26 @@ function SectionPerfil() {
                   {showCurrentPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
                 </button>
               </div>
+
+              {/* Forgot password — aligned right col */}
+              <span />
               <button
                 type="button"
                 className="sp-link-btn"
                 onClick={() => setShowForgotConfirm(true)}
               >
-                Esqueceu a senha?
+                {t('sp.forgotPw')}
               </button>
+
+              {/* New password row */}
+              <span className="sp-labeled-form-label">{t('sp.newPw')}</span>
               <div className="sp-pw-row">
                 <input
                   className="sp-input sp-input--pw"
                   type={showNewPw ? 'text' : 'password'}
                   value={newPw}
                   onChange={e => setNewPw(e.target.value)}
-                  placeholder="Nova senha (mín. 8 caracteres)"
+                  placeholder={t('sp.newPwHint')}
                   autoComplete="new-password"
                 />
                 <button
@@ -303,23 +312,29 @@ function SectionPerfil() {
                   {showNewPw ? <EyeOff size={15} strokeWidth={2} /> : <Eye size={15} strokeWidth={2} />}
                 </button>
               </div>
+
+              {/* Confirm password row */}
+              <span className="sp-labeled-form-label">{t('sp.confirmPw')}</span>
               <input
                 className="sp-input"
                 type="password"
                 value={confirmPw}
                 onChange={e => setConfirmPw(e.target.value)}
-                placeholder="Confirmar nova senha"
+                placeholder="••••••••"
                 autoComplete="new-password"
               />
-            </div>
-            <div className="sp-pw-actions">
-              <button
-                className="sp-btn-save"
-                type="submit"
-                disabled={savingPw || !currentPw || !newPw || !confirmPw}
-              >
-                {savingPw ? 'Salvando…' : 'Atualizar senha'}
-              </button>
+
+              {/* Actions — aligned right col */}
+              <span />
+              <div className="sp-pw-actions">
+                <button
+                  className="sp-btn-save"
+                  type="submit"
+                  disabled={savingPw || !currentPw || !newPw || !confirmPw}
+                >
+                  {savingPw ? <><Spinner /> {t('common.saving')}</> : t('sp.updatePw')}
+                </button>
+              </div>
             </div>
           </form>
         )}
@@ -330,41 +345,52 @@ function SectionPerfil() {
 
 // ── Section: Preferências ──────────────────────────────────────────────────
 function SectionPreferencias() {
+  const { session } = useAuth()
   const { theme, setTheme, weekStartsOn, setWeekStartsOn, language, setLanguage, soundEnabled, setSoundEnabled } = useSettings()
+  const t = useT()
+
+  async function handleSaveLanguage(lang) {
+    setLanguage(lang)
+    if (session?.user?.id) {
+      await supabase.from('profiles').update({ language: lang }).eq('id', session.user.id)
+    }
+  }
 
   return (
     <div className="sp-section">
-      <h2 className="sp-section-title">Preferências</h2>
+      <h2 className="sp-section-title">{t('settings.preferences')}</h2>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">Tema</h3>
+        <h3 className="sp-group-title">{t('sp.theme')}</h3>
         <div className="sp-option-group">
-          {[
-            { value: 'dark',   label: 'Escuro'  },
-            { value: 'light',  label: 'Claro'   },
-            { value: 'system', label: 'Sistema' },
-          ].map(opt => (
-            <button
-              key={opt.value}
-              className={`sp-option-btn${theme === opt.value ? ' active' : ''}`}
-              onClick={() => setTheme(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
+          <button
+            className={`sp-option-btn${theme === 'dark' ? ' active' : ''}`}
+            onClick={() => setTheme('dark')}
+          >
+            <Moon size={14} strokeWidth={2} /> {t('sp.dark')}
+          </button>
+          <button
+            className={`sp-option-btn${theme === 'light' ? ' active' : ''}`}
+            onClick={() => setTheme('light')}
+          >
+            <Sun size={14} strokeWidth={2} /> {t('sp.light')}
+          </button>
+          <button
+            className={`sp-option-btn${theme === 'system' ? ' active' : ''}`}
+            onClick={() => setTheme('system')}
+          >
+            <Monitor size={14} strokeWidth={2} /> {t('sp.system')}
+          </button>
         </div>
-        {theme === 'system' && (
-          <p className="sp-hint">Segue a preferência do sistema operacional.</p>
-        )}
       </div>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">Início da semana</h3>
+        <h3 className="sp-group-title">{t('sp.weekStart')}</h3>
         <div className="sp-option-group">
           {[
-            { value: 'sunday',   label: 'Domingo'       },
-            { value: 'monday',   label: 'Segunda-feira' },
-            { value: 'saturday', label: 'Sábado'        },
+            { value: 'sunday',   label: t('sp.sunday')   },
+            { value: 'monday',   label: t('sp.monday')   },
+            { value: 'saturday', label: t('sp.saturday') },
           ].map(opt => (
             <button
               key={opt.value}
@@ -378,25 +404,27 @@ function SectionPreferencias() {
       </div>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">Idioma</h3>
+        <h3 className="sp-group-title">{t('sp.language')}</h3>
         <div className="sp-option-group">
           <button
             className={`sp-option-btn${language === 'pt' ? ' active' : ''}`}
-            onClick={() => setLanguage('pt')}
+            onClick={() => handleSaveLanguage('pt')}
           >
             Português
           </button>
-          <button className="sp-option-btn sp-option-btn--disabled" disabled>
+          <button
+            className={`sp-option-btn${language === 'en' ? ' active' : ''}`}
+            onClick={() => handleSaveLanguage('en')}
+          >
             English
-            <span className="sp-badge-soon">em breve</span>
           </button>
         </div>
       </div>
 
       <div className="sp-group">
-        <h3 className="sp-group-title">Sons</h3>
+        <h3 className="sp-group-title">{t('sp.sounds')}</h3>
         <div className="sp-toggle-row">
-          <span className="sp-toggle-label">Sons de interface</span>
+          <span className="sp-toggle-label">{t('sp.soundLabel')}</span>
           <button
             className={`sp-toggle${soundEnabled ? ' active' : ''}`}
             role="switch"
@@ -411,17 +439,16 @@ function SectionPreferencias() {
   )
 }
 
-// ── Nav config ─────────────────────────────────────────────────────────────
-const SECTIONS = [
-  { id: 'perfil',       label: 'Perfil',       Icon: User              },
-
-  { id: 'preferencias', label: 'Preferências', Icon: SlidersHorizontal },
-]
-
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [active, setActive] = useState('perfil')
   const navigate = useNavigate()
+  const t = useT()
+
+  const SECTIONS = [
+    { id: 'perfil',       label: t('settings.profile'),     Icon: User              },
+    { id: 'preferencias', label: t('settings.preferences'), Icon: SlidersHorizontal },
+  ]
 
   return (
     <div className="sp-root">
@@ -433,11 +460,11 @@ export default function SettingsPage() {
             <button
               className="sp-back-btn"
               onClick={() => navigate(-1)}
-              aria-label="Voltar"
+              aria-label={t('settings.back')}
             >
               <ChevronLeft size={16} strokeWidth={2.5} />
             </button>
-            <span className="sp-sidebar-title">Configurações</span>
+            <span className="sp-sidebar-title">{t('settings.title')}</span>
           </div>
 
           <nav className="sp-nav">

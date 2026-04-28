@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { useT } from '../hooks/useT'
+import { Spinner } from '../lib/ui'
 import './AddEventModal.css'
 
 const COLORS = [
@@ -20,6 +22,7 @@ const DEFAULT_FORM = {
 }
 
 export default function AddEventModal({ onClose, onSave, onDelete, initialData, defaultDate }) {
+  const t = useT()
   const prefill = defaultDate
     ? {
         start_at: toLocalDateTimeInput(new Date(defaultDate.setHours(9, 0, 0, 0))),
@@ -93,7 +96,7 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
     <div className="modal-backdrop" onClick={handleBackdrop}>
       <div className="modal-card" role="dialog" aria-modal="true">
         <div className="modal-header">
-          <h2 className="modal-title">{initialData ? 'Editar evento' : 'Novo evento'}</h2>
+          <h2 className="modal-title">{initialData ? t('event.editTitle') : t('event.newTitle')}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Fechar">✕</button>
         </div>
 
@@ -102,7 +105,7 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
             ref={titleRef}
             className="modal-input modal-title-input"
             type="text"
-            placeholder="Título do evento"
+            placeholder={t('event.titlePh')}
             value={form.title}
             onChange={(e) => set('title', e.target.value)}
             required
@@ -116,13 +119,13 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
               checked={form.all_day}
               onChange={(e) => set('all_day', e.target.checked)}
             />
-            <span className="toggle-label">Dia inteiro</span>
+            <span className="toggle-label">{t('event.allDay')}</span>
           </label>
 
           {/* Time fields */}
           {form.all_day ? (
             <div className="modal-field">
-              <label className="modal-label">Data</label>
+              <label className="modal-label">{t('event.date')}</label>
               <input
                 className="modal-input"
                 type="date"
@@ -134,7 +137,7 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
           ) : (
             <div className="modal-row">
               <div className="modal-field">
-                <label className="modal-label">Início</label>
+                <label className="modal-label">{t('event.start')}</label>
                 <input
                   className="modal-input"
                   type="datetime-local"
@@ -144,7 +147,7 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
                 />
               </div>
               <div className="modal-field">
-                <label className="modal-label">Fim</label>
+                <label className="modal-label">{t('event.end')}</label>
                 <input
                   className="modal-input"
                   type="datetime-local"
@@ -158,7 +161,7 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
 
           {/* Color */}
           <div className="modal-field">
-            <label className="modal-label">Cor</label>
+            <label className="modal-label">{t('event.color')}</label>
             <div className="color-picker">
               {COLORS.map(c => (
                 <button
@@ -175,22 +178,22 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
           {/* Recurrence */}
           <div className="modal-row">
             <div className="modal-field">
-              <label className="modal-label">Repetição</label>
+                <label className="modal-label">{t('event.recurrence')}</label>
               <select
                 className="modal-select"
                 value={form.recurrence}
                 onChange={(e) => set('recurrence', e.target.value)}
               >
-                <option value="none">Não repete</option>
-                <option value="daily">Diariamente</option>
-                <option value="weekly">Semanalmente</option>
-                <option value="monthly">Mensalmente</option>
+                <option value="none">{t('event.noRepeat')}</option>
+                <option value="daily">{t('event.daily')}</option>
+                <option value="weekly">{t('event.weekly')}</option>
+                <option value="monthly">{t('event.monthly')}</option>
               </select>
             </div>
 
             {form.recurrence !== 'none' && (
               <div className="modal-field">
-                <label className="modal-label">Repetir até</label>
+                <label className="modal-label">{t('event.recurUntil')}</label>
                 <input
                   className="modal-input"
                   type="date"
@@ -204,13 +207,13 @@ export default function AddEventModal({ onClose, onSave, onDelete, initialData, 
           <div className="modal-actions">
             {onDelete && (
               <button type="button" className="btn-delete" onClick={onDelete}>
-                Excluir
+                {t('event.delete')}
               </button>
             )}
             <div className="modal-actions-right">
-              <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
+              <button type="button" className="btn-cancel" onClick={onClose}>{t('common.cancel')}</button>
               <button type="submit" className="btn-save" disabled={saving || !form.title.trim()}>
-                {saving ? '...' : initialData ? 'Salvar' : 'Criar evento'}
+                {saving ? <><Spinner /> {t('common.saving')}</> : initialData ? t('event.save') : t('event.newTitle')}
               </button>
             </div>
           </div>

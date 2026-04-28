@@ -262,6 +262,29 @@
   margin-bottom: 0.625rem;
 }
 
+/* ── 2-column labeled form (GitHub/Notion style) ──────────────────────────── */
+.sp-labeled-form {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 0.625rem 1rem;
+  align-items: center;
+}
+
+.sp-labeled-form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+
+@media (max-width: 520px) {
+  .sp-labeled-form {
+    grid-template-columns: 1fr;
+  }
+  .sp-labeled-form-label { text-align: left; }
+}
+
 .sp-pw-row {
   position: relative;
   display: flex;
