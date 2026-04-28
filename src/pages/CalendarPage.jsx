@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { fetchEvents, createEvent, updateEvent, deleteEvent } from '../lib/events'
 import AddEventModal from '../components/AddEventModal'
-import Skeleton from '../components/Skeleton'
 import './CalendarPage.css'
 
 const COLOR_MAP = {
@@ -97,7 +96,7 @@ export default function CalendarPage() {
 
       {/* Calendar grid */}
       {loading ? (
-        <CalendarGridSkeleton />
+        <div className="cal-loading"><div className="loading-dot" /></div>
       ) : view === 'month' ? (
         <MonthView
           cursor={cursor}
@@ -127,35 +126,6 @@ export default function CalendarPage() {
           defaultDate={modal.mode === 'create' ? modal.date : null}
         />
       )}
-    </div>
-  )
-}
-
-/* ─── Calendar skeleton (mimics month grid structure) ─────────── */
-const SK_EVENTS = [0,0,1,0,1,0,0, 0,1,0,0,1,0,0, 1,0,0,1,0,0,1, 0,0,1,0,0,1,0, 0,1,0,0,0,1,0]
-
-function CalendarGridSkeleton() {
-  return (
-    <div className="cal-skeleton">
-      <div className="cal-skeleton-header">
-        {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => (
-          <div key={d} className="cal-skeleton-weekday">
-            <Skeleton width="24px" height="9px" borderRadius="3px" />
-          </div>
-        ))}
-      </div>
-      {Array.from({ length: 5 }).map((_, row) => (
-        <div key={row} className="cal-skeleton-row">
-          {Array.from({ length: 7 }).map((_, col) => (
-            <div key={col} className="cal-skeleton-cell">
-              <Skeleton width="20px" height="9px" borderRadius="3px" />
-              {SK_EVENTS[row * 7 + col] ? (
-                <Skeleton width="80%" height="10px" borderRadius="3px" style={{ marginTop: '0.375rem' }} />
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ))}
     </div>
   )
 }

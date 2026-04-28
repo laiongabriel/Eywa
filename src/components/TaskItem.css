@@ -173,6 +173,12 @@
   letter-spacing: 0;
 }
 
+.task-toggle-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
 /* Actions */
 .task-actions {
   display: flex;

@@ -124,50 +124,11 @@
   display: none; /* handled inside edit flow via modal footer */
 }
 
-/* Skeleton */
-.cal-skeleton {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.cal-skeleton-header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.625rem 0;
-}
-
-.cal-skeleton-weekday {
+/* Loading */
+.cal-loading {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 0.25rem 0;
-}
-
-.cal-skeleton-row {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  flex: 1;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.cal-skeleton-row:last-child {
-  border-bottom: none;
-}
-
-.cal-skeleton-cell {
-  padding: 0.625rem 0.5rem;
-  border-right: 1px solid var(--color-border);
-  min-height: 80px;
-}
-
-.cal-skeleton-cell:last-child {
-  border-right: none;
+  padding: 4rem;
 }
 
 /* ─── Month View ───────────────────────── */

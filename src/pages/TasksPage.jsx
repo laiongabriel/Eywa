@@ -23,28 +23,9 @@ import {
   requestNotificationPermission,
 } from '../lib/notifications'
 import TaskItem from '../components/TaskItem'
-import Skeleton from '../components/Skeleton'
 import AddTaskModal from '../components/AddTaskModal'
 import FocusMode from '../components/FocusMode'
 import './TasksPage.css'
-
-/** Shimmer placeholder mimicking a single task item row */
-function TaskItemSkeleton() {
-  return (
-    <div className="task-item-skeleton">
-      <Skeleton width="6px" height="14px" borderRadius="3px" style={{ opacity: 0.6 }} />
-      <Skeleton width="20px" height="20px" borderRadius="5px" style={{ flexShrink: 0 }} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <Skeleton height="13px" borderRadius="4px" style={{ width: 'var(--sk-title-w, 72%)' }} />
-      </div>
-      <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
-        <Skeleton width="28px" height="28px" borderRadius="7px" />
-        <Skeleton width="28px" height="28px" borderRadius="7px" />
-        <Skeleton width="28px" height="28px" borderRadius="7px" />
-      </div>
-    </div>
-  )
-}
 
 /** Wraps TaskItem with dnd-kit sortable behaviour + smooth grid height collapse */
 function SortableTaskItem({ task, isFadingOut, index, ...props }) {
@@ -253,10 +234,8 @@ export default function TasksPage() {
       </div>
 
       {loading ? (
-        <div className="tasks-skeleton">
-          {[72, 85, 55, 68, 78].map((w, i) => (
-            <TaskItemSkeleton key={i} style={{ '--sk-title-w': `${w}%` }} />
-          ))}
+        <div className="tasks-loading">
+          <div className="loading-dot" />
         </div>
       ) : sortableTasks.length === 0 && completedTasks.length === 0 ? (
         <div className="tasks-empty">Nenhuma tarefa criada ainda.</div>

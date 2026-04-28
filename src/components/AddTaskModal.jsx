@@ -7,6 +7,78 @@ import './AddTaskModal.css'
 
 registerLocale('pt-BR', ptBR)
 
+const REMINDER_OPTIONS = [
+  { value: '',     label: 'Sem lembrete' },
+  { value: '0',    label: 'Na hora' },
+  { value: '5',    label: '5 minutos antes' },
+  { value: '15',   label: '15 minutos antes' },
+  { value: '30',   label: '30 minutos antes' },
+  { value: '60',   label: '1 hora antes' },
+  { value: '1440', label: '1 dia antes' },
+]
+
+function ReminderSelect({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef(null)
+  const selectedLabel = REMINDER_OPTIONS.find(o => o.value === value)?.label ?? 'Sem lembrete'
+
+  useEffect(() => {
+    if (!open) return
+    function onMouseDown(e) {
+      if (!containerRef.current?.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [open])
+
+  function handleKeyDown(e) {
+    if (e.key === 'Escape') setOpen(false)
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(v => !v) }
+  }
+
+  return (
+    <div className="reminder-select" ref={containerRef}>
+      <button
+        type="button"
+        className={`reminder-select-trigger${open ? ' open' : ''}`}
+        onClick={() => setOpen(v => !v)}
+        onKeyDown={handleKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="reminder-select-label">{selectedLabel}</span>
+        <svg className="reminder-select-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div className="reminder-select-dropdown" role="listbox">
+          {REMINDER_OPTIONS.map(opt => (
+            <div
+              key={opt.value}
+              className={`reminder-select-option${opt.value === value ? ' selected' : ''}`}
+              role="option"
+              aria-selected={opt.value === value}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                onChange(opt.value)
+                setOpen(false)
+              }}
+            >
+              <span>{opt.label}</span>
+              {opt.value === value && (
+                <svg className="reminder-select-check" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ModalSpinner() {
   return (
     <svg className="btn-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -50,7 +122,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
   const [saving, setSaving]       = useState(false)
   const titleRef                  = useRef(null)
 
-  useEffect(() => { titleRef.current?.focus() }, [])
+  useEffect(() => { titleRef.current?.focus({ preventScroll: true }) }, [])
 
   function set(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -207,19 +279,10 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
               <div className="modal-row modal-row--reminder">
                 <div className="modal-field">
                   <label className="modal-label">Lembrete</label>
-                  <select
-                    className="modal-select"
+                  <ReminderSelect
                     value={form.reminderOffset}
-                    onChange={(e) => set('reminderOffset', e.target.value)}
-                  >
-                    <option value="">Sem lembrete</option>
-                    <option value="0">Na hora</option>
-                    <option value="5">5 minutos antes</option>
-                    <option value="15">15 minutos antes</option>
-                    <option value="30">30 minutos antes</option>
-                    <option value="60">1 hora antes</option>
-                    <option value="1440">1 dia antes</option>
-                  </select>
+                    onChange={(v) => set('reminderOffset', v)}
+                  />
                 </div>
               </div>
             </div>

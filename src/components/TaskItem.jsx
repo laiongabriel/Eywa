@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateTask, deleteTask } from '../lib/tasks'
 import { playPriorityMark, playTaskComplete, playTaskDelete } from '../lib/sounds'
 import './TaskItem.css'
@@ -8,16 +8,28 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [pop, setPop] = useState(false)
+  const [localCompleted, setLocalCompleted] = useState(task.completed)
+  const [toggleError, setToggleError] = useState(null)
+
+  // Keep in sync with parent (e.g. external undo or refresh)
+  useEffect(() => { setLocalCompleted(task.completed) }, [task.completed])
 
   async function handleToggle() {
-    const nowCompleted = !task.completed
-    const updated = await updateTask(task.id, { completed: nowCompleted })
+    const nowCompleted = !localCompleted
+    setLocalCompleted(nowCompleted)  // optimistic
     if (nowCompleted) {
       playTaskComplete()
       setPop(true)
       setTimeout(() => setPop(false), 400)
     }
-    onUpdate(updated)
+    try {
+      const updated = await updateTask(task.id, { completed: nowCompleted })
+      onUpdate(updated)
+    } catch {
+      setLocalCompleted(!nowCompleted)  // revert
+      setToggleError('Erro ao atualizar')
+      setTimeout(() => setToggleError(null), 3000)
+    }
   }
 
   async function handleDelete() {
@@ -60,11 +72,11 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
         <span className="task-drag-handle" {...dragHandle}>⠿</span>
       )}
       <button
-        className={`task-checkbox ${task.completed ? 'checked' : ''} ${pop ? 'pop' : ''}`}
+        className={`task-checkbox ${localCompleted ? 'checked' : ''} ${pop ? 'pop' : ''}`}
         onClick={handleToggle}
-        aria-label={task.completed ? 'Marcar como pendente' : 'Marcar como concluída'}
+        aria-label={localCompleted ? 'Marcar como pendente' : 'Marcar como concluída'}
       >
-        {task.completed && <CheckIcon />}
+        {localCompleted && <CheckIcon />}
       </button>
 
       <div className="task-body">
@@ -93,6 +105,9 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
               {task.estimated_minutes ? formatDuration(task.estimated_minutes) : ''}
             </span>
           </div>
+        )}
+        {toggleError && (
+          <span className="task-toggle-error">{toggleError}</span>
         )}
       </div>
 
