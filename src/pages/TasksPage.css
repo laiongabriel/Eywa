@@ -41,6 +41,14 @@
   color: var(--color-text-primary);
   margin: 0;
   letter-spacing: -0.035em;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.tasks-heading-name {
+  color: var(--color-amber-bright);
 }
 
 .tasks-count {

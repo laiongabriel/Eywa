@@ -63,8 +63,15 @@ function SortableTaskItem({ task, isFadingOut, index, ...props }) {
   )
 }
 
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'Bom dia'
+  if (h >= 12 && h < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
 export default function TasksPage() {
-  const { session } = useAuth()
+  const { session, username } = useAuth()
   const userId = session.user.id
   const { addToast } = useToast()
 
@@ -229,7 +236,6 @@ export default function TasksPage() {
               <li key={task.id}>
                 <TaskItem
                   task={task}
-                  userId={userId}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
                   onDeleteStart={handleDeleteStart}
@@ -246,10 +252,13 @@ export default function TasksPage() {
 
       <div className="tasks-header">
         <div className="tasks-header-left">
-          <h1 className="tasks-heading">Tarefas</h1>
-          {activeCount > 0 && (
-            <span className="tasks-count">{activeCount}</span>
-          )}
+          <h1 className="tasks-heading">
+            {username
+              ? <>{getGreeting()}, <span className="tasks-heading-name">{username}</span>
+                {activeCount > 0 && <span className="tasks-count">{activeCount}</span>}
+              </>
+              : <>Tarefas{activeCount > 0 && <span className="tasks-count">{activeCount}</span>}</>}
+          </h1>
         </div>
         <button className="btn-add-task" onClick={openAddModal}>
           + Nova tarefa
@@ -273,7 +282,6 @@ export default function TasksPage() {
                       task={task}
                       index={index}
                       isFadingOut={deletingIds.has(task.id)}
-                      userId={userId}
                       onUpdate={handleUpdate}
                       onDelete={handleDelete}
                       onDeleteStart={handleDeleteStart}
@@ -307,7 +315,6 @@ export default function TasksPage() {
                     <div style={{ minHeight: 0 }}>
                     <TaskItem
                       task={task}
-                      userId={userId}
                       onUpdate={handleUpdate}
                       onDelete={handleDelete}
                       onDeleteStart={handleDeleteStart}
