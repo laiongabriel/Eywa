@@ -304,7 +304,7 @@ export default function AuthPage() {
   const strength = getPasswordStrength(fields.password)
 
   // ── Confirmation screens ──────────────────────────────────────────────────────────────
-  if (authLoading || profileChecking) {
+  if (authLoading) {
     return (
       <div className="auth-root">
         <div className="auth-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>

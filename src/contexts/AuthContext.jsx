@@ -19,18 +19,19 @@ export function AuthProvider({ children }) {
       if (data?.username) setUsername(data.username)
     }
 
-    // loading is controlled exclusively by getSession — it becomes false
-    // as soon as the initial session check resolves, regardless of result.
+    // loading is controlled by whichever resolves first: getSession() or
+    // onAuthStateChange's INITIAL_SESSION event. INITIAL_SESSION fires from
+    // localStorage almost synchronously; getSession() may do a network call
+    // (token refresh). Both set loading=false so the faster one wins.
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setLoading(false)
       if (session) fetchProfile(session.user.id)
     })
 
-    // onAuthStateChange handles subsequent events (login, logout, token refresh)
-    // but never touches loading — it was already resolved by getSession above.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
+      setLoading(false) // no-op if getSession already resolved; wins if INITIAL_SESSION fires first
       if (session) fetchProfile(session.user.id)
       else setUsername(null)
     })
