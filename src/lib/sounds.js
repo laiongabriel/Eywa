@@ -109,6 +109,22 @@ export function playTaskComplete() {
   } catch { /* silent fail */ }
 }
 
+/** Marking a task as priority — warm mid-low two-note lift, E2→B2 */
+export function playPriorityMark() {
+  try {
+    const c = ctx()
+    if (!c) return
+    if (c.state === 'suspended') c.resume()
+    const now = c.currentTime
+    // E2 (82 Hz) — gentle attack, long decay
+    note(c, 82.41,  now,        0.85, 0.072, 'sine')
+    // B2 (123 Hz) — slightly softer, staggered
+    note(c, 123.47, now + 0.10, 0.80, 0.058, 'sine')
+    // Soft shimmer at E3 (164 Hz) — keeps it from being too dull
+    note(c, 164.81, now + 0.18, 0.55, 0.026, 'triangle')
+  } catch { /* silent fail */ }
+}
+
 /** Task deleted — descending 220→140 Hz */
 export function playTaskDelete() {
   try {

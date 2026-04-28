@@ -73,7 +73,6 @@
   align-items: center;
   justify-content: center;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-  margin-top: 2px;
   color: #fff;
 }
 
@@ -113,7 +112,7 @@
 }
 
 .task-title {
-  font-size: 1rem;
+  font-size: var(--task-title-size);
   font-weight: 450;
   color: var(--color-text-primary);
   line-height: 1.45;
@@ -140,7 +139,7 @@
   border: 1px solid var(--color-blue-mid);
   border-radius: 6px;
   color: var(--color-text-primary);
-  font-size: 0.9375rem;
+  font-size: var(--task-title-size);
   font-family: inherit;
   padding: 0.2rem 0.5rem;
   outline: none;

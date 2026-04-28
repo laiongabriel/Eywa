@@ -198,6 +198,8 @@
 
 .review-task-title {
   flex: 1;
+  font-size: var(--task-title-size);
+  line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

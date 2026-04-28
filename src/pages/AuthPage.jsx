@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { resetRouteProgress, startRouteProgress } from '../lib/routeProgress'
 import './AuthPage.css'
 
 // ── Error translation ────────────────────────────────────────────────────────
@@ -118,6 +119,7 @@ export default function AuthPage() {
           navigateTo('/')
         } else {
           // New Google user or user without a profile — ask for username
+          resetRouteProgress()
           setMode('choose-username')
           setAnimKey(k => k + 1)
         }
@@ -214,6 +216,9 @@ export default function AuthPage() {
       return
     }
 
+    const shouldProgressToApp = mode === 'signin'
+    if (shouldProgressToApp) startRouteProgress('/')
+
     setLoading(true)
     try {
       if (mode === 'forgot') {
@@ -255,11 +260,19 @@ export default function AuthPage() {
           .select('id')
           .eq('username', loginVal)
           .maybeSingle()
-        if (!exactUser) { setServerError('Usuário não encontrado.'); return }
+        if (!exactUser) {
+          resetRouteProgress()
+          setServerError('Usuário não encontrado.')
+          return
+        }
 
         const { data: resolved, error: rpcErr } = await supabase
           .rpc('get_email_by_username', { p_username: loginVal })
-        if (rpcErr || !resolved) { setServerError('Usuário não encontrado.'); return }
+        if (rpcErr || !resolved) {
+          resetRouteProgress()
+          setServerError('Usuário não encontrado.')
+          return
+        }
         emailToUse = resolved
       }
       const { error } = await supabase.auth.signInWithPassword({
@@ -270,6 +283,7 @@ export default function AuthPage() {
       // No navigate() here — useEffect handles it once AuthContext confirms session
 
     } catch (err) {
+      if (shouldProgressToApp) resetRouteProgress()
       setServerError(translateError(err.message))
     } finally {
       setLoading(false)
@@ -290,11 +304,14 @@ export default function AuthPage() {
       return
     }
 
+    startRouteProgress('/')
+
     setLoading(true)
     try {
       const { data: taken } = await supabase.from('profiles').select('id')
         .eq('username', usernameVal).maybeSingle()
       if (taken) {
+        resetRouteProgress()
         setErrors(prev => ({ ...prev, username: 'Nome de usuário já em uso.' }))
         setShake(true); return
       }
@@ -303,6 +320,7 @@ export default function AuthPage() {
       if (error) throw error
       navigateTo('/')
     } catch (err) {
+      resetRouteProgress()
       setServerError(translateError(err.message))
     } finally {
       setLoading(false)

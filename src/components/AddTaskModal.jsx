@@ -2,10 +2,19 @@ import { useState, useEffect, useRef } from 'react'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import { ptBR } from 'date-fns/locale'
 import 'react-datepicker/dist/react-datepicker.css'
-import { playModalClose } from '../lib/sounds'
+import { playModalClose, playTaskCreated } from '../lib/sounds'
 import './AddTaskModal.css'
 
 registerLocale('pt-BR', ptBR)
+
+function ModalSpinner() {
+  return (
+    <svg className="btn-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5"
+        strokeLinecap="round" strokeDasharray="28" strokeDashoffset="10" />
+    </svg>
+  )
+}
 
 export default function AddTaskModal({ onClose, onSave, initialData }) {
   const isEdit = !!initialData
@@ -78,6 +87,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
 
     try {
       await onSave(payload)
+      playTaskCreated()
       onClose()
     } catch {
       setSaving(false)
@@ -103,7 +113,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
         <form onSubmit={handleSubmit} className="modal-form">
           <input
             ref={titleRef}
-            className="modal-input modal-title-input"
+            className="modal-input modal-title-input modal-task-title-input"
             type="text"
             placeholder="O que precisa ser feito?"
             value={form.title}
@@ -123,7 +133,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
           {showWhen && (
             <div className="intention-fields">
               <div className="modal-row">
-                <div className="modal-field">
+                <div className="modal-field modal-field--date">
                   <label className="modal-label">Data</label>
                   <DatePicker
                     selected={form.scheduledDate}
@@ -133,6 +143,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     placeholderText="DD/MM/AAAA"
                     className="modal-input datepicker-input"
                     calendarClassName="eywa-datepicker"
+                    wrapperClassName="datepicker-wrapper"
+                    popperClassName="eywa-datepicker-popper"
                     isClearable
                     autoComplete="off"
                     popperPlacement="bottom-start"
@@ -190,7 +202,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={handleCancel}>Cancelar</button>
             <button type="submit" className="btn-save" disabled={saving || !form.title.trim()}>
-              {saving ? '...' : isEdit ? 'Salvar' : 'Criar tarefa'}
+              {saving ? <ModalSpinner /> : isEdit ? 'Salvar' : 'Criar tarefa'}
             </button>
           </div>
         </form>

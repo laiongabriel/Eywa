@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { updateTask, deleteTask } from '../lib/tasks'
-import { playTaskComplete, playTaskDelete } from '../lib/sounds'
+import { playPriorityMark, playTaskComplete, playTaskDelete } from '../lib/sounds'
 import './TaskItem.css'
 
 export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
@@ -33,7 +33,9 @@ export default function TaskItem({ task, userId, onUpdate, onDelete, onEdit, onS
   }
 
   async function handleSetMIT() {
-    const updated = await updateTask(task.id, { is_mit: !task.is_mit })
+    const willBePriority = !task.is_mit
+    const updated = await updateTask(task.id, { is_mit: willBePriority })
+    if (willBePriority) playPriorityMark()
     onUpdate(updated)
   }
 

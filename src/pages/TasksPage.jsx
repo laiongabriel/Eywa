@@ -109,6 +109,7 @@ export default function TasksPage() {
   async function handleEditOpen(task) {
     setEditingTask(task)
     setShowModal(true)
+    playModalOpen()
   }
 
   async function handleEditSave(payload) {
@@ -182,17 +183,20 @@ export default function TasksPage() {
       {mitTasks.length > 0 && (
         <section className="mit-section">
           <div className="mit-label">Prioritárias</div>
-          {mitTasks.map(task => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              userId={userId}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-              onEdit={() => handleEditOpen(task)}
-              onStartFocus={setFocusTask}
-            />
-          ))}
+          <ul className="tasks-list">
+            {mitTasks.map(task => (
+              <li key={task.id}>
+                <TaskItem
+                  task={task}
+                  userId={userId}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  onEdit={() => handleEditOpen(task)}
+                  onStartFocus={setFocusTask}
+                />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

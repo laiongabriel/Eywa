@@ -14,6 +14,8 @@
   --color-text-primary:   #eceef4;
   --color-text-secondary: #9da6ba;
   --color-text-muted:     #5c6880;
+  --task-title-size:      0.95rem;
+  --task-title-focus-size: clamp(1.35rem, 3.6vw, 2rem);
 
   --font-body:    'Lexend', system-ui, -apple-system, sans-serif;
   --font-display: 'Cabinet Grotesk', 'Lexend', system-ui, sans-serif;
@@ -51,11 +53,36 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+html { scrollbar-gutter: stable; }
 body { margin: 0; min-height: 100vh; background: var(--color-bg); color: var(--color-text-primary); }
 #root { min-height: 100vh; }
 .loading-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg); }
 .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-blue-mid); animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+
+.route-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 2px;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.route-progress.visible {
+  opacity: 1;
+}
+
+.route-progress-bar {
+  width: 100%;
+  height: 100%;
+  background: #d97706;
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.4);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.18s linear;
+}
 
 /* ── Elegant tooltips ──────────────────────────────────────────── */
 [data-tooltip] { position: relative; }

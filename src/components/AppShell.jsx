@@ -1,14 +1,22 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { resetRouteProgress, startRouteProgress } from '../lib/routeProgress'
 import './AppShell.css'
 
 export default function AppShell({ children }) {
   const [showSignOut, setShowSignOut] = useState(false)
 
   async function confirmSignOut() {
-    await supabase.auth.signOut()
-    window.location.href = '/auth'
+    setShowSignOut(false)
+    startRouteProgress('/auth')
+
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+    } catch {
+      resetRouteProgress()
+    }
   }
 
   return (
