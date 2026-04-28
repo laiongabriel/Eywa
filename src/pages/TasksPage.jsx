@@ -63,15 +63,8 @@ function SortableTaskItem({ task, isFadingOut, index, ...props }) {
   )
 }
 
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h >= 5 && h < 12) return 'Bom dia'
-  if (h >= 12 && h < 18) return 'Boa tarde'
-  return 'Boa noite'
-}
-
 export default function TasksPage() {
-  const { session, username } = useAuth()
+  const { session } = useAuth()
   const userId = session.user.id
   const { addToast } = useToast()
 
@@ -227,10 +220,6 @@ export default function TasksPage() {
 
   return (
     <div className="tasks-root">
-      {username && (
-        <p className="tasks-greeting">{getGreeting()}, <span className="tasks-greeting-name">{username}</span></p>
-      )}
-
       {/* MIT section — pinned, multiple allowed */}
       {mitTasks.length > 0 && (
         <section className="mit-section">

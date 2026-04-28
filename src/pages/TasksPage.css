@@ -43,19 +43,6 @@
   letter-spacing: -0.035em;
 }
 
-.tasks-greeting {
-  font-family: var(--font-display);
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.tasks-greeting-name {
-  color: var(--color-amber-bright);
-}
-
 .tasks-count {
   font-size: 0.8125rem;
   font-weight: 600;

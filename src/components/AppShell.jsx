@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { resetRouteProgress, startRouteProgress } from '../lib/routeProgress'
 import { Check, X } from 'lucide-react'
+import UserMenu from './UserMenu'
 import './AppShell.css'
 
 export default function AppShell({ children }) {
@@ -33,10 +34,7 @@ export default function AppShell({ children }) {
           </NavLink>
         </div>
         <div className="shell-nav-right">
-          {/* Sign out */}
-          <button className="btn-signout" onClick={() => setShowSignOut(true)}>
-            Sair
-          </button>
+          <UserMenu onSignOut={() => setShowSignOut(true)} />
         </div>
       </nav>
 

@@ -7,33 +7,42 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(undefined) // undefined = loading
   const [username, setUsername] = useState(null)
+  const [avatarUrl, setAvatarUrl] = useState(null)
 
   useEffect(() => {
-    async function fetchUsername(userId) {
+    async function fetchProfile(userId) {
       const { data } = await supabase
         .from('profiles')
-        .select('username')
+        .select('username, avatar_url')
         .eq('id', userId)
         .maybeSingle()
       if (data?.username) setUsername(data.username)
+      setAvatarUrl(data?.avatar_url ?? null)
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      if (session) fetchUsername(session.user.id)
+      if (session) fetchProfile(session.user.id)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (session) fetchUsername(session.user.id)
-      else setUsername(null)
+      if (session) fetchProfile(session.user.id)
+      else { setUsername(null); setAvatarUrl(null) }
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
+  // Allows settings page to update local state after a successful DB write
+  // without triggering a full re-fetch
+  function updateProfile({ username: u, avatarUrl: av } = {}) {
+    if (u !== undefined) setUsername(u)
+    if (av !== undefined) setAvatarUrl(av)
+  }
+
   return (
-    <AuthContext.Provider value={{ session, loading: session === undefined, username }}>
+    <AuthContext.Provider value={{ session, loading: session === undefined, username, avatarUrl, updateProfile }}>
       {children}
     </AuthContext.Provider>
   )

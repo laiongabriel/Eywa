@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { SettingsProvider } from './contexts/SettingsContext'
 import { ToastProvider, useToast } from './contexts/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppShell from './components/AppShell'
@@ -9,6 +10,7 @@ import AuthCallback from './pages/AuthCallback'
 import ResetPassword from './pages/ResetPassword'
 import TasksPage from './pages/TasksPage'
 import CalendarPage from './pages/CalendarPage'
+import SettingsPage from './pages/SettingsPage'
 import {
   completeRouteProgress,
   getRouteProgressSnapshot,
@@ -74,6 +76,7 @@ function AppContent() {
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<ProtectedShell><TasksPage /></ProtectedShell>} />
           <Route path="/agenda" element={<ProtectedShell><CalendarPage /></ProtectedShell>} />
+          <Route path="/settings" element={<ProtectedShell><SettingsPage /></ProtectedShell>} />
         </Routes>
       </AuthProvider>
     </>
@@ -83,9 +86,11 @@ function AppContent() {
 export default function App() {
   return (
     <ToastProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <SettingsProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </SettingsProvider>
     </ToastProvider>
   )
 }
