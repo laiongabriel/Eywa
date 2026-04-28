@@ -185,6 +185,7 @@
 .focus-btn-resume {
   background: var(--color-blue-mid);
   color: #fff;
+  border: 1px solid transparent;
   box-shadow: 0 4px 16px rgba(59, 111, 212, 0.3);
 }
 
