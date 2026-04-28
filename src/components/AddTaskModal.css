@@ -1,3 +1,8 @@
+/* ═══════════════════════════════════════════════════════════════
+   AddTaskModal — complete styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Backdrop & card ─────────────────────────────────────────── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -10,7 +15,6 @@
   z-index: 100;
   animation: mbFadeIn 0.15s ease;
 }
-
 @keyframes mbFadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -24,157 +28,22 @@
   border-radius: 12px;
   padding: 1.75rem;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  /* Scale removed — it caused text/caret jump on focused input during animation */
   animation: mcSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  /* ensure datepicker popper is not clipped */
   overflow: visible;
 }
-
-/* ── react-datepicker Eywa theme overrides ───────────────────────── */
-.react-datepicker-wrapper,
-.react-datepicker__input-container {
-  width: 100%;
-}
-
-.datepicker-wrapper {
-  display: block;
-  width: 100%;
-  position: relative;
-}
-
-.react-datepicker__input-container .datepicker-input {
-  width: 100%;
-  cursor: pointer;
-}
-
-.eywa-datepicker-popper {
-  position: fixed !important;
-  z-index: 320 !important;
-}
-
-.eywa-datepicker-popper[data-placement^='bottom'] {
-  padding-top: 0.375rem;
-}
-
-/* Duration h/min row */
-.duration-row {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.duration-input {
-  width: 60px !important;
-  padding-left: 0.65rem !important;
-  padding-right: 0.4rem !important;
-}
-
-.duration-sep {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
-.eywa-datepicker {
-  font-family: var(--font-body) !important;
-  background: var(--color-surface) !important;
-  border: 1px solid var(--color-border-active) !important;
-  border-radius: 10px !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
-  color: var(--color-text-primary) !important;
-  font-size: 0.875rem !important;
-}
-
-.eywa-datepicker .react-datepicker__header {
-  background: var(--color-surface-raised) !important;
-  border-bottom: 1px solid var(--color-border) !important;
-  border-radius: 10px 10px 0 0 !important;
-  padding: 0.75rem 0 0.5rem !important;
-}
-
-.eywa-datepicker .react-datepicker__current-month {
-  color: var(--color-text-primary) !important;
-  font-family: var(--font-body) !important;
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  margin-bottom: 0.5rem !important;
-}
-
-/* Fix day-name and day alignment */
-.eywa-datepicker .react-datepicker__day-names,
-.eywa-datepicker .react-datepicker__week {
-  display: flex !important;
-  justify-content: center !important;
-}
-
-.eywa-datepicker .react-datepicker__day-name {
-  color: var(--color-text-muted) !important;
-  font-size: 0.72rem !important;
-  font-weight: 600 !important;
-  width: 2rem !important;
-  line-height: 2rem !important;
-  text-align: center !important;
-  font-family: var(--font-body) !important;
-}
-
-.eywa-datepicker .react-datepicker__day {
-  color: var(--color-text-primary) !important;
-  border-radius: 6px !important;
-  font-family: var(--font-body) !important;
-  width: 2rem !important;
-  line-height: 2rem !important;
-  text-align: center !important;
-  transition: background 0.12s !important;
-  margin: 0.1rem !important;
-}
-
-.eywa-datepicker .react-datepicker__day:hover {
-  background: var(--color-surface-hover) !important;
-}
-
-.eywa-datepicker .react-datepicker__day--selected,
-.eywa-datepicker .react-datepicker__day--keyboard-selected {
-  background: var(--color-amber) !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-}
-
-.eywa-datepicker .react-datepicker__day--today {
-  font-weight: 700 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 2px !important;
-}
-
-.eywa-datepicker .react-datepicker__day--outside-month {
-  color: var(--color-text-muted) !important;
-  opacity: 0.4 !important;
-}
-
-.eywa-datepicker .react-datepicker__navigation-icon::before {
-  border-color: var(--color-text-secondary) !important;
-}
-
-.eywa-datepicker .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
-  border-color: var(--color-text-primary) !important;
-}
-
-.eywa-datepicker .react-datepicker__close-icon::after {
-  background-color: var(--color-text-muted) !important;
-  font-size: 14px !important;
-}
-
 @keyframes mcSlideUp {
-  from { opacity: 0; transform: translateY(18px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Header ──────────────────────────────────────────────────── */
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.25rem;
 }
-
 .modal-title {
   font-family: var(--font-display);
   font-size: 1.125rem;
@@ -183,7 +52,6 @@
   margin: 0;
   letter-spacing: -0.025em;
 }
-
 .modal-close {
   background: none;
   border: none;
@@ -195,26 +63,23 @@
   border-radius: 5px;
   transition: color 0.15s ease, background 0.15s ease;
 }
-
 .modal-close:hover {
   color: var(--color-text-primary);
   background: var(--color-surface-raised);
 }
 
+/* ── Form & base input ───────────────────────────────────────── */
 .modal-form {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
 }
-
 .modal-title-input {
   font-weight: 500;
 }
-
 .modal-task-title-input {
   font-size: var(--task-title-size) !important;
 }
-
 .modal-input {
   width: 100%;
   padding: 0.65rem 0.875rem;
@@ -228,191 +93,13 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
 }
-
-.modal-input::placeholder {
-  color: var(--color-text-muted);
-}
-
+.modal-input::placeholder { color: var(--color-text-muted); }
 .modal-input:focus {
   border-color: var(--color-blue-mid);
   box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.12);
 }
 
-.modal-input[type="date"],
-.modal-input[type="datetime-local"] {
-  color-scheme: inherit;
-}
-
-/* Custom reminder dropdown */
-.reminder-select {
-  position: relative;
-  width: 100%;
-}
-
-.reminder-select-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.625rem 0.875rem;
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  color: var(--color-text-primary);
-  font-size: 0.875rem;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-  outline: none;
-}
-
-.reminder-select-trigger:hover,
-.reminder-select-trigger.open {
-  border-color: var(--color-border-active);
-}
-
-.reminder-select-trigger:focus-visible {
-  border-color: var(--color-blue-mid);
-}
-
-.reminder-select-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.reminder-select-chevron {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  color: var(--color-text-muted);
-  transition: transform 0.18s ease;
-}
-
-.reminder-select-trigger.open .reminder-select-chevron {
-  transform: rotate(180deg);
-}
-
-.reminder-select-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border-active);
-  border-radius: 10px;
-  padding: 0.25rem;
-  z-index: 200;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-  animation: rdropIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes rdropIn {
-  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
-}
-
-.reminder-select-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.75rem;
-  border-radius: 7px;
-  font-size: 0.875rem;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: background 0.1s ease;
-}
-
-.reminder-select-option:hover {
-  background: var(--color-surface-hover);
-}
-
-.reminder-select-option.selected {
-  color: var(--color-amber-bright);
-  font-weight: 500;
-}
-
-.reminder-select-check {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  color: var(--color-amber-bright);
-}
-
-.modal-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.75rem;
-  align-items: end;
-}
-
-.modal-row--duration {
-  grid-template-columns: 1fr;
-}
-
-.modal-row--reminder {
-  grid-template-columns: 1fr;
-}
-
-.modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.modal-field--date {
-  position: relative;
-  overflow: visible;
-}
-
-.modal-field--time {
-  width: 9rem;
-}
-
-/* HH : MM custom time entry */
-.time-hhmm {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.time-part-input {
-  width: 3.5rem !important;
-  padding-left: 0.65rem !important;
-  padding-right: 0.4rem !important;
-}
-
-/* hide number spinners + fix cursor position (text-align: left, not center) */
-.duration-input::-webkit-inner-spin-button,
-.duration-input::-webkit-outer-spin-button,
-.time-part-input::-webkit-inner-spin-button,
-.time-part-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.duration-input,
-.time-part-input {
-  appearance: textfield;
-  -moz-appearance: textfield;
-  text-align: left;
-}
-
-.time-colon {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  line-height: 1;
-  padding-bottom: 0.1rem;
-}
-
-.modal-label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  letter-spacing: 0.015em;
-}
-
+/* ── Intention toggle ────────────────────────────────────────── */
 .intention-toggle {
   display: flex;
   align-items: center;
@@ -428,49 +115,448 @@
   transition: border-color 0.15s ease, color 0.15s ease;
   text-align: left;
 }
-
 .intention-toggle:hover,
 .intention-toggle.open {
   border-color: var(--color-border-active);
   color: var(--color-text-primary);
 }
-
 .intention-arrow {
   font-size: 1rem;
   line-height: 1;
   transition: transform 0.2s ease;
   display: inline-block;
 }
+.intention-arrow.open { transform: rotate(90deg); }
 
-.intention-arrow.open {
-  transform: rotate(90deg);
-}
-
+/* ── Intention fields container ──────────────────────────────── */
 .intention-fields {
   display: flex;
   flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ── Modal rows ──────────────────────────────────────────────── */
+.modal-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 0.75rem;
+  align-items: end;
 }
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+.modal-row--single {
+  grid-template-columns: 1fr;
 }
-
-.btn-spinner {
-  width: 18px;
-  height: 18px;
-  animation: spin 0.65s linear infinite;
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.modal-field--date {
+  position: relative;
+  overflow: visible;
+}
+.modal-field--time {
   flex-shrink: 0;
 }
+.modal-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.015em;
+}
 
+/* ═══════════════════════════════════════════════════════════════
+   SpinField — shared by TimePicker and Duration
+   ═══════════════════════════════════════════════════════════════ */
+.spin-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 3.25rem;
+}
+.spin-arrow {
+  background: none;
+  border: none;
+  padding: 0.3rem 0;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+.spin-arrow:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+.spin-input {
+  width: 100%;
+  padding: 0.5rem 0;
+  text-align: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -moz-appearance: textfield;
+}
+.spin-input::-webkit-inner-spin-button,
+.spin-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.spin-input:focus {
+  border-color: var(--color-blue-mid);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.12);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CustomTimePicker
+   ═══════════════════════════════════════════════════════════════ */
+.ctp-root {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.ctp-colon {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  line-height: 1;
+  /* vertically center with the input (accounts for arrow buttons above/below) */
+  align-self: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CustomDuration
+   ═══════════════════════════════════════════════════════════════ */
+.cdur-root {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cdur-sep {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  /* align with input row, not the whole spin-field */
+  align-self: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CustomDatePicker
+   ═══════════════════════════════════════════════════════════════ */
+.cdp-root {
+  position: relative;
+  width: 100%;
+}
+.cdp-input-wrap {
+  position: relative;
+}
+.cdp-input {
+  cursor: pointer;
+  padding-right: 2.25rem; /* room for clear ×  */
+}
+.cdp-clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.cdp-clear:hover { color: var(--color-text-primary); }
+
+/* Floating panel */
+.cdp-panel {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 270px;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  z-index: 300;
+  animation: cdpOpen 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-theme="light"] .cdp-panel {
+  border-color: var(--color-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+@keyframes cdpOpen {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Header nav */
+.cdp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.5rem 0.5rem;
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .cdp-header {
+  border-bottom-color: var(--color-border);
+}
+.cdp-nav {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.cdp-nav:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+.cdp-month-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* Day-name row */
+.cdp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0.5rem 0.375rem 0.2rem;
+}
+.cdp-wday {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0;
+  text-transform: uppercase;
+}
+
+/* Day grid */
+.cdp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0.2rem 0.375rem 0.5rem;
+  gap: 1px;
+}
+@keyframes cdpSlideL {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes cdpSlideR {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.cdp-grid.cdp-slide-left  { animation: cdpSlideL 0.18s ease; }
+.cdp-grid.cdp-slide-right { animation: cdpSlideR 0.18s ease; }
+
+/* Individual day */
+.cdp-day {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  line-height: 1.5;
+}
+.cdp-day:hover:not(.out) {
+  background: var(--color-surface-hover);
+}
+.cdp-day.out {
+  color: var(--color-text-muted);
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+.cdp-day.tod {
+  border-color: rgba(217, 119, 6, 0.5);
+  font-weight: 600;
+}
+[data-theme="light"] .cdp-day.tod {
+  border-color: rgba(184, 94, 0, 0.5);
+}
+.cdp-day.sel {
+  background: var(--color-amber);
+  color: #0d1117;
+  font-weight: 700;
+  border-color: transparent;
+}
+.cdp-day.sel:hover {
+  background: var(--color-amber-bright);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UnitDropdown (Reminder)
+   ═══════════════════════════════════════════════════════════════ */
+.unit-dd {
+  position: relative;
+  flex-shrink: 0;
+}
+.unit-dd-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  white-space: nowrap;
+}
+.unit-dd-trigger:hover,
+.unit-dd-trigger.open { border-color: var(--color-border-active); }
+.unit-dd-trigger svg {
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.unit-dd-trigger.open svg { transform: rotate(180deg); }
+
+.unit-dd-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 310;
+  animation: udropIn 0.1s ease;
+}
+[data-theme="light"] .unit-dd-menu {
+  border-color: var(--color-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+@keyframes udropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.unit-dd-opt {
+  padding: 0.45rem 0.625rem;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.unit-dd-opt:hover { background: var(--color-surface-hover); }
+.unit-dd-opt.sel {
+  color: var(--color-amber-bright);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ReminderField
+   ═══════════════════════════════════════════════════════════════ */
+.reminder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.125rem;
+}
+.reminder-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.reminder-toggle-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.015em;
+}
+.reminder-check {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--color-amber);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+.reminder-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 1.5rem;
+}
+.reminder-before-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.reminder-value-input {
+  width: 4rem;
+  padding: 0.5rem 0.5rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+.reminder-value-input::-webkit-inner-spin-button,
+.reminder-value-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.reminder-value-input:focus { border-color: var(--color-blue-mid); }
+.reminder-before-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.reminder-now-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Actions
+   ═══════════════════════════════════════════════════════════════ */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.625rem;
   margin-top: 0.25rem;
 }
-
 .btn-cancel {
   background: none;
   border: 1px solid var(--color-border);
@@ -486,12 +572,10 @@
   align-items: center;
   justify-content: center;
 }
-
 .btn-cancel:hover {
   border-color: var(--color-border-active);
   color: var(--color-text-primary);
 }
-
 .btn-save {
   background: var(--color-amber);
   border: none;
@@ -509,17 +593,20 @@
   justify-content: center;
   gap: 0.375rem;
 }
-
 .btn-save:hover:not(:disabled) {
   background: var(--color-amber-bright);
   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
 }
+.btn-save:active:not(:disabled) { transform: scale(0.98); }
+.btn-save:disabled { opacity: 0.5; cursor: default; }
 
-.btn-save:active:not(:disabled) {
-  transform: scale(0.98);
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
-
-.btn-save:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
 }
