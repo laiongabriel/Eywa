@@ -227,6 +227,22 @@ export default function TasksPage() {
 
   return (
     <div className="tasks-root">
+      <div className="tasks-header">
+        <div className="tasks-header-left">
+          {username && (
+            <>
+              <span className="tasks-greeting">{getGreeting()}, <span className="tasks-greeting-name">{username}</span></span>
+              <span className="tasks-header-sep">·</span>
+            </>
+          )}
+          <h1 className="tasks-heading">Tarefas</h1>
+          {activeCount > 0 && <span className="tasks-count">{activeCount}</span>}
+        </div>
+        <button className="btn-add-task" onClick={openAddModal}>
+          + Nova tarefa
+        </button>
+      </div>
+
       {/* MIT section — pinned, multiple allowed */}
       {mitTasks.length > 0 && (
         <section className="mit-section">
@@ -249,21 +265,6 @@ export default function TasksPage() {
           </ul>
         </section>
       )}
-
-      <div className="tasks-header">
-        <div className="tasks-header-left">
-          <h1 className="tasks-heading">
-            {username
-              ? <>{getGreeting()}, <span className="tasks-heading-name">{username}</span>
-                {activeCount > 0 && <span className="tasks-count">{activeCount}</span>}
-              </>
-              : <>Tarefas{activeCount > 0 && <span className="tasks-count">{activeCount}</span>}</>}
-          </h1>
-        </div>
-        <button className="btn-add-task" onClick={openAddModal}>
-          + Nova tarefa
-        </button>
-      </div>
 
       {loading ? (
         <div className="tasks-loading">
