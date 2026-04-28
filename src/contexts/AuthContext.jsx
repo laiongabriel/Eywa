@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabase'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(undefined) // undefined = loading
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState(null)
 
   useEffect(() => {
@@ -18,15 +19,20 @@ export function AuthProvider({ children }) {
       if (data?.username) setUsername(data.username)
     }
 
+    // loading is controlled exclusively by getSession — it becomes false
+    // as soon as the initial session check resolves, regardless of result.
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
+      setLoading(false)
       if (session) fetchProfile(session.user.id)
     })
 
+    // onAuthStateChange handles subsequent events (login, logout, token refresh)
+    // but never touches loading — it was already resolved by getSession above.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       if (session) fetchProfile(session.user.id)
-      else { setUsername(null) }
+      else setUsername(null)
     })
 
     return () => subscription.unsubscribe()
@@ -37,7 +43,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, loading: session === undefined, username, updateProfile }}>
+    <AuthContext.Provider value={{ session, loading, username, updateProfile }}>
       {children}
     </AuthContext.Provider>
   )
