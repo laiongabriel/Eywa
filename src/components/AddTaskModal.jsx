@@ -145,6 +145,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     calendarClassName="eywa-datepicker"
                     wrapperClassName="datepicker-wrapper"
                     popperClassName="eywa-datepicker-popper"
+                    portalId="datepicker-portal"
                     isClearable
                     autoComplete="off"
                     popperPlacement="bottom-start"

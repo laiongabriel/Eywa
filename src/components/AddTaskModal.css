@@ -47,7 +47,7 @@
 }
 
 .eywa-datepicker-popper {
-  position: absolute !important;
+  position: fixed !important;
   z-index: 320 !important;
 }
 
@@ -64,9 +64,8 @@
 
 .duration-input {
   width: 60px !important;
-  text-align: center;
-  padding-left: 0.5rem !important;
-  padding-right: 0.5rem !important;
+  padding-left: 0.65rem !important;
+  padding-right: 0.4rem !important;
 }
 
 .duration-sep {
@@ -298,8 +297,7 @@
 
 .time-part-input {
   width: 3.5rem !important;
-  text-align: center;
-  padding-left: 0.4rem !important;
+  padding-left: 0.65rem !important;
   padding-right: 0.4rem !important;
 }
 

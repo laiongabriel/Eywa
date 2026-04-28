@@ -27,25 +27,28 @@ function note(audioCtx, freq, startTime, duration, volume = 0.14, type = 'sine')
   osc.stop(startTime + duration + 0.06)
 }
 
-/** Opening a modal — gentle low ascending sweep C3→E3 */
+/** Opening a modal — G2 bass ground + ascending sweep C3→E3 */
 export function playModalOpen() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
     const now = c.currentTime
+    // Warm grounding bass
+    note(c, 98.00, now, 0.40, 0.048)
+    // Ascending sweep starts slightly after, C3 → E3
     const osc = c.createOscillator()
     const gain = c.createGain()
     osc.connect(gain)
     gain.connect(c.destination)
     osc.type = 'sine'
-    osc.frequency.setValueAtTime(130, now)
-    osc.frequency.exponentialRampToValueAtTime(196, now + 0.14)
-    gain.gain.setValueAtTime(0, now)
-    gain.gain.linearRampToValueAtTime(0.10, now + 0.04)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28)
-    osc.start(now)
-    osc.stop(now + 0.30)
+    osc.frequency.setValueAtTime(130, now + 0.04)
+    osc.frequency.exponentialRampToValueAtTime(196, now + 0.20)
+    gain.gain.setValueAtTime(0, now + 0.04)
+    gain.gain.linearRampToValueAtTime(0.088, now + 0.08)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34)
+    osc.start(now + 0.04)
+    osc.stop(now + 0.36)
   } catch { /* silent fail */ }
 }
 
@@ -83,7 +86,7 @@ export function playTaskCreated() {
   } catch { /* silent fail */ }
 }
 
-/** Task marked complete — warm G3 + C4 sine chord */
+/** Task marked complete — G2+G3 chord resolving to C4 */
 export function playTaskComplete() {
   try {
     const c = ctx()
@@ -103,25 +106,36 @@ export function playTaskComplete() {
       osc.start(now + delay)
       osc.stop(now + delay + dur + 0.05)
     }
-    // G3 → C4
-    tone(196.00, 0,    0.75, 0.085)
-    tone(261.63, 0.12, 0.90, 0.068)
+    tone(98.00,  0,    0.80, 0.050)  // G2 — deep bass anchor
+    tone(196.00, 0,    0.80, 0.078)  // G3 — main
+    tone(261.63, 0.14, 0.95, 0.060)  // C4 — resolution
   } catch { /* silent fail */ }
 }
 
-/** Marking a task as priority — warm mid-low two-note lift, E2→B2 */
+/** Marking as priority — G2+D3 chord (bell attack) + G3 resolve.
+ *  Bell envelope (0.008s attack) = instantly distinct from all other sounds. */
 export function playPriorityMark() {
   try {
     const c = ctx()
     if (!c) return
     if (c.state === 'suspended') c.resume()
     const now = c.currentTime
-    // E2 (82 Hz) — gentle attack, long decay
-    note(c, 82.41,  now,        0.85, 0.072, 'sine')
-    // B2 (123 Hz) — slightly softer, staggered
-    note(c, 123.47, now + 0.10, 0.80, 0.058, 'sine')
-    // Soft shimmer at E3 (164 Hz) — keeps it from being too dull
-    note(c, 164.81, now + 0.18, 0.55, 0.026, 'triangle')
+    const bell = (freq, startTime, duration, volume) => {
+      const osc = c.createOscillator()
+      const gain = c.createGain()
+      osc.connect(gain)
+      gain.connect(c.destination)
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0, startTime)
+      gain.gain.linearRampToValueAtTime(volume, startTime + 0.008)
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration)
+      osc.start(startTime)
+      osc.stop(startTime + duration + 0.05)
+    }
+    bell(98.00,  now,        1.10, 0.078)  // G2 — simultaneous
+    bell(146.83, now,        1.30, 0.062)  // D3 — simultaneous (perfect fifth)
+    bell(196.00, now + 0.22, 0.85, 0.036)  // G3 — gentle resolve
   } catch { /* silent fail */ }
 }
 
