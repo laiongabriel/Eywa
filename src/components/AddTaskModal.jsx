@@ -211,6 +211,90 @@ function UnitDropdown({ value, onChange }) {
   )
 }
 
+/* ─── TimeInput ──────────────────────────────────────────────── */
+function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
+  const hRef = useRef(null)
+  const mRef = useRef(null)
+  // Store latest state in ref so wheel listeners never stale-close over values
+  const api = useRef({ valueH, valueM, onChangeH, onChangeM })
+  api.current = { valueH, valueM, onChangeH, onChangeM }
+
+  useEffect(() => {
+    const hEl = hRef.current
+    const mEl = mRef.current
+    if (!hEl || !mEl) return
+    function onWheelH(e) {
+      e.preventDefault()
+      const n = ((parseInt(api.current.valueH) || 0) + (e.deltaY < 0 ? 1 : -1) + 24) % 24
+      api.current.onChangeH(String(n))
+    }
+    function onWheelM(e) {
+      e.preventDefault()
+      const n = ((parseInt(api.current.valueM) || 0) + (e.deltaY < 0 ? 1 : -1) + 60) % 60
+      api.current.onChangeM(String(n))
+    }
+    hEl.addEventListener('wheel', onWheelH, { passive: false })
+    mEl.addEventListener('wheel', onWheelM, { passive: false })
+    return () => {
+      hEl.removeEventListener('wheel', onWheelH)
+      mEl.removeEventListener('wheel', onWheelM)
+    }
+  }, [])
+
+  function handleHChange(e) {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
+    onChangeH(raw)
+    if (raw.length === 2 && parseInt(raw) <= 23) {
+      mRef.current?.focus()
+      mRef.current?.select()
+    }
+  }
+  function handleHBlur() {
+    if (valueH === '') return
+    const n = parseInt(valueH)
+    if (isNaN(n)) { onChangeH(''); return }
+    if (n > 23) onChangeH('23')
+    else if (n < 0) onChangeH('0')
+  }
+  function handleMChange(e) {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 2)
+    onChangeM(raw)
+  }
+  function handleMBlur() {
+    if (valueM === '') return
+    const n = parseInt(valueM)
+    if (isNaN(n)) { onChangeM(''); return }
+    if (n > 59) onChangeM('59')
+    else if (n < 0) onChangeM('0')
+  }
+
+  return (
+    <div className="time-hhmm">
+      <input
+        ref={hRef}
+        className="modal-input time-part-input"
+        type="text"
+        inputMode="numeric"
+        placeholder="HH"
+        value={valueH}
+        onChange={handleHChange}
+        onBlur={handleHBlur}
+      />
+      <span className="time-colon">:</span>
+      <input
+        ref={mRef}
+        className="modal-input time-part-input"
+        type="text"
+        inputMode="numeric"
+        placeholder="MM"
+        value={valueM}
+        onChange={handleMChange}
+        onBlur={handleMBlur}
+      />
+    </div>
+  )
+}
+
 /* ─── BellIcon ───────────────────────────────────────────────── */
 function BellIcon() {
   return (
@@ -227,38 +311,36 @@ function ReminderInlineField({ hasTime, now, value, unit, onNowChange, onValueCh
   return (
     <div
       className="modal-field"
-      data-tooltip={disabled ? 'Defina um horário para ativar o lembrete' : undefined}
+      {...(disabled ? { 'data-tooltip': 'Defina um horário para ativar o lembrete' } : {})}
     >
-      <label className="modal-label">Lembrete</label>
-      <div className={`reminder-inline-row${disabled ? ' disabled' : ''}`}>
-        <BellIcon />
-        {now ? (
+      <div className="reminder-label-row">
+        <label className="modal-label">Lembrete</label>
+        {!disabled && (
           <button
             type="button"
-            className="reminder-now-pill active"
-            onClick={() => onNowChange(false)}
+            className={`reminder-na-hora-btn${now ? ' active' : ''}`}
+            onClick={() => onNowChange(!now)}
           >
             Na hora
           </button>
+        )}
+      </div>
+      <div className={`reminder-control${disabled ? ' disabled' : ''}`}>
+        <BellIcon />
+        {now ? (
+          <span className="reminder-now-text">Na hora</span>
         ) : (
           <>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               className="modal-input duration-input"
-              min="1" max="9999"
-              value={value}
               placeholder="–"
-              onChange={(e) => onValueChange(e.target.value)}
+              value={value}
+              onChange={(e) => onValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
             />
             <UnitDropdown value={unit} onChange={onUnitChange} />
             <span className="duration-sep">antes</span>
-            <button
-              type="button"
-              className="reminder-now-pill"
-              onClick={() => onNowChange(true)}
-            >
-              Na hora
-            </button>
           </>
         )}
       </div>
@@ -424,23 +506,12 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
                 <div className="modal-field modal-field--time">
                   <label className="modal-label">Horário</label>
-                  <div className="time-hhmm">
-                    <input
-                      className="modal-input time-part-input"
-                      type="number" min="0" max="23" step="1"
-                      placeholder="HH"
-                      value={form.scheduledH}
-                      onChange={(e) => set('scheduledH', e.target.value)}
-                    />
-                    <span className="time-colon">:</span>
-                    <input
-                      className="modal-input time-part-input"
-                      type="number" min="0" max="59" step="1"
-                      placeholder="MM"
-                      value={form.scheduledM}
-                      onChange={(e) => set('scheduledM', e.target.value)}
-                    />
-                  </div>
+                  <TimeInput
+                    valueH={form.scheduledH}
+                    valueM={form.scheduledM}
+                    onChangeH={(v) => set('scheduledH', v)}
+                    onChangeM={(v) => set('scheduledM', v)}
+                  />
                 </div>
               </div>
 

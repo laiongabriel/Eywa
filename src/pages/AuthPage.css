@@ -354,7 +354,7 @@
   cursor: pointer;
   padding: 0.25rem 0;
   border-radius: 0;
-  color: var(--color-blue-light);
+  color: var(--color-amber);
   font-weight: 500;
   transition: color 0.15s;
   text-decoration: underline;
@@ -367,11 +367,11 @@
 }
 
 .auth-toggle-btn.signin-cta {
-  color: var(--color-text-secondary);
+  color: var(--color-amber);
 }
 
 .auth-toggle-btn.signin-cta:hover {
-  color: var(--color-text-primary);
+  color: var(--color-amber-bright);
 }
 
 /* --------------------------------------------------------------------------
