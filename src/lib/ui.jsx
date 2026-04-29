@@ -62,7 +62,7 @@ export function UserAvatar({ username, size = 32 }) {
         minHeight: size,
         borderRadius: '50%',
         overflow: 'hidden',
-        background: '#3b6fd4',
+        background: '#2a3347',
         color: '#fff',
         fontSize,
         fontWeight: 600,

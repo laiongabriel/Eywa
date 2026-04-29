@@ -69,7 +69,7 @@ function validateField(field, value, allValues, mode) {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AuthPage() {
   const navigate = useNavigate()
-  const { session, loading: authLoading, updateProfile } = useAuth()
+  const { session, loading: authLoading, username, profileReady, updateProfile } = useAuth()
 
   // mode: 'signin' | 'signup' | 'forgot' | 'forgot-sent' | 'choose-username'
   const [mode, setMode]               = useState('signin')
@@ -84,7 +84,6 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm,  setShowConfirm]  = useState(false)
   const [exiting, setExiting]           = useState(false)
-  const [profileChecking, setProfileChecking] = useState(false)
   const innerRef          = useRef(null)
   const profileCheckedRef = useRef(false)
   const exitPathRef       = useRef('/')
@@ -103,32 +102,18 @@ export default function AuthPage() {
   // ProtectedRoute never sees a stale null-session when we navigate.
   // Handles all auth methods: Google popup, email signin, any future provider.
   useEffect(() => {
-    if (authLoading || !session) return
+    if (authLoading || !session || !profileReady) return
     if (profileCheckedRef.current) return
     profileCheckedRef.current = true
-    setProfileChecking(true)
 
-    supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', session.user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data && data.username) {
-          // Navigate directly — navigateTo() relies on card exit animation,
-          // but we're rendering the spinner here (no onAnimationEnd), so it
-          // would never fire and the spinner would hang forever.
-          navigate('/')
-        } else {
-          // New Google user or user without a profile — ask for username
-          setProfileChecking(false)
-          resetRouteProgress()
-          setMode('choose-username')
-          setAnimKey(k => k + 1)
-        }
-      })
-      .catch(() => navigate('/'))
-  }, [session, authLoading, navigate])
+    if (username) {
+      navigate('/')
+    } else {
+      resetRouteProgress()
+      setMode('choose-username')
+      setAnimKey(k => k + 1)
+    }
+  }, [session, authLoading, username, profileReady, navigate])
 
   // Shake cleanup via animationend (avoids re-triggering cardIn)
   useEffect(() => {

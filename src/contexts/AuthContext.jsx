@@ -5,9 +5,9 @@ import { supabase } from '../lib/supabase'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [session, setSession] = useState(undefined) // undefined = still resolving
   const [username, setUsername] = useState(null)
+  const [profileReady, setProfileReady] = useState(false)
 
   useEffect(() => {
     async function fetchProfile(userId) {
@@ -17,23 +17,25 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .maybeSingle()
       if (data?.username) setUsername(data.username)
+      setProfileReady(true)
     }
 
-    // loading is controlled by whichever resolves first: getSession() or
-    // onAuthStateChange's INITIAL_SESSION event. INITIAL_SESSION fires from
-    // localStorage almost synchronously; getSession() may do a network call
-    // (token refresh). Both set loading=false so the faster one wins.
+    // loading = session === undefined. Resolves as soon as either source fires.
+    // onAuthStateChange fires INITIAL_SESSION from localStorage almost synchronously.
+    // getSession() is a fallback (may do a network round-trip to refresh the token).
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
+      setSession(s => s !== undefined ? s : (session ?? null))
       if (session) fetchProfile(session.user.id)
+      else setProfileReady(true) // no session — nothing to fetch
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setLoading(false) // no-op if getSession already resolved; wins if INITIAL_SESSION fires first
+      setSession(session ?? null)
       if (session) fetchProfile(session.user.id)
-      else setUsername(null)
+      else {
+        setUsername(null)
+        setProfileReady(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -44,7 +46,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, loading, username, updateProfile }}>
+    <AuthContext.Provider value={{ session, loading: session === undefined, username, profileReady, updateProfile }}>
       {children}
     </AuthContext.Provider>
   )
