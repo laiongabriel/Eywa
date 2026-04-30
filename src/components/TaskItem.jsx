@@ -2,21 +2,28 @@ import { useState, useEffect } from 'react'
 import { updateTask, deleteTask } from '../lib/tasks'
 import { playPriorityMark, playTaskComplete, playTaskDelete } from '../lib/sounds'
 import { useToast } from '../contexts/ToastContext'
-import { Check, Play, Pencil, Trash2, BellRing } from 'lucide-react'
+import { Check, Play, Pencil, Trash2, BellRing, Repeat2 } from 'lucide-react'
 import './TaskItem.css'
 
 export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDeleteCancel, onEdit, onStartFocus, dragHandle, onDeleteStart }) {
   const { addToast } = useToast()
   const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [pop, setPop] = useState(false)
-  const [localCompleted, setLocalCompleted] = useState(task.completed)
+  const today = new Date().toISOString().split('T')[0]
+  const [localCompleted, setLocalCompleted] = useState(
+    (task.is_daily ? task.last_completed_date === today : false) || task.completed
+  )
   const [localMIT, setLocalMIT] = useState(task.is_mit)
 
   // Keep in sync with parent (e.g. external undo or refresh)
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setLocalCompleted(task.completed) }, [task.completed])
+  useEffect(() => {
+    const t = new Date().toISOString().split('T')[0]
+    setLocalCompleted((task.is_daily ? task.last_completed_date === t : false) || task.completed)
+  }, [task.completed, task.is_daily, task.last_completed_date])
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setLocalMIT(task.is_mit) }, [task.is_mit])
 
@@ -29,7 +36,13 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
       setTimeout(() => setPop(false), 400)
     }
     try {
-      const updated = await updateTask(task.id, { completed: nowCompleted })
+      let updated
+      if (task.is_daily) {
+        const t = new Date().toISOString().split('T')[0]
+        updated = await updateTask(task.id, { last_completed_date: nowCompleted ? t : null })
+      } else {
+        updated = await updateTask(task.id, { completed: nowCompleted })
+      }
       onUpdate(updated)
     } catch {
       setLocalCompleted(!nowCompleted)  // revert
@@ -101,6 +114,7 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
   }
 
   return (
+    <>
     <div className={`task-item ${localCompleted ? 'completed' : ''} ${localMIT ? 'is-mit' : ''} ${deleting ? 'deleting' : ''} ${task._pending ? 'pending' : ''}`}>
       {dragHandle && (
         <span className="task-drag-handle" {...dragHandle}>⠿</span>
@@ -131,7 +145,7 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
           </span>
         )}
 
-        {(task.scheduled_at || task.estimated_minutes || task.reminder_offset_minutes != null) && (
+        {(task.scheduled_at || task.estimated_minutes || task.reminder_offset_minutes != null || task.is_daily) && (
           <div className="task-meta">
             <span className="task-scheduled">
               {task.scheduled_at && formatScheduled(task.scheduled_at)}
@@ -142,6 +156,13 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
                   {(task.scheduled_at || task.estimated_minutes) ? ' · ' : ''}
                   <BellRing size={14} strokeWidth={2} aria-hidden="true" style={{ display: 'inline-block', verticalAlign: '-3px' }} />
                   {' '}{formatReminderText(task.reminder_offset_minutes)}
+                </>
+              )}
+              {task.is_daily && (
+                <>
+                  {(task.scheduled_at || task.estimated_minutes || task.reminder_offset_minutes != null) ? ' · ' : ''}
+                  <Repeat2 size={13} strokeWidth={2} aria-hidden="true" style={{ display: 'inline-block', verticalAlign: '-2px', opacity: 0.7 }} />
+                  {' Diária'}
                 </>
               )}
             </span>
@@ -178,7 +199,7 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
         </button>
         <button
           className="task-action-btn delete-btn"
-          onClick={handleDelete}
+          onClick={() => setConfirmDelete(true)}
           data-tooltip="Deletar"
           disabled={deleting}
         >
@@ -186,6 +207,33 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
         </button>
       </div>
     </div>
+
+    {confirmDelete && (
+      <div
+        className="modal-backdrop"
+        onClick={e => { if (e.target === e.currentTarget) setConfirmDelete(false) }}
+        onKeyDown={e => { if (e.key === 'Escape') setConfirmDelete(false) }}
+      >
+        <div className="modal-card" style={{ maxWidth: 360 }} role="alertdialog" aria-modal="true" tabIndex={-1}>
+          <div className="modal-header">
+            <h2 className="modal-title">Excluir tarefa</h2>
+            <button className="modal-close" onClick={() => setConfirmDelete(false)} aria-label="Fechar">✕</button>
+          </div>
+          <p className="del-confirm-body">
+            Deseja excluir <strong>"{task.title}"</strong>? Esta ação não pode ser desfeita.
+          </p>
+          <div className="modal-actions">
+            <button className="btn-cancel" type="button" autoFocus onClick={() => setConfirmDelete(false)}>
+              Cancelar
+            </button>
+            <button className="btn-delete-confirm" type="button" onClick={() => { setConfirmDelete(false); handleDelete() }}>
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   )
 }
 

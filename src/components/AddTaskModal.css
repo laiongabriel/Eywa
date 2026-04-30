@@ -597,3 +597,48 @@
   animation: spin 0.65s linear infinite;
   flex-shrink: 0;
 }
+
+/* ── Destructive confirm button (delete modal) ───────────────── */
+.btn-delete-confirm {
+  background: none;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-delete-confirm:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ── Delete confirmation modal body text ─────────────────────── */
+.del-confirm-body {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 1.5rem;
+  line-height: 1.55;
+}
+
+/* ── Daily repeat toggle ─────────────────────────────────────── */
+.modal-daily-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+.modal-daily-row:hover { color: var(--color-text-primary); }
+.modal-daily-check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-blue-mid);
+  cursor: pointer;
+  flex-shrink: 0;
+}

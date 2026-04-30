@@ -399,6 +399,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       reminderPreset:      r.preset,
       reminderCustomValue: r.customValue,
       reminderCustomUnit:  r.customUnit,
+      isDaily:         initialData?.is_daily ?? false,
     }
   }
 
@@ -472,6 +473,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
       scheduled_at,
       estimated_minutes:      totalMins > 0 ? totalMins : null,
       reminder_offset_minutes,
+      is_daily: form.isDaily,
     }
 
     try {
@@ -583,6 +585,26 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
             </div>
             </div>
           </div>
+
+          <label className="modal-daily-row">
+            <input
+              type="checkbox"
+              className="modal-daily-check"
+              checked={form.isDaily}
+              onChange={e => set('isDaily', e.target.checked)}
+            />
+            <span>Repetir diariamente</span>
+          </label>
+
+          <label className="modal-daily-row">
+            <input
+              type="checkbox"
+              className="modal-daily-check"
+              checked={form.isDaily}
+              onChange={e => set('isDaily', e.target.checked)}
+            />
+            <span>Repetir diariamente</span>
+          </label>
 
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={handleCancel}>Cancelar</button>

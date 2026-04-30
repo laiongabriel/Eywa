@@ -148,8 +148,10 @@ export default function TasksPage() {
 
   function handleUpdate(updated) {
     setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
-    // If task is now completed, remove from order; if un-completed, add back
-    if (updated.completed) {
+    const today = new Date().toISOString().split('T')[0]
+    const doneForToday = updated.is_daily && updated.last_completed_date === today
+    // If task is now completed (or daily done today), remove from order; otherwise add back
+    if (updated.completed || doneForToday) {
       setOrder(prev => prev.filter(id => id !== updated.id))
       cancelTaskNotification(updated.id)
     } else {
@@ -197,6 +199,7 @@ export default function TasksPage() {
 
   // -- Derived lists -----------------------------------------------------------
   const taskMap = Object.fromEntries(tasks.map(t => [t.id, t]))
+  const today = new Date().toISOString().split('T')[0]
 
   // MIT tasks (multiple) — pinned at top, never part of sortable
   const mitTasks = tasks.filter(t => t.is_mit && !t.completed)
@@ -204,11 +207,18 @@ export default function TasksPage() {
   // Sortable active tasks: use saved order, filter out MITs and completed
   const sortableOrder = order.filter(id => {
     const t = taskMap[id]
-    return t && !t.completed && !t.is_mit
+    if (!t) return false
+    if (t.completed || t.is_mit) return false
+    if (t.is_daily && t.last_completed_date === today) return false
+    return true
   })
   // Any tasks not yet in order list (e.g. loaded fresh)
   tasks.forEach(t => {
-    if (!t.completed && !t.is_mit && !sortableOrder.includes(t.id)) {
+    if (!t.completed && !t.is_mit && !t.is_daily && !sortableOrder.includes(t.id)) {
+      sortableOrder.push(t.id)
+    }
+    // Daily tasks not done today also belong in the list
+    if (!t.completed && !t.is_mit && t.is_daily && t.last_completed_date !== today && !sortableOrder.includes(t.id)) {
       sortableOrder.push(t.id)
     }
   })
