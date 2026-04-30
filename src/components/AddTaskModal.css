@@ -539,16 +539,21 @@
   background: none;
   border: none;
   color: var(--color-text-muted);
-  font-size: 1rem;
+  font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
-  padding: 0.1rem 0.2rem;
-  border-radius: 3px;
-  transition: color 0.15s;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
   margin-left: auto;
   flex-shrink: 0;
+  min-width: 1.75rem;
+  text-align: center;
 }
-.rinline-clear:hover { color: var(--color-text-primary); }
+.rinline-clear:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
 
 /* ═══════════════════════════════════════════════════════════════
    Actions / Buttons

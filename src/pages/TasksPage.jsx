@@ -202,7 +202,7 @@ export default function TasksPage() {
   const today = new Date().toISOString().split('T')[0]
 
   // MIT tasks (multiple) — pinned at top, never part of sortable
-  const mitTasks = tasks.filter(t => t.is_mit && !t.completed)
+  const mitTasks = tasks.filter(t => t.is_mit && !t.completed && !(t.is_daily && t.last_completed_date === today))
 
   // Sortable active tasks: use saved order, filter out MITs and completed
   const sortableOrder = order.filter(id => {
