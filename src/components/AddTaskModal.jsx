@@ -466,11 +466,12 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
     const m = parseInt(form.scheduledM) || 0
 
     let scheduled_at = null
-    if (hasTime && !form.scheduledDate) {
+    const effectiveDate = form.isDaily ? null : form.scheduledDate
+    if (hasTime && !effectiveDate) {
       const d = new Date(); d.setHours(h, m, 0, 0)
       scheduled_at = d.toISOString()
-    } else if (form.scheduledDate) {
-      const d = new Date(form.scheduledDate)
+    } else if (effectiveDate) {
+      const d = new Date(effectiveDate)
       if (hasTime) d.setHours(h, m, 0, 0); else d.setHours(0, 0, 0, 0)
       scheduled_at = d.toISOString()
     }
@@ -615,7 +616,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 <button
                   type="button"
                   className={`daily-toggle${form.isDaily ? ' on' : ''}`}
-                  onClick={() => set('isDaily', !form.isDaily)}
+                  onClick={() => setForm(f => ({ ...f, isDaily: !f.isDaily, scheduledDate: !f.isDaily ? null : f.scheduledDate }))}
                   aria-pressed={form.isDaily}
                   aria-label="Repetir diariamente"
                 >
