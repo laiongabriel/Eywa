@@ -220,13 +220,13 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
             <button className="modal-close" onClick={() => setConfirmDelete(false)} aria-label="Fechar">✕</button>
           </div>
           <p className="del-confirm-body">
-            Deseja excluir <strong>"{task.title}"</strong>? Esta ação não pode ser desfeita.
+            Deseja excluir <strong>"{task.title}"</strong>?
           </p>
           <div className="modal-actions">
-            <button className="btn-cancel" type="button" autoFocus onClick={() => setConfirmDelete(false)}>
+            <button className="btn-cancel" type="button" onClick={() => setConfirmDelete(false)}>
               Cancelar
             </button>
-            <button className="btn-delete-confirm" type="button" onClick={() => { setConfirmDelete(false); handleDelete() }}>
+            <button className="btn-delete-confirm" type="button" autoFocus onClick={() => { setConfirmDelete(false); handleDelete() }}>
               Excluir
             </button>
           </div>

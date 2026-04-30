@@ -582,29 +582,22 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                   />
                 </div>
               </div>
+
+              {/* Daily repeat toggle */}
+              <div className="modal-daily-row">
+                <button
+                  type="button"
+                  className={`modal-daily-toggle${form.isDaily ? ' on' : ''}`}
+                  onClick={() => set('isDaily', !form.isDaily)}
+                  aria-pressed={form.isDaily}
+                >
+                  <span className="modal-daily-knob" />
+                </button>
+                <span className="modal-daily-label">Repetir diariamente</span>
+              </div>
             </div>
             </div>
           </div>
-
-          <label className="modal-daily-row">
-            <input
-              type="checkbox"
-              className="modal-daily-check"
-              checked={form.isDaily}
-              onChange={e => set('isDaily', e.target.checked)}
-            />
-            <span>Repetir diariamente</span>
-          </label>
-
-          <label className="modal-daily-row">
-            <input
-              type="checkbox"
-              className="modal-daily-check"
-              checked={form.isDaily}
-              onChange={e => set('isDaily', e.target.checked)}
-            />
-            <span>Repetir diariamente</span>
-          </label>
 
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={handleCancel}>Cancelar</button>

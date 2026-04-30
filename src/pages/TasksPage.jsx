@@ -224,7 +224,7 @@ export default function TasksPage() {
   })
 
   const sortableTasks = sortableOrder.map(id => taskMap[id]).filter(Boolean)
-  const completedTasks = tasks.filter(t => t.completed)
+  const completedTasks = tasks.filter(t => t.completed || (t.is_daily && t.last_completed_date === today))
 
   const activeCount = tasks.filter(t => !t.completed).length
 
