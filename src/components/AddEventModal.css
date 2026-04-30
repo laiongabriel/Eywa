@@ -51,8 +51,8 @@
 .color-red    { background: #ef4444; }
 
 /* Delete button in edit mode */
-.modal-actions {
-  justify-content: space-between !important;
+.modal-form .modal-actions {
+  justify-content: space-between;
 }
 
 .modal-actions-right {
