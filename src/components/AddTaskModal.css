@@ -441,70 +441,59 @@
 .unit-dd-opt.sel { color: var(--color-amber-bright); font-weight: 500; }
 
 /* ═══════════════════════════════════════════════════════════════
-   ReminderSelect
+   Linha 3 — Lembrete + Repetir diariamente
    ═══════════════════════════════════════════════════════════════ */
-.modal-row--dur-rem {
+.modal-row-3 {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.875rem;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
   align-items: end;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ReminderChips — inline pill selector
-   ═══════════════════════════════════════════════════════════════ */
-.rchip-root { width: 100%; }
-.rchip-root.disabled {
-  opacity: 0.35;
-  pointer-events: none;
-  cursor: default;
-}
-
-.rchip-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.rchip {
-  padding: 0.2rem 0.5rem;
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: 20px;
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-family: inherit;
-  cursor: pointer;
-  white-space: nowrap;
-  line-height: 1.6;
-  transition: border-color 0.12s, background 0.12s, color 0.12s;
-}
-.rchip:hover {
-  border-color: var(--color-border-active);
-  color: var(--color-text-primary);
-}
-.rchip.sel {
-  background: var(--color-amber);
-  border-color: transparent;
-  color: #0d1117;
-  font-weight: 600;
-}
-
-.rchip-custom {
+/* ── Inline Reminder ─────────────────────────────────────── */
+.rinline-root {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  margin-top: 0.5rem;
+  height: 2.25rem;
+  padding: 0 0.125rem;
 }
-
-.rsel-custom-input {
-  width: 3.25rem;
-  padding: 0.4rem 0.5rem;
+.rinline-root.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.rinline-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.rinline-root.is-set .rinline-icon { color: var(--color-blue-mid); }
+.rinline-add {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.rinline-add:hover { color: var(--color-text-secondary); }
+.rinline-now-text {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+.rinline-num {
+  width: 2.75rem;
+  padding: 0.3rem 0.375rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   color: var(--color-text-primary);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-family: inherit;
   outline: none;
   text-align: center;
@@ -512,12 +501,49 @@
   transition: border-color 0.15s;
   box-sizing: border-box;
 }
-.rsel-custom-input:focus { border-color: var(--color-blue-mid); }
-.rsel-custom-sep {
+.rinline-num:focus { border-color: var(--color-blue-mid); }
+.rinline-root .unit-dd-trigger {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8125rem;
+}
+.rinline-antes {
   font-size: 0.8125rem;
   color: var(--color-text-muted);
   white-space: nowrap;
 }
+.rinline-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--color-border-active);
+  flex-shrink: 0;
+  margin: 0 0.125rem;
+}
+.rinline-naahora {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.rinline-naahora:hover { color: var(--color-text-primary); }
+.rinline-clear {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.2rem;
+  border-radius: 3px;
+  transition: color 0.15s;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.rinline-clear:hover { color: var(--color-text-primary); }
 
 /* ═══════════════════════════════════════════════════════════════
    Actions / Buttons
@@ -624,44 +650,42 @@
   line-height: 1.55;
 }
 
-/* ── Daily repeat checkbox ─────────────────────────────────────── */
-.modal-daily-input-hidden {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-.modal-daily-row {
-  display: inline-flex;
+/* ── Daily toggle ─────────────────────────────────────────────── */
+.modal-field--daily { flex-shrink: 0; }
+.daily-toggle-wrap {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
+  height: 2.25rem;
+}
+.daily-toggle {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 9px;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  user-select: none;
-  transition: color 0.15s;
-}
-.modal-daily-row:hover { color: var(--color-text-primary); }
-.modal-daily-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  border: 1.5px solid var(--color-border-active);
-  background: transparent;
+  background: var(--color-border-active);
+  transition: background 0.18s ease;
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
 }
-.modal-daily-check.on {
-  background: var(--color-blue-mid);
-  border-color: var(--color-blue-mid);
+.daily-toggle.on { background: var(--color-blue-mid); }
+.daily-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s ease;
 }
-.modal-daily-check svg {
-  width: 10px;
-  height: 8px;
-  display: block;
+.daily-toggle.on .daily-toggle-knob { transform: translateX(12px); }
+.daily-toggle-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  user-select: none;
 }
 

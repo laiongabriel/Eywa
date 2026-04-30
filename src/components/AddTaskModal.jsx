@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { playModalClose, playTaskCreated } from '../lib/sounds'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Bell } from 'lucide-react'
 import './AddTaskModal.css'
 
 /* ─── Constants ──────────────────────────────────────────────── */
@@ -311,53 +311,76 @@ function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
   )
 }
 
-/* ─── ReminderSelect ─────────────────────────────────────────── */
-const CHIP_PRESETS = [
-  { id: '',       short: 'Nenhum'   },
-  { id: 'now',    short: 'Na hora'  },
-  { id: '5m',     short: '5 min'    },
-  { id: '10m',    short: '10 min'   },
-  { id: '15m',    short: '15 min'   },
-  { id: '30m',    short: '30 min'   },
-  { id: '1h',     short: '1 hora'   },
-  { id: '2h',     short: '2 horas'  },
-  { id: '1d',     short: '1 dia'    },
-  { id: 'custom', short: '+ tempo'  },
-]
+/* ─── ReminderInline ─────────────────────────────────────────── */
+function ReminderInline({ disabled, preset, customValue, customUnit, onPresetChange, onCustomValueChange, onCustomUnitChange }) {
+  const isSet   = preset !== ''
+  const isNow   = preset === 'now'
+  const isValue = isSet && !isNow
 
-function ReminderSelect({ disabled, preset, customValue, customUnit, onPresetChange, onCustomValueChange, onCustomUnitChange }) {
+  const displayValue = (() => {
+    if (preset === 'custom' || preset === '') return customValue
+    const found = REMINDER_PRESETS.find(p => p.id === preset && p.mins > 0)
+    if (!found) return customValue
+    if (found.mins % 1440 === 0) return String(found.mins / 1440)
+    if (found.mins % 60   === 0) return String(found.mins / 60)
+    return String(found.mins)
+  })()
+
+  const displayUnit = (() => {
+    if (preset === 'custom' || preset === '') return customUnit
+    const found = REMINDER_PRESETS.find(p => p.id === preset && p.mins > 0)
+    if (!found) return customUnit
+    if (found.mins % 1440 === 0) return 'days'
+    if (found.mins % 60   === 0) return 'hours'
+    return 'minutes'
+  })()
+
+  function activate() {
+    onPresetChange('custom')
+    onCustomValueChange('30')
+    onCustomUnitChange('minutes')
+  }
+
   return (
     <div
-      className={`rchip-root${disabled ? ' disabled' : ''}`}
+      className={`rinline-root${isSet ? ' is-set' : ''}${disabled ? ' disabled' : ''}`}
       {...(disabled ? { 'data-tooltip': 'Defina um horário para ativar o lembrete' } : {})}
     >
-      <div className="rchip-wrap">
-        {CHIP_PRESETS.map(p => (
-          <button
-            key={p.id || 'none'}
-            type="button"
-            className={`rchip${preset === p.id ? ' sel' : ''}`}
-            onClick={() => onPresetChange(p.id)}
-            tabIndex={disabled ? -1 : 0}
-          >
-            {p.short}
-          </button>
-        ))}
-      </div>
-      {preset === 'custom' && (
-        <div className="rchip-custom">
+      <span className="rinline-icon">
+        <Bell size={14} strokeWidth={1.8} aria-hidden="true" />
+      </span>
+
+      {!isSet && (
+        <button type="button" className="rinline-add" onClick={activate}>
+          Adicionar lembrete
+        </button>
+      )}
+
+      {isNow && (
+        <>
+          <span className="rinline-now-text">Na hora</span>
+          <button type="button" className="rinline-clear" onClick={() => onPresetChange('')} aria-label="Remover lembrete">×</button>
+        </>
+      )}
+
+      {isValue && (
+        <>
           <input
             type="text"
             inputMode="numeric"
-            className="rsel-custom-input"
-            placeholder="30"
-            value={customValue}
-            onChange={(e) => onCustomValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            autoFocus
+            className="rinline-num"
+            value={displayValue}
+            onChange={e => {
+              onPresetChange('custom')
+              onCustomValueChange(e.target.value.replace(/\D/g, '').slice(0, 4))
+            }}
           />
-          <UnitDropdown value={customUnit} onChange={onCustomUnitChange} />
-          <span className="rsel-custom-sep">antes</span>
-        </div>
+          <UnitDropdown value={displayUnit} onChange={v => { onPresetChange('custom'); onCustomUnitChange(v) }} />
+          <span className="rinline-antes">antes</span>
+          <span className="rinline-sep" aria-hidden="true" />
+          <button type="button" className="rinline-naahora" onClick={() => onPresetChange('now')}>Na hora</button>
+          <button type="button" className="rinline-clear" onClick={() => onPresetChange('')} aria-label="Remover lembrete">×</button>
+        </>
       )}
     </div>
   )
@@ -546,8 +569,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Duration + Daily */}
-              <div className="modal-row modal-row--dur-rem">
+              {/* Linha 2 — Duração */}
+              <div className="modal-row modal-row--single">
                 <div className="modal-field">
                   <label className="modal-label">Duração</label>
                   <div className="duration-row">
@@ -569,9 +592,13 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     <span className="duration-sep">min</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Linha 3 — Lembrete + Repetir diariamente */}
+              <div className="modal-row modal-row-3">
                 <div className="modal-field">
                   <label className="modal-label">Lembrete</label>
-                  <ReminderSelect
+                  <ReminderInline
                     disabled={!hasScheduledTime}
                     preset={form.reminderPreset}
                     customValue={form.reminderCustomValue}
@@ -581,25 +608,22 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     onCustomUnitChange={(v)  => set('reminderCustomUnit', v)}
                   />
                 </div>
+                <div className="modal-field modal-field--daily">
+                  <span className="modal-label" aria-hidden="true">{String.fromCharCode(160)}</span>
+                  <div className="daily-toggle-wrap">
+                    <button
+                      type="button"
+                      className={`daily-toggle${form.isDaily ? ' on' : ''}`}
+                      onClick={() => set('isDaily', !form.isDaily)}
+                      aria-pressed={form.isDaily}
+                      aria-label="Repetir diariamente"
+                    >
+                      <span className="daily-toggle-knob" />
+                    </button>
+                    <span className="daily-toggle-label">Repetir diariamente</span>
+                  </div>
+                </div>
               </div>
-
-              {/* Daily repeat */}
-              <label className="modal-daily-row">
-                <span className={`modal-daily-check${form.isDaily ? ' on' : ''}`} aria-hidden="true">
-                  {form.isDaily && (
-                    <svg viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 4l2.8 3L9 1" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </span>
-                <input
-                  type="checkbox"
-                  className="modal-daily-input-hidden"
-                  checked={form.isDaily}
-                  onChange={e => set('isDaily', e.target.checked)}
-                />
-                Repetir diariamente
-              </label>
             </div>
             </div>
           </div>
