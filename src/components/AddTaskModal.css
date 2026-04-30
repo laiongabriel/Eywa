@@ -624,45 +624,44 @@
   line-height: 1.55;
 }
 
-/* ── Daily repeat toggle ─────────────────────────────────────── */
-.modal-daily-row {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding-top: 0.125rem;
+/* ── Daily repeat checkbox ─────────────────────────────────────── */
+.modal-daily-input-hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
-.modal-daily-label {
+.modal-daily-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  line-height: 1;
+  user-select: none;
+  transition: color 0.15s;
 }
-.modal-daily-toggle {
-  position: relative;
-  width: 34px;
-  height: 20px;
-  border-radius: 10px;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  background: var(--color-border-active);
-  transition: background 0.18s ease;
+.modal-daily-row:hover { color: var(--color-text-primary); }
+.modal-daily-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--color-border-active);
+  background: transparent;
   flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
 }
-.modal-daily-toggle.on {
+.modal-daily-check.on {
   background: var(--color-blue-mid);
+  border-color: var(--color-blue-mid);
 }
-.modal-daily-knob {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 0.18s ease;
+.modal-daily-check svg {
+  width: 10px;
+  height: 8px;
+  display: block;
 }
-.modal-daily-toggle.on .modal-daily-knob {
-  transform: translateX(14px);
-}
-
 

@@ -546,7 +546,7 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Duration + Reminder */}
+              {/* Duration + Daily */}
               <div className="modal-row modal-row--dur-rem">
                 <div className="modal-field">
                   <label className="modal-label">Duração</label>
@@ -583,18 +583,23 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Daily repeat toggle */}
-              <div className="modal-daily-row">
-                <button
-                  type="button"
-                  className={`modal-daily-toggle${form.isDaily ? ' on' : ''}`}
-                  onClick={() => set('isDaily', !form.isDaily)}
-                  aria-pressed={form.isDaily}
-                >
-                  <span className="modal-daily-knob" />
-                </button>
-                <span className="modal-daily-label">Repetir diariamente</span>
-              </div>
+              {/* Daily repeat */}
+              <label className="modal-daily-row">
+                <span className={`modal-daily-check${form.isDaily ? ' on' : ''}`} aria-hidden="true">
+                  {form.isDaily && (
+                    <svg viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 4l2.8 3L9 1" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </span>
+                <input
+                  type="checkbox"
+                  className="modal-daily-input-hidden"
+                  checked={form.isDaily}
+                  onChange={e => set('isDaily', e.target.checked)}
+                />
+                Repetir diariamente
+              </label>
             </div>
             </div>
           </div>
