@@ -154,7 +154,7 @@
 /* ── Rows & fields ───────────────────────────────────────────── */
 .modal-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: end;
 }
@@ -168,6 +168,7 @@
 .modal-field--date {
   position: relative;
   overflow: visible;
+  min-width: 0;
 }
 .modal-field--time { flex-shrink: 0; }
 
@@ -441,13 +442,12 @@
 .unit-dd-opt.sel { color: var(--color-amber-bright); font-weight: 500; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Linha 3 — Lembrete + Repetir diariamente
+   Linhas 3 e 4 — Lembrete e Repetir diariamente
    ═══════════════════════════════════════════════════════════════ */
-.modal-row-3 {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.75rem;
-  align-items: end;
+.modal-row-daily {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* ── Inline Reminder ─────────────────────────────────────── */
@@ -520,16 +520,21 @@
 }
 .rinline-naahora {
   background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.8125rem;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 0.1rem 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
   font-family: inherit;
   cursor: pointer;
-  transition: color 0.15s;
+  transition: border-color 0.12s, color 0.12s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
-.rinline-naahora:hover { color: var(--color-text-primary); }
+.rinline-naahora:hover {
+  border-color: var(--color-border-active);
+  color: var(--color-text-secondary);
+}
 .rinline-clear {
   background: none;
   border: none;
@@ -651,13 +656,7 @@
 }
 
 /* ── Daily toggle ─────────────────────────────────────────────── */
-.modal-field--daily { flex-shrink: 0; }
-.daily-toggle-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 2.25rem;
-}
+
 .daily-toggle {
   position: relative;
   width: 30px;

@@ -594,8 +594,8 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Linha 3 — Lembrete + Repetir diariamente */}
-              <div className="modal-row modal-row-3">
+              {/* Linha 3 — Lembrete */}
+              <div className="modal-row modal-row--single">
                 <div className="modal-field">
                   <label className="modal-label">Lembrete</label>
                   <ReminderInline
@@ -608,21 +608,20 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                     onCustomUnitChange={(v)  => set('reminderCustomUnit', v)}
                   />
                 </div>
-                <div className="modal-field modal-field--daily">
-                  <span className="modal-label" aria-hidden="true">{String.fromCharCode(160)}</span>
-                  <div className="daily-toggle-wrap">
-                    <button
-                      type="button"
-                      className={`daily-toggle${form.isDaily ? ' on' : ''}`}
-                      onClick={() => set('isDaily', !form.isDaily)}
-                      aria-pressed={form.isDaily}
-                      aria-label="Repetir diariamente"
-                    >
-                      <span className="daily-toggle-knob" />
-                    </button>
-                    <span className="daily-toggle-label">Repetir diariamente</span>
-                  </div>
-                </div>
+              </div>
+
+              {/* Linha 4 — Repetir diariamente */}
+              <div className="modal-row-daily">
+                <button
+                  type="button"
+                  className={`daily-toggle${form.isDaily ? ' on' : ''}`}
+                  onClick={() => set('isDaily', !form.isDaily)}
+                  aria-pressed={form.isDaily}
+                  aria-label="Repetir diariamente"
+                >
+                  <span className="daily-toggle-knob" />
+                </button>
+                <span className="daily-toggle-label">Repetir diariamente</span>
               </div>
             </div>
             </div>
