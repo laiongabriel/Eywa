@@ -1,16 +1,81 @@
-# React + Vite
+# Eywa
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicativo de produtividade pessoal com gerenciamento de tarefas, calendário e modo foco.
 
-Currently, two official plugins are available:
+## Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Tarefas** — criação, edição, exclusão e conclusão de tarefas
+- **Prioridades (MIT)** — marque tarefas como Most Important Tasks; ficam fixadas no topo
+- **Tarefas diárias** — tarefas recorrentes que reiniciam todos os dias
+- **Drag-and-drop** — reordene tarefas arrastando
+- **Modo foco** — sessão cronometrada dedicada a uma única tarefa
+- **Calendário** — agenda de eventos com visão semanal
+- **Lembretes** — notificações push com antecedência configurável
+- **Temas** — escuro, claro e automático (sistema)
+- **PWA** — instalável como app, funciona com service worker
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Camada | Tecnologia |
+|--------|------------|
+| Frontend | React 19, Vite 8 |
+| Roteamento | React Router v7 |
+| Backend / Auth | Supabase (PostgreSQL + Auth) |
+| Drag-and-drop | @dnd-kit |
+| Ícones | lucide-react |
+| Deploy | Netlify |
 
-## Expanding the ESLint configuration
+## Configuração local
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Pré-requisitos
+
+- Node.js 18+
+- Conta no [Supabase](https://supabase.com)
+
+### Passos
+
+1. Clone o repositório e instale as dependências:
+
+```bash
+git clone <url-do-repo>
+cd eywa
+npm install
+```
+
+2. Crie um projeto no Supabase e execute as migrations em ordem na aba **SQL Editor**:
+
+```
+supabase/migration_profiles.sql
+supabase/migration_tasks.sql
+supabase/migration_events.sql
+supabase/migration_reminder.sql
+```
+
+3. Crie um arquivo `.env` na raiz do projeto:
+
+```env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anon
+```
+
+4. Inicie o servidor de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+## Deploy
+
+O projeto está configurado para deploy no Netlify via `netlify.toml`. Basta conectar o repositório e definir as variáveis de ambiente `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` nas configurações do site.
+
+## Estrutura do banco de dados
+
+| Tabela | Descrição |
+|--------|-----------|
+| `profiles` | Perfil do usuário (username) |
+| `tasks` | Tarefas com suporte a datas, duração, lembretes e recorrência diária |
+| `events` | Eventos do calendário |
+
+## Licença
+
+MIT

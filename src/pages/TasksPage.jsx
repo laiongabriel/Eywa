@@ -69,7 +69,7 @@ export default function TasksPage() {
   const { addToast } = useToast()
 
   const [tasks, setTasks]         = useState([])
-  const [order, setOrder]         = useState([])   // IDs of active (non-completed) tasks
+  const [order, setOrder]         = useState([])
   const [deletingIds, setDeletingIds] = useState(new Set())
   const [loading, setLoading]     = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -86,7 +86,6 @@ export default function TasksPage() {
       if (saved && Array.isArray(saved)) {
         setOrder(saved)
       } else {
-        // Default order: timed tasks first sorted by scheduled_at, then untimed
         const active = data.filter(t => !t.completed && !t.is_mit)
         const timed   = active.filter(t => t.scheduled_at).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
         const untimed = active.filter(t => !t.scheduled_at)
@@ -135,7 +134,6 @@ export default function TasksPage() {
         if (perm === 'granted') scheduleTaskNotification(optimistic)
       })
     }
-    // DB call in background — don't await
     updateTask(taskToEdit.id, payload)
       .then(updated => {
         setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
@@ -150,7 +148,6 @@ export default function TasksPage() {
     setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
     const today = new Date().toISOString().split('T')[0]
     const doneForToday = updated.is_daily && updated.last_completed_date === today
-    // If task is now completed (or daily done today), remove from order; otherwise add back
     if (updated.completed || doneForToday) {
       setOrder(prev => prev.filter(id => id !== updated.id))
       cancelTaskNotification(updated.id)
@@ -197,14 +194,11 @@ export default function TasksPage() {
     persistOrder(newOrder)
   }
 
-  // -- Derived lists -----------------------------------------------------------
   const taskMap = Object.fromEntries(tasks.map(t => [t.id, t]))
   const today = new Date().toISOString().split('T')[0]
 
-  // MIT tasks (multiple) — pinned at top, never part of sortable
   const mitTasks = tasks.filter(t => t.is_mit && !t.completed && !(t.is_daily && t.last_completed_date === today))
 
-  // Sortable active tasks: use saved order, filter out MITs and completed
   const sortableOrder = order.filter(id => {
     const t = taskMap[id]
     if (!t) return false
@@ -212,12 +206,10 @@ export default function TasksPage() {
     if (t.is_daily && t.last_completed_date === today) return false
     return true
   })
-  // Any tasks not yet in order list (e.g. loaded fresh)
   tasks.forEach(t => {
     if (!t.completed && !t.is_mit && !t.is_daily && !sortableOrder.includes(t.id)) {
       sortableOrder.push(t.id)
     }
-    // Daily tasks not done today also belong in the list
     if (!t.completed && !t.is_mit && t.is_daily && t.last_completed_date !== today && !sortableOrder.includes(t.id)) {
       sortableOrder.push(t.id)
     }
@@ -230,7 +222,6 @@ export default function TasksPage() {
 
   return (
     <div className="tasks-root">
-      {/* MIT section — pinned, multiple allowed */}
       {mitTasks.length > 0 && (
         <section className="mit-section">
           <div className="mit-label">Prioritárias</div>

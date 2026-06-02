@@ -13,12 +13,10 @@ function SectionPerfil() {
   const { session, username, updateProfile } = useAuth()
   const { addToast } = useToast()
 
-  // Username (editable)
   const [newUsername, setNewUsername]         = useState(username ?? '')
   const [savingName, setSavingName]           = useState(false)
   const [nameSaved, setNameSaved]             = useState(false)
 
-  // Change password
   const [curPw, setCurPw]                     = useState('')
   const [newPw, setNewPw]                     = useState('')
   const [confirmPw, setConfirmPw]             = useState('')
@@ -26,13 +24,11 @@ function SectionPerfil() {
   const [pwError, setPwError]                 = useState(null)
   const [pwSaved, setPwSaved]                 = useState(false)
 
-  // Change email
   const [newEmail, setNewEmail]               = useState('')
   const [savingEmail, setSavingEmail]         = useState(false)
   const [emailSent, setEmailSent]             = useState(false)
   const [emailError, setEmailError]           = useState(null)
 
-  // Delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletePw, setDeletePw]               = useState('')
   const [deletePwError, setDeletePwError]     = useState(null)
@@ -119,12 +115,10 @@ function SectionPerfil() {
     <div className="sp-section">
       <h2 className="sp-section-title">Perfil</h2>
 
-      {/* Avatar */}
       <div className="sp-group">
         <UserAvatar username={username} size={80} />
       </div>
 
-      {/* Username (editable) */}
       <div className="sp-group">
         <label className="sp-field-label">Nome de usuário</label>
         <form className="sp-field-row" onSubmit={handleSaveName}>
@@ -152,13 +146,11 @@ function SectionPerfil() {
         }
       </div>
 
-      {/* Email (read-only) */}
       <div className="sp-group">
         <label className="sp-field-label">Email</label>
         <p className="sp-field-value">{session?.user?.email}</p>
       </div>
 
-      {/* Change email */}
       <div className="sp-group">
         <h3 className="sp-group-title">Alterar email</h3>
         {emailSent ? (
@@ -186,7 +178,6 @@ function SectionPerfil() {
         {!emailSent && <p className="sp-hint">Um link de confirmação será enviado para o novo endereço.</p>}
       </div>
 
-      {/* Change password */}
       <div className="sp-group">
         <h3 className="sp-group-title">Alterar senha</h3>
         <form className="sp-form-block" onSubmit={handleSavePassword}>
@@ -228,7 +219,6 @@ function SectionPerfil() {
         </form>
       </div>
 
-      {/* Danger zone */}
       <div className="sp-group">
         <div className="sp-danger-row">
           <div>
@@ -241,7 +231,6 @@ function SectionPerfil() {
         </div>
       </div>
 
-      {/* Delete modal */}
       {showDeleteModal && (
         <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) closeDeleteModal() }}>
           <div className="modal-card" style={{ maxWidth: 420 }}>

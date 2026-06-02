@@ -3,7 +3,6 @@ import { playModalClose, playTaskCreated } from '../lib/sounds'
 import { ChevronDown, Bell } from 'lucide-react'
 import './AddTaskModal.css'
 
-/* ─── Constants ──────────────────────────────────────────────── */
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
@@ -15,7 +14,6 @@ const UNIT_OPTIONS = [
   { value: 'days',    label: 'dias'    },
 ]
 
-/* ─── Reminder presets ───────────────────────────────────────── */
 const REMINDER_PRESETS = [
   { id: '',    label: 'Sem lembrete',  mins: null },
   { id: 'now', label: 'Na hora',       mins: 0    },
@@ -28,7 +26,6 @@ const REMINDER_PRESETS = [
   { id: '1d',  label: '1 dia antes',   mins: 1440 },
 ]
 
-/* ─── Parse reminder_offset_minutes → form state ─────────────── */
 function parseReminderMinutes(mins) {
   if (mins == null) return { preset: '',     customValue: '30', customUnit: 'minutes' }
   if (mins === 0)   return { preset: 'now',  customValue: '30', customUnit: 'minutes' }
@@ -40,7 +37,6 @@ function parseReminderMinutes(mins) {
 }
 
 
-/* ─── CustomDatePicker ───────────────────────────────────────── */
 function CustomDatePicker({ value, onChange }) {
   const [open, setOpen]           = useState(false)
   const [viewYear, setViewYear]   = useState(() => new Date().getFullYear())
@@ -49,7 +45,6 @@ function CustomDatePicker({ value, onChange }) {
   const [slideDir, setSlideDir]   = useState('left')
   const containerRef              = useRef(null)
 
-  // Reset to current month every time the calendar opens
   useEffect(() => {
     if (open) {
       const now = new Date()
@@ -185,7 +180,6 @@ function CustomDatePicker({ value, onChange }) {
   )
 }
 
-/* ─── UnitDropdown ───────────────────────────────────────────── */
 function UnitDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -225,11 +219,9 @@ function UnitDropdown({ value, onChange }) {
   )
 }
 
-/* ─── TimeInput ──────────────────────────────────────────────── */
 function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
   const hRef = useRef(null)
   const mRef = useRef(null)
-  // Store latest state in ref so wheel listeners never stale-close over values
   const api = useRef({ valueH, valueM, onChangeH, onChangeM })
   useLayoutEffect(() => {
     api.current = { valueH, valueM, onChangeH, onChangeM }
@@ -311,7 +303,6 @@ function TimeInput({ valueH, valueM, onChangeH, onChangeM }) {
   )
 }
 
-/* ─── ReminderInline ─────────────────────────────────────────── */
 function ReminderInline({ disabled, preset, customValue, customUnit, onPresetChange, onCustomValueChange, onCustomUnitChange }) {
   const isSet   = preset !== ''
   const isNow   = preset === 'now'
@@ -386,7 +377,6 @@ function ReminderInline({ disabled, preset, customValue, customUnit, onPresetCha
   )
 }
 
-/* ─── ModalSpinner ───────────────────────────────────────────── */
 function ModalSpinner() {
   return (
     <svg className="btn-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -396,7 +386,6 @@ function ModalSpinner() {
   )
 }
 
-/* ─── AddTaskModal ───────────────────────────────────────────── */
 export default function AddTaskModal({ onClose, onSave, initialData }) {
   const isEdit = !!initialData
 
@@ -431,7 +420,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
   const [saving, setSaving]     = useState(false)
   const titleRef                = useRef(null)
 
-  // Short delay past the slide-up animation to avoid caret/text jump
   useEffect(() => {
     const id = setTimeout(() => titleRef.current?.focus({ preventScroll: true }), 160)
     return () => clearTimeout(id)
@@ -550,7 +538,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
           <div className={`intention-fields-wrap${showWhen ? ' open' : ''}`}>
             <div className="intention-fields-inner">
             <div className="intention-fields">
-              {/* Date + Time */}
               <div className="modal-row">
                 <div className="modal-field modal-field--date">
                   <label className="modal-label">Data</label>
@@ -570,7 +557,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Linha 2 — Duração */}
               <div className="modal-row modal-row--single">
                 <div className="modal-field">
                   <label className="modal-label">Duração</label>
@@ -595,7 +581,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Linha 3 — Lembrete */}
               <div className="modal-row modal-row--single">
                 <div className="modal-field">
                   <label className="modal-label">Lembrete</label>
@@ -611,7 +596,6 @@ export default function AddTaskModal({ onClose, onSave, initialData }) {
                 </div>
               </div>
 
-              {/* Linha 4 — Repetir diariamente */}
               <div className="modal-row-daily">
                 <button
                   type="button"

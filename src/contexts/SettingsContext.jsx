@@ -21,7 +21,6 @@ export function SettingsProvider({ children }) {
   const [weekStartsOn, setWeekStartsOnState] = useState(() => getLS('eywa:weekStartsOn', 'sunday'))
   const [soundEnabled, setSoundEnabledState] = useState(() => getLS('eywa:soundEnabled', true))
 
-  // Apply theme to document whenever it changes
   useEffect(() => {
     const el = document.documentElement
     if (theme === 'system') {

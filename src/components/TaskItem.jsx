@@ -18,18 +18,15 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
   )
   const [localMIT, setLocalMIT] = useState(task.is_mit)
 
-  // Keep in sync with parent (e.g. external undo or refresh)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const t = new Date().toISOString().split('T')[0]
     setLocalCompleted((task.is_daily ? task.last_completed_date === t : false) || task.completed)
   }, [task.completed, task.is_daily, task.last_completed_date])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setLocalMIT(task.is_mit) }, [task.is_mit])
 
   async function handleToggle() {
     const nowCompleted = !localCompleted
-    setLocalCompleted(nowCompleted)  // optimistic
+    setLocalCompleted(nowCompleted)
     if (nowCompleted) {
       playTaskComplete()
       setPop(true)
@@ -45,7 +42,7 @@ export default function TaskItem({ task, onUpdate, onDelete, onRestoreTask, onDe
       }
       onUpdate(updated)
     } catch {
-      setLocalCompleted(!nowCompleted)  // revert
+      setLocalCompleted(!nowCompleted)
       addToast('Erro ao atualizar tarefa')
     }
   }
